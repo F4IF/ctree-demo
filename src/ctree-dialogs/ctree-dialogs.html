@@ -1,0 +1,385 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-location/iron-location.html">
+<link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
+
+<!-- TODO: try using importHref to load these (had issues when loading link with dialog url) -->
+<link rel="import" href="../ctree-element-screen/ctree-element-screen.html">
+<link rel="import" href="../ctree-user-screen/ctree-user-screen.html">
+
+<dom-module id="ctree-dialogs">
+  <template>
+    <style>
+      :host {
+      }
+      paper-dialog {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        min-width: 400px;
+        max-width: 800px;
+        min-height: 400px;
+        width: 80%;
+        height: 90%;
+      }
+      @media (max-width: 400px), (max-height: 400px) {
+        paper-dialog {
+          width: 100%;
+          height: 100%;
+          min-width: 320px;
+          min-height: 320px;
+          margin: 0;
+        }
+      }
+      ctree-element-screen {
+        width: 100%;
+        height: 100%;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+    </style>
+
+    <iron-location query="{{query}}" dwell-time="800"></iron-location>
+    <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
+
+    <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="[[element]]" element-id="{{queryParams.e}}" description-config-id="{{queryParams.c}}" description-segment-variation-ids="{{descriptionSegmentVariationIds}}"></ctree-element-screen>
+    </paper-dialog>
+
+    <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <ctree-user-screen ctree-key="[[ctreeKey]]" page="{{_userPage}}" on-close-tapped="_userDialogClosed"></ctree-user-screen>
+    </paper-dialog>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-dialogs',
+
+    properties: {
+      /**
+       * The unique key identifying a cTree.  If the site only has one cTree
+       * this doesn't need to be set.
+       */
+      ctreeKey: String,
+
+      dialog: {
+        type: String,
+        readOnly: true,
+        observer: '_dialogChanged',
+      },
+
+      page: {
+        type: String,
+        observer: '_pageChanged',
+      },
+
+      element: {
+        type: Object,
+        observer: '_elementChanged',
+      },
+
+      elementId: {
+        type: Number,
+        observer: '_elementIdChanged',
+      },
+
+      descriptionConfigId: {
+        type: Number,
+        observer: '_descriptionConfigIdChanged',
+      },
+
+      descriptionSegmentVariationIds: {
+        type: Array,
+        observer: '_descriptionSegmentVariationIdsChanged',
+      },
+
+      feedbackSegment: Number,
+
+      historyContributor: Number,
+
+      _elementPage: {
+        type: String,
+        observer: '_elementPageChanged',
+      },
+
+      _userPage: {
+        type: String,
+        observer: '_userPageChanged',
+      },
+    },
+
+    observers: [
+      '_dialogParamChanged(queryParams.d)',
+      '_pageParamChanged(queryParams.p)',
+      '_elementParamChanged(queryParams.e)',
+      '_descriptionConfigParamChanged(queryParams.c)',
+      '_descriptionSegmentVariationsParamChanged(queryParams.s)',
+    ],
+
+    openElementDialog: function() {
+      this._setDialog('element');
+    },
+
+    openUserDialog: function() {
+      this._setDialog('user');
+    },
+
+    _elementDialogClosed: function() {
+      if (this.dialog === 'element') {
+        this._setDialog(undefined);
+        this._dialogChanged(undefined);
+      }
+    },
+
+    _userDialogClosed: function() {
+      if (this.dialog === 'user') {
+        this._setDialog(undefined);
+        this._dialogChanged(undefined);
+      }
+    },
+
+    _dialogChanged: function(dialog, previousDialog) {
+      if (dialog === previousDialog) return;
+
+      var isElement = (dialog === 'element');
+      var isUser = (dialog === 'user');
+
+      if ((isElement || isUser) && dialog) {
+        // TODO: use this for Polymer 2.0
+        //this.queryParams.d = dialog;
+        this.set('queryParams.d', dialog);
+      } else if (this.queryParams.hasOwnProperty('d')) {
+        delete this.queryParams.d;
+      }
+      if ((isElement || isUser) && this.page) {
+        // TODO: use this for Polymer 2.0
+        //this.queryParams.p = this.page;
+        this.set('queryParams.p', this.page);
+      } else if (this.queryParams.hasOwnProperty('p')) {
+        delete this.queryParams.p;
+      }
+      if (isElement && this.elementId) {
+        // TODO: use this for Polymer 2.0
+        //this.queryParams.e = this.elementId;
+        this.set('queryParams.e', this.elementId);
+      } else if (this.queryParams.hasOwnProperty('e')) {
+        delete this.queryParams.e;
+      }
+      if (isElement && this.descriptionConfigId) {
+        // TODO: use this for Polymer 2.0
+        //this.queryParams.c = this.descriptionConfigId;
+        this.set('queryParams.c', this.descriptionConfigId);
+      } else if (this.queryParams.hasOwnProperty('c')) {
+        delete this.queryParams.c;
+      }
+      if (isElement && this.descriptionSegmentVariationIds && this.descriptionSegmentVariationIds.length > 0) {
+        // TODO: use this for Polymer 2.0
+        //this.queryParams.s = this.descriptionSegmentVariationIds.join(',');
+        this.set('queryParams.s', this.descriptionSegmentVariationIds.join(','));
+      } else if (this.queryParams.hasOwnProperty('s')) {
+        delete this.queryParams.s;
+      }
+
+      // TODO: use this for Polymer 2.0
+      //this.notifyPath('queryParams');
+      this.$.params.paramsObjectChanged();
+
+      if (isElement) {
+        this._elementPage = this.page;
+      } else if (isUser) {
+        this._userPage = this.page;
+      }
+
+      if (isElement !== this.$.elementDialog.opened) {
+        if (isElement) {
+          // TODO: this causes issues, so for now just import normally
+          //this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-element-screen/ctree-element-screen.html'), () => {this.$.elementDialog.open();}, null);
+          this.$.elementDialog.open();
+        } else {
+          this.$.elementDialog.close();
+        }
+      }
+      if (isUser !== this.$.userDialog.opened) {
+        if (isUser) {
+          // TODO: this causes issues, so for now just import normally
+          //this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-user-screen/ctree-user-screen.html'), () => {this.$.userDialog.open();}, null);
+          this.$.userDialog.open();
+        } else {
+          this.$.userDialog.close();
+        }
+      }
+    },
+
+    _dialogParamChanged: function(dialog) {
+      this._setDialog(dialog);
+    },
+
+    _pageParamChanged: function(page) {
+      if (this.queryParams.d === 'element' || this.queryParams.d === 'user') {
+        if (this.queryParams.d === 'element') {
+          this._elementPage = page;
+        } else {// if (this.queryParams.d === 'user') {
+          this._userPage = page;
+        }
+
+        if (!page && this.queryParams.hasOwnProperty('p')) {
+          delete this.queryParams.p;
+          // TODO: use this for Polymer 2.0
+          //this.notifyPath('queryParams.p');
+          this.$.params.paramsObjectChanged();
+        }
+      }
+    },
+
+    _elementParamChanged: function(elementId) {
+      if (this.queryParams.d === 'element' && !elementId && this.queryParams.hasOwnProperty('e')) {
+        delete this.queryParams.e;
+        // TODO: use this for Polymer 2.0
+        //this.notifyPath('queryParams.e');
+        this.$.params.paramsObjectChanged();
+      }
+    },
+
+    _descriptionConfigParamChanged: function(descriptionConfigId) {
+      if (this.queryParams.d === 'element' && !descriptionConfigId && this.queryParams.hasOwnProperty('c')) {
+        delete this.queryParams.c;
+        // TODO: use this for Polymer 2.0
+        //this.notifyPath('queryParams.c');
+        this.$.params.paramsObjectChanged();
+      }
+    },
+
+    _descriptionSegmentVariationsParamChanged: function(descriptionSegmentVariationIdsStr) {
+      if (descriptionSegmentVariationIdsStr) {
+        var descriptionSegmentVariationIds = descriptionSegmentVariationIdsStr.split(',');
+        for (var i = 0; i < descriptionSegmentVariationIds.length; i++) {
+          var id = parseInt(descriptionSegmentVariationIds[i]);
+          if (id != NaN) {
+            descriptionSegmentVariationIds[i] = id;
+          } else {
+            descriptionSegmentVariationIds.splice(i, 1);
+            i--;
+          }
+        }
+        this.descriptionSegmentVariationIds = descriptionSegmentVariationIds;
+
+      } else if (this.queryParams.d === 'element' && this.queryParams.hasOwnProperty('s')) {
+        delete this.queryParams.s;
+        // TODO: use this for Polymer 2.0
+        //this.notifyPath('queryParams.s');
+        this.$.params.paramsObjectChanged();
+      }
+    },
+
+    _pageChanged: function(page) {
+      if ((this.queryParams.d === 'element' || this.queryParams.d === 'user') && this.queryParams.p !== page) {
+        if (page) {
+          this.set('queryParams.p', page);
+        } else if (this.queryParams.hasOwnProperty('p')) {
+          delete this.queryParams.p;
+          // TODO: use this for Polymer 2.0
+          //this.notifyPath('queryParams.p');
+          this.$.params.paramsObjectChanged();
+        }
+      }
+    },
+
+    _elementPageChanged: function(page) {
+      if (this.queryParams.d !== 'element') return;
+
+      this.set('queryParams.p', page);
+    },
+
+    _userPageChanged: function(page) {
+      if (this.queryParams.d !== 'user') return;
+
+      this.set('queryParams.p', page);
+    },
+
+    _elementChanged: function(element) {
+      if (element) {
+        this.elementId = element.id;
+      }
+    },
+
+    _elementIdChanged: function(elementId) {
+      if (this.queryParams && this.queryParams.d === 'element' && this.queryParams.e !== elementId) {
+        if (elementId) {
+          if (this.element && this.element.id !== elementId) {
+            this.element = undefined;
+          }
+          this.set('queryParams.e', elementId);
+        } else if (this.queryParams.hasOwnProperty('e')) {
+          delete this.queryParams.e;
+          // TODO: use this for Polymer 2.0
+          //this.notifyPath('queryParams.e');
+          this.$.params.paramsObjectChanged();
+        }
+      }
+      // TODO:
+    },
+
+    _descriptionConfigIdChanged: function(descriptionConfigId) {
+      if (this.queryParams.d === 'element' && this.queryParams.c !== descriptionConfigId) {
+        if (descriptionConfigId) {
+          this.set('queryParams.c', descriptionConfigId);
+        } else if (this.queryParams.hasOwnProperty('c')) {
+          delete this.queryParams.c;
+          // TODO: use this for Polymer 2.0
+          //this.notifyPath('queryParams.c');
+          this.$.params.paramsObjectChanged();
+        }
+      }
+      // TODO:
+    },
+
+    _descriptionSegmentVariationIdsChanged: function(descriptionSegmentVariationIds) {
+      if (this.queryParams.d === 'element') {
+        if (descriptionSegmentVariationIds.length > 0) {
+          this.set('queryParams.s', descriptionSegmentVariationIds.join(','));
+        } else if (this.queryParams.hasOwnProperty('s')) {
+          delete this.queryParams.s;
+          // TODO: use this for Polymer 2.0
+          //this.notifyPath('queryParams.s');
+          this.$.params.paramsObjectChanged();
+        }
+      }
+      // TODO:
+    },
+  });
+  </script>
+</dom-module>

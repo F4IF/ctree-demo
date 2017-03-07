@@ -1,0 +1,113 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<!-- internal -->
+<link rel="import" href="../ctree-feedback-entry/ctree-feedback-entry.html">
+<link rel="import" href="../ctree-feedback-item/ctree-feedback-item.html">
+<link rel="import" href="../ctree-sort/ctree-sort.html">
+
+<dom-module id="ctree-feedback-page">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #topFeedbackEntry {
+        width: 100%;
+      }
+      iron-list {
+        position: absolute;
+        top: 96px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .item {
+        display: block;
+        position: relative;
+        width: 50px;
+        height: 80px;
+        margin: 8px;
+        background: #00FF00;
+      }
+    </style>
+
+    <ctree-feedback-entry id="topFeedbackEntry" on-iron-resize="_onFeedbackResized"></ctree-feedback-entry>
+    <ctree-sort id="feedbackSort" type="{{type}}" ascending="{{ascending}}"></ctree-sort>
+    <iron-list id="feedback" items="[[feedback]]" as="item">
+      <template><div>
+        <ctree-feedback-item item="[[item]]" depth="[[item.depth]]" sentiment="[[item.sentiment]]" comment="[[item.comment]]" on-iron-resize="_onItemResized"></ctree-feedback-item>
+      </div></template>
+    </iron-list>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-feedback-page',
+
+    properties: {
+      feedback: {
+        type: Array,
+        value: [
+          {depth: 0, sentiment: 1, comment: "Test comment 1"},
+          {depth: 1, sentiment: 0, comment: "Test response"},
+          {depth: 2, sentiment: -1, comment: "Test sub-response"},
+          {depth: 3, sentiment: 0, comment: "Test deep-response"},
+          {depth: 0, sentiment: 0, comment: "Test comment 2"}
+        ],
+      },
+
+      segment: Number,
+
+      descriptionConfigId: {
+        type: Number,
+        observer: '_onDescriptionConfigChanged',
+      },
+    },
+
+    _onDescriptionConfigChanged: function(descriptionConfigId) {
+      // TODO: refresh feedback list
+    },
+
+    _onFeedbackResized: function() {
+      this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
+    },
+
+    _onItemResized: function(e) {
+      item = e.target.item;
+      if (item) {
+        this.$.feedback.updateSizeForItem(item);
+      }
+    },
+  });
+  </script>
+</dom-module>

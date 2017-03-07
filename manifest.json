@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "Collaboration Tree",
+  "version": "0.1.0",
+  "short_name": "cTree",
+    "icons": [{
+      "src": "images/app-icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }, {
+      "src": "images/app-icon.svg",
+      "sizes": "128x128",
+      "type": "image/svg"
+    }, {
+      "src": "images/app-icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }, {
+      "src": "images/app-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg"
+    },{
+      "src": "images/app-icon.svg",
+      "sizes": "384x384",
+      "type": "image/svg"
+    }],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#5F9F00",
+  "theme_color": "#5F9F00"
+}

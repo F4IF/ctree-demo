@@ -1,0 +1,446 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<link rel="import" href="ctree-loader-behavior-test.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  // test configuration values
+  var Test = {
+    LOAD_DELAY: 2500,
+    SUGGESTED_COMMENTS: [601, 600, 613, 913, 211, 431, 413], // see COMMENT_CATEGORY and COMMENT_SUBJECT
+    HISTORY_COMMENTS: [100, 113, 201, 230, 222, 210, 211, 213, 310], // see COMMENT_CATEGORY and COMMENT_SUBJECT
+  };
+
+  var getTestItems = function(cTreeData, list, offset, pageSize, commentCodes) {
+    var items = [];
+    for (var i = 0; i < pageSize && offset < list.length; i++, offset++) {
+      // TODO: this should simulate reality better by only returning the pieces of the element needed for suggestedItem (id, type, name, description config, description segments)
+      var element = cTreeData.testElements[list[offset]];
+      cTreeData.elements[element.id] = element;
+
+      var item = {element: element};
+      if (commentCodes) {
+        var commentCode = commentCodes[Math.floor(Math.random() * commentCodes.length)];
+        item.commentCode =  commentCode;
+
+        var CATEGORY = Polymer.CTreeLoader.COMMENT_CATEGORY;
+        var SUBJECT = Polymer.CTreeLoader.COMMENT_SUBJECT;
+        var subjectCode = commentCode % 100;
+        var categoryCode = commentCode - subjectCode;
+        if (!categoryCode != CATEGORY.NEEDS) {
+          if (subjectCode == SUBJECT.FEEDBACK) {
+            // TODO: add support for testing nested feedback too
+            item.feedback = element.feedback[Math.floor(Math.random() * element.feedback.length)];
+          } else if (subjectCode == SUBJECT.DESCRIPTION
+              || subjectCode == SUBJECT.TRANSLATION) {  // TODO: do we need more for translation?
+            var configIndex = Math.floor(Math.random() * element.description.length);
+            var description = element.description[configIndex];
+            if (description) {
+              item.descriptionConfig = description.id;
+              item.descriptionSegments = [];
+              var segments = description.segments;
+              for (var j = 0; j < segments.length; j++) {
+                var variations = segments[j].variations;
+                var variationIndex = Math.floor(Math.random() * variations.length);
+                item.descriptionSegments.push(variations[variationIndex].id);
+              }
+            }
+          }
+        }
+        if (categoryCode <= CATEGORY.TRANSLATED) {
+          item.commentData = new Date().getTime() - Math.floor(Math.pow(Math.random() * Math.sqrt(6048000), 2) * 1000);  // timestamp up to 10 weeks ago
+        } else {
+          // TODO: add comment data based on subject
+        }
+      }
+
+      items.push(item);
+    }
+    return items;
+  }
+
+  Polymer.CTreeListLoader = Polymer({
+    is: 'ctree-list-loader-test',
+
+    behaviors: [
+      Polymer.CTreeLoaderBehavior,
+    ],
+
+    properties: {
+      pageSize: {
+        type: Number,
+        value: 20,
+      },
+
+      /**
+       * The type of list to load in current properties.  Supported values:
+       *   - suggested
+       *   - bookmarked
+       *   - history
+       */
+      currentName: {
+        type: String,
+        observer: "_currentChanged",
+      },
+
+      /**
+       * All items loaded for the current list.
+       *
+       * Structure:
+       *   [{
+       *     element: Element,
+       *     feedback: Feedback,
+       *     descriptionConfig: Number,
+       *     descriptionSegments: [Number],
+       *     commentCode: Number,
+       *     commentData: Object,	// type depends on commentCode
+       *   }, ...]
+       */
+      currentItems: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      /**
+       * Indicates if the next page of items for the current list is loading.
+       */
+      currentLoading: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: false,
+      },
+
+      /**
+       * Indicates if the current list has more items to load.
+       */
+      currentHasMore: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: true,
+      },
+
+      /**
+       * Structure:
+       *   [{
+       *     element: Element,
+       *     feedback: Feedback,
+       *     descriptionConfig: Number,
+       *     descriptionSegments: [Numbers],
+       *     commentCode: Number,
+       *     commentData: Object,	// type depends on commentCode
+       *   }, ...]
+       */
+      suggestedItems: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      suggestedLoading: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: false,
+      },
+
+      suggestedHasMore: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: true,
+      },
+
+      /**
+       * Structure:
+       *   [{
+       *     element: Element,
+       *   }, ...]
+       */
+      bookmarkedItems: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      bookmarkedLoading: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: false,
+      },
+
+      bookmarkedHasMore: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: true,
+      },
+
+      /**
+       * Structure:
+       *   [{
+       *     element: Element,
+       *     feedback: Feedback,
+       *     commentCode: Number,
+       *     descriptionConfig: Number,
+       *     descriptionSegments: [Numbers],
+       *   }, ...]
+       */
+      historyItems: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      historyLoading: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: false,
+      },
+
+      historyHasMore: {
+        type: Boolean,
+        readOnly: true,
+        notify: true,
+        value: true,
+      },
+    },
+
+    loadSuggested: function() {
+      var cTreeData = this._cTreeData;
+      var listData = cTreeData.lists.suggested;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('suggested', true);
+      this.async(function() {
+        if (!this.ctreeKey) return;
+
+        if (!listData.offset) {
+          listData.offset = 0;
+        }
+        var items = getTestItems(cTreeData, cTreeData.testSuggested, listData.offset, this.pageSize, Test.SUGGESTED_COMMENTS);
+        if (!items || items.length == 0) {
+          listData.hasMore = false;
+          if (this._cTreeData == cTreeData) {
+            this._setSuggestedHasMore(false);
+          }
+        } else {
+          items.forEach(function(item) {
+            if (this._cTreeData == cTreeData) {
+              this.push('suggestedItems', item);
+              if (this.currentName == 'suggested') {
+                this.notifySplices('currentItems', [{
+                  index: this.currentItems.length - 1,
+                  removed: [],
+                  addedCount: 1,
+                  object: this.currentItems,
+                  type: 'splice',
+                }]);
+              }
+            } else {
+              listData.items.push(item);
+            }
+            listData.offset++;
+          }, this);
+        }
+        listData.loading = false;
+        if (this._cTreeData == cTreeData) {
+          this._setLoading('suggested', false);
+        }
+      }, Test.LOAD_DELAY);
+    },
+
+    loadBookmarked: function() {
+      var cTreeData = this._cTreeData;
+      var listData = cTreeData.lists.bookmarked;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('bookmarked', true);
+      this.async(function() {
+        if (!listData.offset) {
+          listData.offset = 0;
+        }
+        var items = getTestItems(cTreeData, cTreeData.testBookmarked, listData.offset, this.pageSize)
+        if (!items || items.length == 0) {
+          listData.hasMore = false;
+          if (this._cTreeData == cTreeData) {
+            this._setBookmarkedHasMore(false);
+          }
+        } else {
+          items.forEach(function(item) {
+            if (this._cTreeData == cTreeData) {
+              this.push('bookmarkedItems', item);
+              if (this.currentName == 'bookmarked') {
+                this.notifySplices('currentItems', [{
+                  index: this.currentItems.length - 1,
+                  removed: [],
+                  addedCount: 1,
+                  object: this.currentItems,
+                  type: 'splice',
+                }]);
+              }
+            } else {
+              listData.items.push(item);
+            }
+            listData.offset++;
+          }, this);
+        }
+        listData.loading = false;
+        if (this._cTreeData == cTreeData) {
+          this._setLoading('bookmarked', false);
+        }
+      }, Test.LOAD_DELAY);
+    },
+
+    loadHistory: function() {
+      var cTreeData = this._cTreeData;
+      var listData = cTreeData.lists.history;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('history', true);
+      this.async(function() {
+        if (!listData.offset) {
+          listData.offset = 0;
+        }
+        var items = getTestItems(cTreeData, cTreeData.testHistory, listData.offset, this.pageSize, Test.HISTORY_COMMENTS);
+        if (!items || items.length == 0) {
+          listData.hasMore = false;
+          if (this._cTreeData == cTreeData) {
+            this._setHistoryHasMore(false);
+          }
+        } else {
+          items.forEach(function(item) {
+            if (this._cTreeData == cTreeData) {
+              this.push('historyItems', item);
+              if (this.currentName == 'history') {
+                this.notifySplices('currentItems', [{
+                  index: this.currentItems.length - 1,
+                  removed: [],
+                  addedCount: 1,
+                  object: this.currentItems,
+                  type: 'splice',
+                }]);
+              }
+            } else {
+              listData.items.push(item);
+            }
+            listData.offset++;
+          }, this);
+        }
+        listData.loading = false;
+        if (this._cTreeData == cTreeData) {
+          this._setLoading('history', false);
+        }
+      }, Test.LOAD_DELAY);
+    },
+
+    _setLoading: function(name, loading) {
+      if (name == 'suggested') {
+        this._setSuggestedLoading(loading);
+      } else if (name == 'bookmarked') {
+        this._setBookmarkedLoading(loading);
+      } else if (name == 'history') {
+        this._setHistoryLoading(loading);
+      }
+      if (name == this.currentName) {
+        this._setCurrentLoading(loading);
+      }
+    },
+
+    _setHasMore: function(name, hasMore) {
+      if (name == 'suggested') {
+        this._setSuggestedHasMore(hasMore);
+      } else if (name == 'bookmarked') {
+        this._setBookmarkedHasMore(hasMore);
+      } else if (name == 'history') {
+        this._setHistoryHasMore(hasMore);
+      }
+      if (name == this.currentName) {
+        this._setCurrentHasMore(hasMore);
+      }
+    },
+
+    _cTreeDataChanged: function(cTreeData) {
+      var listData = cTreeData.lists.suggested;
+      this._setSuggestedItems(listData.items);
+      this._setSuggestedLoading(listData.loading);
+      this._setSuggestedHasMore(listData.hasMore);
+      listData = cTreeData.lists.bookmarked;
+      this._setBookmarkedItems(listData.items);
+      this._setBookmarkedLoading(listData.loading);
+      this._setBookmarkedHasMore(listData.hasMore);
+      listData = cTreeData.lists.history;
+      this._setHistoryItems(listData.items);
+      this._setHistoryLoading(listData.loading);
+      this._setHistoryHasMore(listData.hasMore);
+      this._currentChanged(this.currentName, this.currentName);
+    },
+
+    _currentChanged: function(currentName, previousName) {
+      if (currentName == "suggested") {
+        this._setCurrentItems(this.suggestedItems);
+        this._setCurrentLoading(this.suggestedLoading);
+        this._setCurrentHasMore(this.suggestedHasMore);
+        this.loadCurrent = this.loadSuggested;
+      } else if (currentName == "bookmarked") {
+        this._setCurrentItems(this.bookmarkedItems);
+        this._setCurrentLoading(this.bookmarkedLoading);
+        this._setCurrentHasMore(this.bookmarkedHasMore);
+        this.loadCurrent = this.loadBookmarked;
+      } else if (currentName == "history") {
+        this._setCurrentItems(this.historyItems);
+        this._setCurrentLoading(this.historyLoading);
+        this._setCurrentHasMore(this.historyHasMore);
+        this.loadCurrent = this.loadHistory;
+      } else {
+        this._setCurrentItems([]);
+        this._setCurrentLoading(false);
+        this._setCurrentHasMore(false);
+        this.loadCurrent = null;
+      }
+    },
+  });
+
+})();
+
+</script>

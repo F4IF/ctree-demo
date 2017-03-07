@@ -1,0 +1,146 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<!-- internal -->
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-sort/ctree-sort.html">
+
+<dom-module id="ctree-history-page">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      iron-list {
+        position: absolute;
+        top: 96px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .item {
+        display: block;
+        position: relative;
+        width: 50px;
+        height: 80px;
+        margin: 8px;
+        background: #00FF00;
+      }
+      #controls {
+        width: 100%;
+        border: 0;
+        border-spacing: 0;
+      }
+      #controls td {
+        valign: middle;
+        padding: 0;
+      }
+      #filters {
+        width: 100%;
+        white-space: nowrap;
+      }
+      ctree-sort {
+        white-space: nowrap;
+      }
+    </style>
+
+    <ctree-user-dialog-accessor id="userDialog"></ctree-user-dialog-accessor>
+
+    <table id="controls"><tr>
+      <td id="filters">
+        <paper-icon-button id="rating" icon="thumbs-up" title="rating"></paper-icon-button>
+        <paper-icon-button id="feedback" icon="comment" title="feedback"></paper-icon-button>
+        <paper-icon-button id="edits" icon="description" title="edits"></paper-icon-button>
+        <paper-icon-button id="relations" icon="relations" title="relations" hidden$="false"></paper-icon-button>
+      </td>
+      <td><ctree-sort id="sort" type="{{sortType}}" ascending="{{sortAscending}}"></ctree-sort></td>
+    </tr></table>
+    <iron-list id="items" items="[[items]]" as="item">
+      <template><div>
+        <!-- TODO: list of history entries (different types) -->
+      </div></template>
+    </iron-list>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-history-page',
+
+    properties: {
+      items: {
+        type: Array,
+        value: [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+        ],
+      },
+
+      descriptionConfigId: {
+        type: Number,
+        observer: '_onDescriptionConfigChanged',
+      },
+
+      contributor: {
+        type: Object,
+        observer: '_contributorChanged',
+      },
+    },
+
+    _onDescriptionConfigChanged: function(descriptionConfigId) {
+      // TODO: refresh history list
+      // TODO: consider how to eliminate network cost of case when change both description config and contributor
+    },
+
+    _contributorChanged: function(contributor) {
+      // TODO: refresh history list
+    },
+
+    _onFeedbackResized: function() {
+      this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
+    },
+
+    _onItemResized: function(e) {
+      item = e.target.item;
+      if (item) {
+        this.$.feedback.updateSizeForItem(item);
+      }
+    },
+  });
+  </script>
+</dom-module>

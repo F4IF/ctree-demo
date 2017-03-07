@@ -1,0 +1,486 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-location/iron-location.html">
+<link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
+<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<link rel="import" href="icons.html">
+
+<script>
+// TODO: create a loder for tree types or add to ctree-loader
+var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png"},
+    	          future: {label: "Future City",	icon: "/images/app-icon-32.png"},
+    	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png"},
+    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png"},
+    	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png"}};
+var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
+</script>
+
+<dom-module id="ctree-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --app-primary-color: #5F9F00;
+        --app-secondary-color: black;
+      }
+      app-drawer app-toolbar {
+        background-color: #4F7F00;
+        color: #fff;
+      }
+      app-header-layout {
+        height: 100vh;
+      }
+      app-header {
+        background-color: var(--app-primary-color);
+        color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+      app-header paper-badge {
+        display: none;
+        --paper-badge-margin-left: -14px;
+        --paper-badge-margin-bottom: -14px;
+      }
+      paper-tab {
+        width: 0;
+      }
+      paper-tab[link] a {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        color: #fff;
+        text-decoration: none;
+      }
+      paper-tab iron-icon {
+        padding-right: 2px;
+      }
+      .tabTooltip {
+        visibility: hidden;
+      }
+      paper-button {
+        text-transform: none;
+      }
+      paper-button iron-icon {
+        padding-right: 8px;
+      }
+      .nav-drawer {
+        bottom: 0;
+      }
+      .nav-content {
+        padding: 12px 8px;
+        height: 100%;
+      }
+      .nav-content paper-input {
+        padding: 0 12px;
+      }
+      .drawer-list a {
+        display: block;
+        padding: 0;
+        line-height: 32px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+      }
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+      .drawer-list a.subroute {
+        padding-left: 32px;
+      }
+      #elementPreviewList {
+        @apply(--layout-fit);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        padding: 10px;
+        padding-top: 10px;
+        padding-bottom: 48px;
+      }
+      ctree-element-preview {
+        width: 280px;
+        height: 320px;
+      }
+      #loadingIndicator {
+        position: absolute;
+        top: auto !important;
+        bottom: -36px;
+        left: 0;
+        right: 0;
+        font-size: 16px;
+        text-align: center;
+      }
+      #addButton {
+        position: absolute;
+        bottom: 24px;
+        right: 24px;
+      }
+      .notifications-drawer {
+        top: -20px;
+        bottom: -72px;
+      }
+      .notifications-content {
+        height: 100%;
+      }
+      .notifications-header div {
+        display: inline-block;
+        padding: 12px 16px;
+        font-weight: 500;
+        font-size: 16px
+      }
+      .notifications-header paper-icon-button {
+        float: right;
+        margin: 4px;
+      }
+      @media (max-width: 340px) {
+        .tabLabel {
+          display: none;
+        }
+        .tabTooltip {
+          visibility: visible;
+        }
+      }
+    </style>
+
+    <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
+    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
+    <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
+
+    <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
+    <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
+    <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
+    <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
+
+    <ctree-list-loader-test id="loader" ctree-key="[[ctreeKey]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader-test>
+
+    <app-drawer-layout fullbleed>
+
+      <!-- Navigation drawer -->
+      <app-drawer id="navDrawer" class="nav-drawer" swipe-open>
+        <app-toolbar>cTrees</app-toolbar>
+        <div class="nav-content">
+          <paper-input label="Search" no-label-float>
+            <iron-icon icon="search" prefix></iron-icon>
+          </paper-input>
+
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="all" role="navigation">
+            <iron-list items="[[navList]]" as="item">
+              <template>
+                <a name="[[item.name]]" href="[[rootPath]]/[[item.name]]">
+                  <paper-button>
+                    <iron-icon src="[[item.data.icon]]"></iron-icon>
+                    [[item.data.label]]
+                  </paper-button>
+                </a>
+              </template>
+            </iron-list>
+          </iron-selector>
+        </div>
+      </app-drawer>
+
+      <app-header-layout id="mainLayout" has-scrolling-region>
+        <app-header fixed effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div title>cTree.org</div>
+            <paper-icon-button icon="search" on-tap="showSearch"></paper-icon-button>
+            <paper-icon-button icon="account-circle" on-tap="showAccountDialog"></paper-icon-button>
+            <paper-icon-button icon="account-stats" on-tap="showAccountStats"></paper-icon-button>
+            <paper-icon-button id="notifications" icon="notifications-none" on-tap="showNotifications"></paper-icon-button>
+            <paper-badge for="notifications"></paper-badge>
+          </app-toolbar><app-toolbar style="height: 36px;">
+            <paper-tabs selected="{{subpage}}" attr-for-selected="name" fallback-selection="suggested" bottom-item>
+              <paper-tab id="suggestedTab" name="suggested" link>
+                <a href="[[rootPath]][[ctreeKey]]/suggested" tabindex="-1">
+                  <iron-icon icon="suggested"></iron-icon><div class="tabLabel">SUGGESTED</div>
+                </a>
+              </paper-tab>
+              <paper-tab id="bookmarksTab" name="bookmarked" link>
+                <a href="[[rootPath]][[ctreeKey]]/bookmarked" tabindex="-1">
+                  <iron-icon icon="bookmark"></iron-icon><div class="tabLabel">BOOKMARKS</div>
+                </a>
+              </paper-tab>
+              <paper-tab id="historyTab" name="history" link>
+                <a href="[[rootPath]][[ctreeKey]]/history" tabindex="-1">
+                  <iron-icon icon="history"></iron-icon><div class="tabLabel">HISTORY</div>
+                </a>
+              </paper-tab>
+            </paper-tabs>
+            <paper-tooltip class="tabTooltip" for="suggestedTab" offset="-8">Suggested</paper-tooltip>
+            <paper-tooltip class="tabTooltip" for="bookmarksTab" offset="-8">Bookmarks</paper-tooltip>
+            <paper-tooltip class="tabTooltip" for="historyTab" offset="-8">History</paper-tooltip>
+          </app-toolbar>
+
+        </app-header>
+
+        <iron-list id="elementPreviewList" items="[[pageListItems]]" as="item" grid>
+          <template>
+            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]"></ctree-element>
+          </template>
+
+          <div id="loadingIndicator" hidden$="[[!hasMoreListItems]]">
+            <paper-spinner active$="[[loadingListItems]]"></paper-spinner> Loading more
+          </div>
+        </iron-list>
+
+        <iron-scroll-threshold id="scrollThreshold"
+            lower-threshold="500"
+            scroll-target="elementPreviewList"
+            on-lower-threshold="loadMoreListItems">
+        </iron-scroll-threshold>
+
+        <paper-fab id="addButton" icon="add" title="Add" on-tap="_addElement"></paper-fab>
+
+        <!-- Notification drawer -->
+        <app-drawer id="notificationsDrawer" class="notifications-drawer" align="end" on-app-drawer-transitioned="notificationsDrawerTransitioned">
+          <div class="notifications-content" align="left">
+            <div class="notifications-header">
+              <div>Notifications</div>
+              <paper-icon-button on-tap="clearNotifications" icon="playlist-add-check"></paper-icon-button>
+            </div>
+            <iron-list items="[[notifications]]" as="item">
+              <template>
+                <!-- TODO -->
+              </template>
+            </iron-list>
+          </div>
+        </app-drawer>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'ctree-app',
+
+      properties: {
+        rootPath: {
+          type: String,
+          value: '',
+          observer: '_rootChanged',
+        },
+
+        page: {
+          type: String,
+          observer: '_pageChanged',
+        },
+
+        navList: Array,
+
+        notifications: Array,
+      },
+
+      observers: [
+        '_dialogParamChanged(queryParams.d)',
+        '_pathChanged(path)',
+        '_subpageChanged(subpage)',
+        '_loadingListItemsChanged(loadingListItems)',
+      ],
+
+      ready: function() {
+        this._updateNavList();
+        // TODO:
+      },
+
+      showSearch: function() {
+        // TODO: initiate search input
+      },
+
+      showNotifications: function() {
+        // TODO: show notifications in dialog below button when larger width (i.e. not on phones)
+    	   this.$.notificationsDrawer.toggle();
+      },
+
+      notificationsDrawerTransitioned: function() {
+        this.$.elementPreviewList.style.overflowY = this.$.notificationsDrawer.opened ? "hidden" : "auto";
+      },
+
+      clearNotifications: function() {
+        // TODO: clear all notifications & update notifications indicator in header
+      },
+
+      showAccountDialog: function() {
+        var dialog = this.$.userDialog;
+        // TODO: show account details in account dialog
+        dialog.page = 'details';
+        dialog.open();
+      },
+
+      showAccountStats: function() {
+        var dialog = this.$.userDialog;
+        // TODO: show account stats in account dialog
+        dialog.page = 'stats';
+        dialog.open();
+      },
+
+      _rootChanged: function (path) {
+        this._updateNavList();
+      },
+
+      loadMoreListItems: function() {
+        if (this.$.importLoader.loaded) {
+          this.$.loader.loadCurrent();
+        } else {
+          this.$.importLoader.load();
+        }
+      },
+
+      _importLoaderLoadingChanged: function(e) {
+        if (!e.detail.value && this.$.importLoader.loaded
+            && !this.$.importPreview.loading && !this.$.importPreview.loaded) {
+          this.$.importPreview.load();
+          this.loadMoreListItems();
+        }
+      },
+
+      _loadingListItemsChanged: function(loadingListItems) {
+        this.$.scrollThreshold.clearTriggers();
+      },
+
+      _updateNavList: function() {
+        // TODO: make conditional on if search is active and what search text is
+        /*if (this.navList) {
+          this.navList.length = 0;
+        } else {
+          this.navList = [];
+        }*/
+        var newNavList = [];
+        for (var i = 0; i < ctreeSavedPages.length; i++) {
+          var name = ctreeSavedPages[i];
+          var pageData = ctreePages[name];
+          if (!pageData.icon.startsWith(this.rootPath)) {
+            pageData.icon = this.rootPath + pageData.icon;
+          }
+          newNavList.push({name: name, data: pageData});
+        }
+        this.navList = newNavList;
+      },
+
+      _dialogParamChanged: function(dialogParam) {
+        if (dialogParam === 'element') {
+          this.$.elementDialog.open();
+        } else if (dialogParam === 'user') {
+          this.$.userDialog.open();
+        }
+      },
+
+      _pathChanged: function(fullPath) {
+        if (fullPath.startsWith(this.rootPath)) {
+          fullPath = fullPath.substr(this.rootPath.length);
+        }
+        var pathSegments = fullPath.split('/');
+        if (pathSegments.length > 1) {
+          if (ctreeSavedPages.indexOf(pathSegments[1]) < 0) {
+            page = ctreeSavedPages[0];
+          } else {
+            page = pathSegments[1];
+          }
+          if (pathSegments.length > 2) {
+            subpage = pathSegments[2];
+            if (subpage != 'bookmarked' && subpage != 'history') {
+              subpage = 'suggested';
+            }
+          } else {
+            subpage = 'suggested';
+          }
+        } else {
+          page = ctreeSavedPages[0];
+          subpage = 'suggested';
+        }
+        var forceSubpageChanged = (this.page != page && this.subpage == subpage);
+        this.page = page;
+        this.subpage = subpage;
+        if (forceSubpageChanged) {
+          this._subpageChanged(subpage);
+        }
+      },
+
+      _pageChanged: function(page) {
+        this.ctreeKey = this.rootPath + (page && page.length > 0 ? '/' + page : '');
+      },
+
+      _subpageChanged: function(subpage) {
+        this.$.loader.currentName = subpage;
+        this.$.scrollThreshold.clearTriggers();
+        // This must be delayed to prevent issue with rootPath being set after trying to load items, which triggers loading component
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          if (!this.$.importLoader.loaded || this.$.loader.currentItems.length == 0) {
+            this.loadMoreListItems();
+          }
+        });
+      },
+
+      // TODO: respond to element changes via the ctree element loader
+      _bookmarkChanged: function(event) {
+        var element = event.detail.element;
+        // TODO: remove event from bookmarked list (may not be found)
+        if (event.detail.bookmarked) {
+          // TODO: add event to top of bookmarked list
+        }
+        // TODO: start checking for duplicates as loading bookmarked items (may have added manually)
+      },
+
+      _getTempNotifications: function() {
+    	  // TODO:
+    	  return [];
+      },
+
+      _addElement: function() {
+        var dialog = this.$.elementDialog;
+        // TODO: initialize dialog for adding new element (edit title, edit type, get suggested elements)
+        dialog.element = undefined;
+        dialog.open();
+      }
+    });
+  </script>
+</dom-module>

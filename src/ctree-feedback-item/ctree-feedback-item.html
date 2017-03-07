@@ -1,0 +1,180 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<!-- internal -->
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+
+<dom-module id="ctree-feedback-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #sentiment {
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+        width: 36px;
+        padding: 8px;
+      }
+      #avatar {
+        display: block;
+        margin: auto;
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: url(../../images/no-avatar.png);
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      #feedback {
+        display: inline-block;
+        vertical-align: top;
+        text-align: right;
+        width: calc(100% - 60px);
+        padding: 8px 8px 8px 0;
+      }
+      #comment {
+        text-align: left;
+      }
+      /* TODO: there's probably a bug with paper-icon-button that needs to be fixed  */
+      paper-icon-button[hidden] {
+        display: none;
+      }
+    </style>
+
+    <ctree-user-dialog-accessor id="userDialog"></ctree-user-dialog-accessor>
+
+    <div id="sentiment">
+      <paper-button id="avatar" title="Username" on-tap="_userClicked" raised></paper-button>
+      <paper-icon-button id="thumbs-up" icon="thumbs-up" title="liked" hidden$="[[!_equals(sentiment, 1)]]"></paper-icon-button>
+      <paper-icon-button id="thumbs-down" icon="thumbs-down" title="disliked" hidden$="[[!_equals(sentiment, -1)]]"></paper-icon-button>
+    </div><div id="feedback">
+      <div id="content" hidden="true"></div>
+      <div id="comment">[[comment]]</div>
+      <ctree-feedback-bar on-feedback-tapped="_commentTapped"></ctree-feedback-bar>
+      <ctree-feedback-entry id="userComment" hidden$="[[!_commenting]]"></ctree-feedback-entry>
+    </div>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-feedback-item',
+
+    /**
+     * Fired when a the feedback button is tapped.
+     *
+     * @event feedback-tapped
+     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+     */
+
+    properties: {
+      item: {
+        type: Object,
+        observer: '_itemChanged',
+      },
+
+      depth: {
+        type: Number,
+        observer: '_depthChanged',
+      },
+
+      sentiment: Number,
+
+      comment: String,
+
+      // TODO: we probalby need to reset this whenever the item is changed (listen for ID or other handle change)
+      // TODO: store entered (but not submitted) comment by ID and clear it so list recycling works correctly
+      _commenting: {
+        type: Boolean,
+        value: false,
+      },
+
+      _offset: Number,
+    },
+
+    behaviors: [
+      Polymer.IronResizableBehavior
+    ],
+
+    listeners: {
+      "iron-resize": "_onSizeChanged"
+    },
+
+    _equals: function(v1, v2) {
+      return v1 === v2;
+    },
+
+    _userClicked: function(e) {
+      // TODO: populate with user data
+      this.$.userDialog.open();
+    },
+
+    _commentTapped: function() {
+      this._commenting = !this._commenting;
+      this.async(this.notifyResize, 1);
+    },
+
+    _itemChanged: function(newItem, oldItem) {
+      // TODO: get user comment store/restore working
+      if (oldItem) {
+        // store comment in progress
+        oldItem.commenting = this._commenting;
+        //oldItem.comment = this.$.userComment.comment;
+      }
+      this._commenting = newItem.commenting;
+      //this.$.userComment.comment = newItem.comment;
+      // TODO: if item has content populate it, otherwise hide content div
+    },
+
+    _onSizeChanged: function() {
+      this._depthChanged(this.depth);
+    },
+
+    _depthChanged: function(depth) {
+      sentiment = this.$.sentiment;
+      sentimentWidth = sentiment.offsetWidth;
+      offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
+      if (offset != this._offset) {
+        this._offset = offset;
+        sentiment.style.marginLeft = offset + 'px';
+        this.$.feedback.style.width = 'calc(100% - ' + (sentimentWidth + 8 + offset) + 'px)';
+      }
+    },
+  });
+  </script>
+</dom-module>

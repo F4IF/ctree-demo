@@ -1,0 +1,205 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+
+<!-- TODO: just for testing avatars, remove once user avatars loaded -->
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../ctree-loader/lorem.html">
+
+<dom-module id="ctree-element-header">
+  <template>
+    <style>
+      :host {
+        display: block;
+        white-space: nowrap;
+        padding: 4px 8px;
+      }
+      .contributor {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: url(../../images/no-avatar.png);
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      #designer {
+        min-width: 48px;
+        width: 48px;
+        height: 48px;
+        margin-top: 4px;
+      }
+      #contributors {
+        display: inline-block;
+        position: relative;
+        left: -6px;
+        height: 48px;
+        padding: 4px 4px;
+        vertical-align: top;
+      }
+      #contributors .contributor {
+        @apply(--shadow-elevation-3dp);
+      }
+      #related {
+        display: inline-block;
+        position: absolute;
+        padding: 4px 0;
+        right: 4px;
+        font-weight: bold;
+        font-size: large;
+      }
+      #children {
+        vertical-align: text-bottom;
+      }
+      .type-count {
+        display: inline-block;
+        vertical-align: text-bottom;
+      }
+      .type-icon {
+        padding-left: 2px;
+        padding-right: 4px;
+      }
+    </style>
+
+    <ctree-user-dialog-accessor id="userDialog"></ctree-user-dialog-accessor>
+
+    <paper-button class="contributor" id="designer" title="designer" on-tap="designerClicked" raised></paper-button>
+    <div id="contributors" on-tap="contributorsClicked"><paper-ripple></paper-ripple>
+      <div class="contributor" title="contributor"></div>
+      <div class="contributor" title="contributor"></div>
+      <div class="contributor" title="contributor"></div>
+    </div>
+    <div id="related" on-tap="relatedClicked"><paper-ripple></paper-ripple>
+      <div id="children">
+        <iron-icon icon="relation-from"></iron-icon>
+        <div class="type-count">3</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
+        <div class="type-count">1</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
+      </div>
+      <div id="parents">
+        <iron-icon icon="relation-to"></iron-icon>
+        <div class="type-count">2</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
+      </div>
+    </div>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-element-header',
+
+    /**
+     * Fired when a the contributors are tapped.
+     *
+     * @event contributors-tapped
+     */
+
+    /**
+     * Fired when a the related elements are tapped.
+     *
+     * @event related-tapped
+     */
+
+    properties: {
+      noclick: {
+        type: Boolean,
+        reflectToAttribute: true,
+        value: false,
+        observer: '_updateClickable',
+      },
+
+      norelations: {
+        type: Boolean,
+        reflectToAttribute: true,
+        value: true,
+        observer: '_updateRelationsVisible',
+      },
+    },
+
+    ready: function() {
+      // TODO: remove test images
+      var imagePath = document.createElement('iron-meta').byKey('rootPath') + "/images/";
+      this.$.designer.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
+      var contributors = this.$.contributors.children;
+      for (var i = 0; i < contributors.length; i++) {
+        var contributor = contributors[i];
+        if (contributor.tagName == 'DIV') {
+          contributor.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
+        }
+      }
+    },
+
+    designerClicked: function() {
+      if (this.noclick) return;
+
+      // TODO: populate with designer data
+      this.$.userDialog.open();
+    },
+
+    contributorsClicked: function() {
+      if (this.noclick) return;
+
+      this.fire('contributors-tapped');
+    },
+
+    relatedClicked: function() {
+      if (this.noclick) return;
+
+      this.fire('related-tapped');
+    },
+
+    _updateClickable: function(noClick) {
+      this.$.designer.raised = !noClick;
+      this.$.designer.noink = noClick;
+      this.$.designer.style.cursor = noClick ? "default" : "pointer";
+      if (noClick) {
+        // HACK: force shadow when noclick set since we're removing raised
+        this.$.designer.style.boxShadow = "0 3px 4px 0 rgba(0, 0, 0, 0.14),"
+                                        + "0 1px 8px 0 rgba(0, 0, 0, 0.12),"
+                                        + "0 3px 3px -2px rgba(0, 0, 0, 0.4)";
+      }
+      this.$.contributors.firstChild.noink = noClick;
+      this.$.contributors.style.cursor = noClick ? "default" : "pointer";
+      this.$.related.firstChild.noink = noClick;
+      this.$.related.style.cursor = noClick ? "default" : "pointer";
+    },
+
+    _updateRelationsVisible: function(noRelations) {
+      this.$.related.style.display = noRelations ? "none" : "inline-block";
+    }
+  });
+  </script>
+</dom-module>

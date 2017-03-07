@@ -1,0 +1,549 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<link rel="import" href="lorem.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  // monostate data
+  var cTreesData = {};
+  var globalUsersData = {};
+
+  // test configuration values
+  var Test = {
+    LOAD_DELAY: 2500,
+    SEGMENT_TYPES: [
+      1, 1, 1, 1, 1, 1, 1,  // Text (String)
+      2,                    // Image (String)
+    ],
+    MAX_CHILDREN: 5,
+    MAX_DESCRIPTION_CONFIGS: 3,
+    MAX_DESCRIPTION_SEGMENTS: 5,
+    MAX_DESCRIPTION_SEGMENT_VARIATIONS: 3,
+  };
+  var ElementTypes = [
+    [
+      {id: 1, name: "Seed",	description: "Core design goals.", iconUrl: "/images/app-icon-32.png",
+        color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
+      {id: 2, name: "Root",	description: "Core principles, based on the design goals.", iconUrl: "/images/app-icon-32.png",
+        color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1], elements: []},
+      {id: 3, name: "Xylem",	description: "Extrapolated principles based on the core principles.", iconUrl: "/images/app-icon-32.png",
+        color: "#e12323", parentsRequired: true,	parentsMax: -1,	parentTypes: [2, 3], elements: []},
+      {id: 4, name: "Node",	description: "Issue which needs to be solved for a principle.", iconUrl: "/images/app-icon-32.png",
+        color: "#00aeae", parentsRequired: true,	parentsMax: 1,	parentTypes: [3], elements: []},
+      {id: 5, name: "Bud",	description: "Possible solution to an issue.", iconUrl: "/images/app-icon-32.png",
+        color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
+      {id: 6, name: "Vein",	description: "Implementation detail for a solution.", iconUrl: "/images/app-icon-32.png",
+        color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [5, 6], elements: []},
+    ],
+  ];
+  var SegmentTypes = [
+    {id: 1, componentName: 'ctree-segment-text', canBeThumbnail: false},
+    {id: 2, componentName: 'ctree-segment-image', canBeThumbnail: true},
+  ];
+
+  var populateCTreeTestData = function(cTreeData) {
+    var types = cTreeData.types;
+
+    // get list of child types for each item type
+    var childTypes = [];
+    var elementTypeCount = [];
+    for (var i = 1; i < types.length; i++) {
+      var type = types[i];
+      if (type) {
+        elementTypeCount[i] = 0;
+        // add this type as child for each parent type
+        for (var j = 0; j < type.parentTypes.length; j++) {
+          var parentTypeIndex = type.parentTypes[j];
+          var childTypesForParent = childTypes[parentTypeIndex];
+          if (!childTypesForParent) {
+            childTypesForParent = [];
+            childTypes[parentTypeIndex] = childTypesForParent;
+          }
+          childTypesForParent.push(i);
+        }
+        if (!type.parentsRequired) {
+          // no parents for type, so add to root node list
+          var parentTypeIndex = 0;
+          var childTypesForParent = childTypes[parentTypeIndex];
+          if (!childTypesForParent) {
+            childTypesForParent = [];
+            childTypes[parentTypeIndex] = childTypesForParent;
+          }
+          childTypesForParent.push(i);
+        }
+      }
+    }
+
+    // create elements which don't have parents
+    var nextElementId = 1;
+    var currentLevelElements;
+    var nextLevelElements = [];
+    var parentlessTypeIds = childTypes[0];
+    var testElements = [];
+    cTreeData.testElements = testElements;
+    for (var i = 0; i < parentlessTypeIds.length; i++) {
+      var typeId = parentlessTypeIds[i];
+      var type = types[typeId];
+      var childCount = Math.floor(1 + Math.random() * Test.MAX_CHILDREN);
+      for (var j = 0; j < childCount; j++) {
+        var element = {id: nextElementId++, type: type, title: type.name + ' ' + ++elementTypeCount[typeId]};
+        testElements[element.id] = element;
+        nextLevelElements.push(element);
+      }
+    }
+    cTreeData.testElementsWithoutParents = nextLevelElements;
+
+    // create elements for each tree level
+    var levelsDeep = 1;
+    var descriptionConfigId = 1;
+    var segmentId = 1;
+    while (nextLevelElements.length > 0) {
+      currentLevelElements = nextLevelElements;
+      nextLevelElements = [];
+      var sharedPoolSize = Math.ceil(currentLevelElements.length * Test.MAX_CHILDREN / 8);
+      var sharedPool = [];
+      for (var i = 0; i < currentLevelElements.length; i++) {
+        var parent = currentLevelElements[i];
+        var childTypesForId = childTypes[parent.type.id];
+        var guaranteeChild = true;
+        if (childTypesForId) {
+          var maxChildCount = Test.MAX_CHILDREN;
+          if (levelsDeep > types.length * 2) {
+            // tree is twice as deep as the number of types so cut chance of having a child down to 30%
+            maxChildCount = 1;
+            guaranteeChild = false;
+          } else if (parent.parents) {
+            for (var j = 0; j < parent.parents.length; j++) {
+              if (testElements[parent.parents[j]].type.id == parent.type.id) {
+                // parent and its parent are of the same type so give a 30% chance of having a child
+                maxChildCount = 1;
+                guaranteeChild = false;
+                break;
+              }
+            }
+          }
+          // create children
+          childCount = Math.floor(Math.pow(Math.random(), 2) * (maxChildCount + 1));
+          if (childCount == 0 && guaranteeChild) {
+            childCount = 1;
+          }
+          if (childCount > 0) {
+            parent.children = [];
+            for (var j = 0; j < childCount; j++) {
+              var typeId = childTypesForId[Math.floor(Math.random() * childTypesForId.length)];
+              var sharedPoolIndex = (Math.random() < 0.5 ? -1 : Math.floor(Math.random() * sharedPoolSize));
+              var element = (sharedPoolIndex >= 0 && sharedPool[typeId] ? sharedPool[typeId][sharedPoolIndex] : null);
+              if (element && types[typeId].parentsMax >= 0 && element.parents.length < types[typeId].parentsMax) {
+                // verify not already a child
+                var initialSharedPoolIndex = sharedPoolIndex;
+                for (var k = 0; k < element.parents.length; k++) {
+                  if (element.parents[k] == parent.id) {
+                    sharedPoolIndex++;
+                    if (sharedPoolIndex >= sharedPoolSize) {
+                      sharedPoolIndex = 0;
+                    }
+                    if (sharedPoolIndex == initialSharedPoolIndex) {
+                      element = null;
+                    } else {
+                      element = sharedPool[typeId][sharedPoolIndex]
+                    }
+                    if (element == null) {
+                      break;
+                    } else {
+                      // restart from beginning
+                      k = -1;
+                    }
+                  }
+                }
+              }
+              if (!element) {
+                // create new element
+                var type = types[typeId];
+                element = {id: nextElementId++, type: type, title: type.name + ' ' + ++elementTypeCount[typeId], parents: [parent.id]};
+                testElements[element.id] = element;
+                nextLevelElements.push(element);
+                if (sharedPoolIndex >= 0) {
+                  if (!sharedPool[typeId]) {
+                    sharedPool[typeId] = [];
+                  }
+                  sharedPool[typeId][sharedPoolIndex] = element;
+                }
+              } else {
+                element.parents.push(parent.id);
+              }
+              parent.children.push(element.id);
+            }
+          }
+        }
+      }
+      levelsDeep++;
+    }
+
+    var segmentTypes = cTreeData.segmentTypes;
+    var imagePath = document.createElement('iron-meta').byKey('rootPath') + "/images/";
+    for (var i = 1; i < testElements.length; i++) {
+      var element = testElements[i];
+
+      var description = [];
+      for (var j = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_CONFIGS - 1)) + 1; j >= 0; j--) {
+        var segments = [];
+        var contributors = [];  // TODO: add contributors, ordered from most contributions to least (pick contributors for each segment added, also include feedback)
+        for (var k = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENTS - 1)) + 1; k >= 0; k--) {
+          var descriptionSegmentTypeId = Math.floor(Math.random() * (segmentTypes.length - 1)) + 1; // no ID 0
+          var descriptionSegmentVariations = [];
+          for (var l = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENT_VARIATIONS - 1)) + 1; l >= 0; l--) {
+            var segment;
+            switch (descriptionSegmentTypeId) {
+              case 1: // Text (String)
+                segment = Lorem.generate('2-5s');
+                break;
+              case 2: // Image (String)
+                segment = Lorem.imageUrl();
+                if (!segment.startsWith('http')) {
+                  segment = imagePath + segment;
+                }
+                break;
+            }
+            if (segment) {
+              descriptionSegmentVariations.push(segment);
+            } else {
+              console.warn('failed to create segment');
+            }
+          }
+          segments.push({id: segmentId++, type: segmentTypes[descriptionSegmentTypeId], variations: descriptionSegmentVariations});
+        }
+        description.push({id: descriptionConfigId++, contributors: contributors, segments: segments});
+      }
+      element.description = description;
+
+      // TODO: add feedback to all elements
+      element.feedback = [];
+
+      element.designer = "Anonymous";	// TODO: probably start passing user ID instead once can load public user data
+    }
+
+    var getTestElementSubset = function(minElements, onAddingItem) {
+      var subset = [];
+      var tempIds = [];
+      var count = testElements.length - 1;
+      for (var i = 0; i < count; i++) {
+        tempIds[i] = i + 1;
+      }
+      // ensure we get at least half a page worth unless there aren't enough items
+      if (minElements * 2 < 10) {
+        minElements = Math.min(10, count / 2);
+      }
+      count = Math.floor((Math.random() + 1) * minElements);  // up to double minElements
+      for (var i = 0; i < count; i++) {
+        var index = Math.floor(Math.random() * tempIds.length);
+        var id = tempIds[index];
+        if (onAddingItem) {
+          onAddingItem(id);
+        }
+        subset.push(id);
+        tempIds.splice(index, 1);
+      }
+      return subset;
+    };
+    cTreeData.testBookmarked = getTestElementSubset(testElements.length / 8, function(id) {
+      testElements[id].bookmarked = true;
+    });
+    cTreeData.testSuggested = getTestElementSubset(testElements.length / 3);
+    cTreeData.testHistory = getTestElementSubset(testElements.length / 5);
+  };
+
+  Polymer.CTreeLoaderBehavior = {
+    properties: {
+      /**
+       * Alternate url where cTree is hosted.  The default is the root domain
+       * where the page holding this element is being hosted.
+       */
+      url: {
+        type: String,
+        notify: true,
+        observer: '_urlChanged',
+      },
+
+      /**
+       * The unique key identifying a cTree.  If the site only has one cTree
+       * this doesn't need to be set.
+       */
+      ctreeKey: {
+        type: String,
+        observer: '_keyChanged',
+      },
+
+      /**
+       * All types for current cTree, indexed by ID.
+       *
+       * Structure:
+       *   [{
+       *     id: Number,
+       *     name: String,
+       *     description: String,
+       *     iconUrl: String,
+       *     color: String,
+       *     parentsRequired: Boolean,
+       *     parentsMax: Number,
+       *     parentTypes: [Numbers],
+       *     elements: [Elements],
+       *   }, ...]
+       */
+      types: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      /**
+       * All segment types supported by current cTree, indexed by ID.
+       *
+       * Structure:
+       *   [{
+       *     id: Number,
+       *     componentName: String,
+       *     canBeThumbnail: Boolean,
+       *   }, ...]
+       */
+      segmentTypes: {
+        type: Array,
+        readOnly: true,
+        notify: true,
+      },
+
+      /**
+       * Object holding all values for current cTrees.  All item lists will be
+       * cleared for all cTrees when the user value changes.
+       *
+       * Structure:
+       *   url: String,
+       *   types: [Types],
+       *   segmentTypes: [SegmentTypes],
+       *   elements: [Elements],
+       *   users: [Users],
+       *   lists: {
+       *     suggested: {
+       *       items: [SuggestedItems],
+       *       loading: Boolean,
+       *       hasMore: Boolean,
+       *       offset: String,			// test: Number
+       *     },
+       *     bookmarked: {
+       *       items: [BookmarkedItems],
+       *       loading: Boolean,
+       *       hasMore: Boolean,
+       *       offset: String,			// test: Number
+       *     },
+       *     history: {
+       *       items: [HistoryItems],
+       *       loading: Boolean,
+       *       hasMore: Boolean,
+       *       offset: String,			// test: Number
+       *     },
+       *   },
+       *   testElements: [Elements],
+       *   testElementsWithoutParents: [Elements],
+       *   testSuggested: [Numbers],
+       *   testBookmarks: [Numbers],
+       *   testHistory: [Numbers],
+       *
+       * Elements Structure:
+       *   [{
+       *     id: Number,
+       *     type: ElementType,
+       *     title: String,
+       *     parents: [Numbers],
+       *     children: [Numbers],
+       *     childrenSearchComplete: Boolean,
+       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+       *     description: [{
+       *       id: Number,
+       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+       *       segments: [{
+       *         id: Number,
+       *         type: SegmentType,
+       *         variations: [],	// data type depends on type
+       *       }, ...],
+       *     }, ...],
+       *     feedback: [{
+       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+       *       text: String,
+       *     }, ...],
+       *     bookmarked: Boolean,
+       *   }, ...]
+       *
+       * Users Structure:
+       *   [{
+       *     id: Number,
+       *     name: String,
+       *     avatar: String,
+       *     // TODO: add more public data
+       *   }, ...]
+       */
+      _cTreeData: {
+        type: Object,
+        observer: '_cTreeDataChanged',
+      },
+    },
+
+    _urlChanged: function(url) {
+      // do nothing for test loader
+    },
+
+    _keyChanged: function(cTreeKey, previousKey) {
+      var cTreeData = cTreesData[cTreeKey];
+      var createCTree = !this._cTreeData;
+      if (createCTree) {
+        cTreeData = {
+          url: this.url,
+          types: [],
+          segmentTypes: [],
+          elements: [],
+          users: [],
+          lists: {
+            suggested:  {items: [], loading: false, hasMore: true},
+            bookmarked: {items: [], loading: false, hasMore: true},
+            history:    {items: [], loading: false, hasMore: true},
+          },
+        };
+        cTreesData[cTreeKey] = cTreeData;
+      }
+
+      this._cTreeData = cTreeData;
+      this._setTypes(cTreeData.types);
+      this._setSegmentTypes(cTreeData.segmentTypes);
+
+      if (createCTree) {
+        this.async(function() {
+          // TODO: enable async (wait to load items until done loading types)
+          // types (can replace/alter to test other type configurations)
+          var rootPath = document.createElement('iron-meta').byKey('rootPath');
+          ElementTypes[0].forEach(function(type) {
+            if (!type.iconUrl.startsWith(rootPath)) {
+              type.iconUrl = rootPath + type.iconUrl;
+            }
+            cTreeData.types[type.id] = type;
+          });
+          SegmentTypes.forEach(function(type) {
+            cTreeData.segmentTypes[type.id] = type;
+          });
+
+          populateCTreeTestData(cTreeData);
+
+          if (this.ctreeKey == cTreeKey) {
+            this.notifySplices('types', [{
+              index: 1,
+              removed: [],
+              addedCount: cTreeData.types.length,
+              object: cTreeData.types,
+              type: 'splice',
+            }]);
+            this.notifySplices('segmentTypes', [{
+              index: 1,
+              removed: [],
+              addedCount: cTreeData.segmentTypes.length,
+              object: cTreeData.segmentTypes,
+              type: 'splice',
+            }]);
+          }
+        }, Test.LOAD_DELAY);
+      }
+    },
+
+    _cTreeDataChanged: function(cTreeData, previousCTreeData) {
+      // Implement when include behavior to initialize additional fields when cTreeData changes
+    },
+  };
+
+  // Initialize object to hold shared static constants and functions
+  Polymer.CTreeLoader = {};
+
+  // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
+  // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
+  Polymer.CTreeLoader.COMMENT_CATEGORY = {
+    // Never look up values
+    NEW: 100,
+    UPDATED: 200,
+    TRANSLATED: 300,
+    NEEDS: 400,
+    NEEDS_FEEDBACK_FOR: 500,
+
+    // Look up some values
+    POPULAR_FROM: 600,
+    POPULAR_WITH: 700,
+    SIMILAR_TO: 800,
+    OPPOSING: 900,
+  };
+
+  Polymer.CTreeLoader.COMMENT_SUBJECT = {
+    // popular: no from/with
+    ELEMENT: 0,
+    TYPE: 1,
+
+    // popular: don't look up, no from/with
+    TITLE: 10,
+    DESCRIPTION: 11,
+    TRANSLATION: 12,
+    FEEDBACK: 13,
+
+    CATEGORY: 20,
+    GROUP: 21,
+    USER: 22,
+
+    // popular: child of
+    PARENT: 30,
+    // popular: parent of
+    CHILD: 31,
+    // popular: sibling of
+    SIBLING: 32,
+  };
+
+  Polymer.CTreeLoader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
+    if (!array) return undefined;
+
+    if (id) {
+      for (var i = 0; i < array.length; i++) {
+        if (array[i].id == id) {
+          return array[i];
+        }
+      }
+    }
+    return defaultToFirst ? array[0] : undefined;
+  };
+
+})();
+
+</script>

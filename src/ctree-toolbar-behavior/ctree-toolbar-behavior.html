@@ -1,0 +1,106 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
+<script>
+  'use strict';
+
+  Polymer.CTreeToolbarBehavior = {
+
+    /**
+     * Fired when the close button is tapped.
+     *
+     * @event close-tapped
+     */
+
+    properties: {
+      /**
+       * If true, don't show close button.
+       */
+      noclose: Boolean,
+
+      _toggleButtonIcon: String,
+
+      /**
+       * Override to contain String icon names.
+       *
+       * Example value:
+       *   ['icon-border', 'icon']
+       */
+      _toggleButtonIconNames: Array,
+    },
+
+    _onToggleButton: function() {
+      // Implement to toggle value
+      //
+      // Example:
+      //   this._toggleValue = !this._toggleValue;
+    },
+
+    _getToggleButtonValue: function() {
+      // Implement to return toggle value
+      //
+      // Example;
+      //   return this._toggleValue;
+      return false;
+    },
+
+    _toggleButton: function() {
+      if (this._toggleButtonIconNames) {
+        this._onToggleButton();
+        this._updateToggleButtonIcon();
+      }
+    },
+
+    _updateToggleButtonIcon: function() {
+      var value = this._getToggleButtonValue();
+      var isDefined = this._toggleButtonIconNames;
+      var valueType = typeof value;
+      if (valueType === 'boolean') {
+        value = (value ? 1 : 0);
+      } else if (valueType !== 'number') {
+        isDefined = false;
+      }
+      this._toggleButtonIcon = isDefined ? this._toggleButtonIconNames[value] : '';
+    },
+
+    _showShare: function(button) {
+      // TODO: show share dialog
+    },
+
+    _closeClicked: function() {
+      this.fire('close-tapped');
+    },
+  };
+  </script>
+</dom-module>

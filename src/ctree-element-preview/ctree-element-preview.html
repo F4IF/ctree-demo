@@ -1,0 +1,371 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+
+<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
+<link rel="import" href="../ctree-element/ctree-element.html">
+<link rel="import" href="../ctree-element/ctree-element-header.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-loader/ctree-element-loader-test.html">
+
+<link rel="import" href="../ctree-segments/ctree-segment-image.html">
+<link rel="import" href="../ctree-segments/ctree-segment-text.html">
+
+<dom-module id="ctree-element-preview">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      ctree-element {
+        box-sizing: border-box;
+        @apply(--shadow-elevation-4dp);
+
+        width: 100%;
+        height: 100%;
+      }
+      #content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+      #segments {
+        width: 100%;
+        height: 100%;
+      }
+      #footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      #shadow {
+        height: 20px;
+        background: transparent; /* For browsers that do not support gradients */
+        background: -webkit-linear-gradient(transparent, #fdf0bd); /* For Safari 5.1 to 6.0 */
+        background: -o-linear-gradient(transparent, #fdf0bd); /* For Opera 11.1 to 12.0 */
+        background: -moz-linear-gradient(transparent, #fdf0bd); /* For Firefox 3.6 to 15 */
+        background: linear-gradient(transparent, #fdf0bd); /* Standard syntax */
+      }
+      #comment {
+        width: 100%;
+        border: 0;
+        padding: 1px 5px;
+        background-color: #fdf0bd;
+        font-size: 0.7em;
+        font-weight: bold;
+        line-height: 14px;
+      }
+      #comment td {
+        padding: 0;
+        align: right;
+        text-align: right;
+      }
+      iron-icon[hidden] {
+        display: none;
+      }
+      #commentContent {
+        width: 100%;
+      }
+      #comment div {
+        max-height: 28px;
+        overflow-y: hidden;
+      }
+      #bottom {
+        height: 2px;
+        width: 100%;
+        background-color: #fdf0bd;
+      }
+      ctree-element-header {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+
+    <ctree-element-loader-test ctree-key="[[ctreeKey]]" list-item="[[listItem]]" element="[[element]]" description-config="{{descriptionConfig}}" description-segments="{{descriptionSegments}}" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
+    <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]" element="[[element]]" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]"></ctree-element-dialog-accessor>
+    <ctree-element id="element" element="[[element]]" noclose>
+      <div id="content" on-tap="_clickContent">
+        <div id="segments"></div>
+        <div id="footer">
+          <div id="shadow"></div>
+          <table id="comment"><tr>
+            <td id="commentContent"><div>[[comment]]</div></td>
+            <td><iron-icon icon="[[commentIcon]]" hidden$="[[_isEmpty(commentIcon)]]" hidden></iron-icon></td>
+          </tr></table>
+          <div id="bottom"></div>
+        </div>
+        <ctree-element-header norelations noclick></ctree-element-header>
+        <paper-ripple id="overlay" recenters></paper-ripple>
+      </div>
+    </ctree-element>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-element-preview',
+
+    properties: {
+      /**
+       * The unique key identifying a cTree.  If the site only has one cTree
+       * this doesn't need to be set.
+       */
+      ctreeKey: String,
+
+      /**
+       * List item data for element. Using this prevents doing multiple updates
+       * as element and descriptionConfig are changed.
+       *
+       * Structure:
+       *   {
+       *     element: Element,
+       *     feedback: Feedback,
+       *     descriptionConfig: Number,
+       *     descriptionSegments: [Number],
+       *     reason: Number,
+       *     related: Object,	// type depends on reason
+       *     changeType: Number,
+       *   }
+       */
+      listItem: {
+        type: Object,
+        observer: '_listItemChanged',
+      },
+
+      /**
+       * Element data
+       *
+       * Structure:
+       *   {
+       *     id: Number,
+       *     type: ElementType,
+       *     title: String,
+       *     parents: [Number],
+       *     children: [Number],
+       *     childrenSearchComplete: Boolean,
+       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+       *     description: [{
+       *       id: Number,
+       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+       *       segments: [{
+       *         id: Number,
+       *         type: SegmentType,
+       *         variations: [],	// data type depends on type
+       *       }, ...],
+       *     }, ...],
+       *     feedback: [{
+       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+       *       text: String,
+       *     }, ...],
+       *     bookmarked: Boolean,
+       *   }
+       */
+      element: {
+        type: Object,
+        observer: '_elementChanged',
+      },
+
+      /**
+       * ID of description config to show.  If this ID isn't included in the
+       * element the first config from the element is used.
+       */
+      descriptionConfig: {
+        type: Number,
+        observer: '_descriptionConfigChanged',
+      },
+
+      /**
+       * IDs of variation to show for each segment.  For any segments where the
+       * ID isn't included in the description config the first variation is used.
+       *
+       * Structure:
+       *   [Number, ...]
+       */
+      descriptionSegments: {
+        type: Array,
+        observer: '_descriptionSegmentsChanged',
+      },
+
+      /**
+       * Comment to display at the bottom of the element preview.
+       */
+      comment: String,
+
+      /**
+       * Icon to display before comment.
+       */
+      commentIcon: String,
+
+      /**
+       * True if user has viewed this item.  Normally this will be taken from
+       * the element data, but can be changed here to update the element or get
+       * the value from the element.
+       */
+      viewed: {
+        type: Boolean,
+        value: false,
+        observer: '_viewedChanged',
+      },
+
+      _bulkChange: Boolean,
+    },
+
+    _isEmpty: function(str) {
+      return !str || str.length == 0;
+    },
+
+    _listItemChanged: function(listItem) {
+      var descriptionChanged = false;
+
+      this._bulkChange = true;
+      if (typeof listItem.element !== 'undefined' && listItem.element !== this.element) {
+        this.element = listItem.element;
+        descriptionChanged = true;
+      }
+      if (typeof listItem.descriptionConfig !== 'undefined' && listItem.descriptionConfig !== this.descriptionConfig) {
+        this.descriptionConfig = listItem.descriptionConfig;
+        descriptionChanged = true;
+      }
+      if (typeof listItem.descriptionSegments !== 'undefined' && listItem.descriptionSegments !== this.descriptionSegments) {
+        this.descriptionSegments = listItem.descriptionSegments;
+        descriptionChanged = true;
+      }
+      this._bulkChange = false;
+
+      if (descriptionChanged) {
+        this._updateDescription(this.element, this.descriptionConfig, this.descriptionSegments);
+      }
+
+      this.viewed = listItem.viewed;
+    },
+
+    _elementChanged: function(element) {
+      // TODO: remove this call once make _updateDescription an explicit observer after updating to Polymer 2.0
+      this._updateDescription(element, this.descriptionConfig, this.descriptionSegments);
+
+      this.viewed = element.viewed;
+    },
+
+    // TODO: remove these individual observers and make _updateDescription an explicit observer once update to Polymer 2.0
+    _descriptionConfigChanged: function(descriptionConfig) {
+      this._updateDescription(this.element, descriptionConfig, this.descriptionSegments);
+    },
+
+    _descriptionSegmentsChanged: function(descriptionSegments) {
+      this._updateDescription(this.element, this.descriptionConfig, descriptionSegments);
+    },
+
+    _getFromArrayWithId: Polymer.CTreeLoader.getFromArrayWithId,
+
+    _updateDescription: function(element, descriptionConfig, descriptionSegments) {
+      if (this._bulkChange || !this.element.description || this.element.description.length == 0) return;
+      var description = this._getFromArrayWithId(this.element.description, this.descriptionConfig);
+      if (!description || !description.segments || (descriptionSegments && description.segments.length != descriptionSegments.length)) return;
+
+      // clear segments
+      var segmentsElement = this.$.segments;
+      while (segmentsElement.firstChild) {
+          segmentsElement.removeChild(segmentsElement.firstChild);
+      }
+
+      // add thumbnail
+      var thumbnailIndex = null;
+      var segments = description.segments;
+      for (var i = 0; i < segments.length; i++) {
+        var segment = segments[i];
+        var type = segment.type;
+        if (type.canBeThumbnail) {
+          thumbnailIndex = i;
+          var component = document.createElement(type.componentName);
+          component.data = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          component.scale = '80%';
+          component.heightPercent = '56.25%';
+          segmentsElement.appendChild(component);
+          break;
+        }
+      }
+
+      // add additional description segments (max 3)
+      // TODO: add padding to top when not showing thumbnail to push below header
+      var count = Math.min(thumbnailIndex < 3 ? 3 : 2, segments.length);
+      for (var i = 0; i < count; i++) {
+        if (i !== thumbnailIndex) {
+          var segment = segments[i];
+          var type = segment.type;
+          var component = document.createElement(type.componentName);
+          component.data = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          component.scale = '80%';
+          segmentsElement.appendChild(component);
+        }
+      }
+      // TODO: set designer info from element
+      // TODO: set contributors info from description config in element
+    },
+
+    // TODO: remove these individual observers and make _updateReason an explicit observer once update to Polymer 2.0
+    _reasonChanged: function(reason) {
+      this._updateReason(reason, this.related, this.changeType);
+    },
+
+    _relatedChanged: function(related) {
+      this._updateReason(this.reason, related, this.changeType);
+    },
+
+    _changeTypeChanged: function(changeType) {
+      this._updateReason(this.reason, this.related, changeType);
+    },
+
+    _updateReason: function(reason, related, changeType) {
+      if (this._bulkChange) return;
+
+      // TODO: populate reason field at bottom if has reason, else show just fade
+    },
+
+    _viewedChanged: function(viewed) {
+      if (!this.element) return;
+
+      this.element.viewed = viewed;
+      this.$.overlay.style.backgroundColor = viewed ? "rgba(0, 0, 0, 0.2)" : "transparent";
+    },
+
+    _clickContent: function() {
+      this.viewed = true;
+      this.$.dialog.open();
+    },
+  });
+  </script>
+</dom-module>

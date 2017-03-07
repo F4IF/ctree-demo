@@ -1,0 +1,156 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../ctree-element/ctree-element-header.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+
+<dom-module id="ctree-details-page">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      ctree-element-header {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+      iron-list {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding-top: 64px;
+      }
+      table {
+        width: 100%;
+        border: 0;
+        border-spacing: 0;
+      }
+      table td {
+        vertical-align: middle;
+        padding: 0;
+      }
+      .content {
+        width: 100%;
+      }
+      .move {
+        width: 100%;
+        text-align: center;
+      }
+      ctree-feedback-bar {
+        text-align: right;
+        white-space: nowrap;
+      }
+    </style>
+
+    <!-- TODO: hide second row unless in edit mode for row -->
+    <!-- TODO: hide left/right arrows if no more variations -->
+    <!-- TODO: consider using dom-repeat instead of iron-list because we don't have a huge number of items and recycling them could be costly since they contain different segment types -->
+    <iron-list id="description" items="[[segments]]" as="segment">
+      <template><div>
+        <table id="nav"><tr>
+          <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$="false"></paper-icon-button></td>
+          <td class="content"></td>
+          <td><paper-icon-button id="next" icon="navigate-next" title="next element variation" hidden$="false"></paper-icon-button></td>
+        </tr></table>
+        <table><tr>
+          <td><paper-icon-button id="delete" icon="delete" title="delete"></td>
+          <td class="move">
+            <paper-icon-button id="move-up" icon="move-up" title="move up"></paper-icon-button>
+            <paper-icon-button id="move-down" icon="move-down" title="move down"></paper-icon-button>
+          </td>
+          <td class="feedback"><ctree-feedback-bar on-feedback-tapped="_fireFeedbackTapped"></ctree-feedback-bar></td>
+        </tr></table>
+      </div></template>
+    </iron-list>
+    <ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-details-page',
+
+    /**
+     * Fired when a the contributors in the header are tapped.
+     *
+     * @event contributors-tapped
+     */
+
+    /**
+     * Fired when a the related elements in the header are tapped.
+     *
+     * @event related-tapped
+     */
+
+    /**
+     * Fired when a the feedback button is tapped for a segment.
+     *
+     * @event feedback-tapped
+     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+     */
+
+    properties: {
+      segments: {
+        type: Array,
+        value: ["", "", ""],
+      },
+
+      descriptionConfigId: {
+        type: Number,
+        observer: '_onDescriptionConfigChanged',
+      },
+    },
+
+    _onDescriptionConfigChanged: function(descriptionConfigId) {
+      // TODO: refresh description details
+    },
+
+    _fireContributorsTapped: function() {
+      this.fire('contributors-tapped');
+    },
+
+    _fireRelatedTapped: function() {
+      this.fire('related-tapped');
+    },
+
+    _fireFeedbackTapped: function(e, detail) {
+      // TODO: figure out segment data from e or detail & pass as detail segmentData
+      this.fire('feedback-tapped', {segmentData: {}});
+    },
+  });
+  </script>
+</dom-module>

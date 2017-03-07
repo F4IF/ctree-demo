@@ -1,0 +1,135 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-behavior.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-shared-styles.html">
+
+<dom-module id="ctree-element">
+  <template>
+    <style include="ctree-toolbar-shared-styles"></style>
+    <style>
+      :host {
+        display: block;
+      }
+      .toolbar {
+        --paper-toolbar-height: 48px;
+        --paper-toolbar-sm-height: 48px;
+
+        @apply(--shadow-elevation-2dp);
+      }
+      .title {
+        font-size: 16px !important;
+      }
+      .type-description {
+        width: 180px;
+      }
+      .content {
+        background: #fdf0bd;
+        height: calc(100% - 48px);
+        width: 100%;
+        overflow: hidden;
+      }
+    </style>
+
+    <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
+      <iron-icon id="typeIcon" src="[[element.type.iconUrl]]"></iron-icon>
+      <span class="title">[[element.title]]</span>
+      <!-- TODO: see if some of the button attributes can be set by the behavior -->
+      <paper-icon-button id="bookmarkButton" icon="[[_toggleButtonIcon]]" alt="favorite" on-tap="_toggleButton"></paper-icon-button>
+      <paper-icon-button id="share" icon="share" alt="share" on-tap="_showShare"></paper-icon-button>
+      <paper-icon-button id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
+      <paper-tooltip for="bookmarkButton" offset="-8">Bookmark</paper-tooltip>
+      <paper-tooltip for="share" offset="-8">Share</paper-tooltip>
+      <paper-tooltip for="close" offset="-8">Close</paper-tooltip>
+      <paper-tooltip for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+    </paper-toolbar>
+    <div class="content"><content></content></div>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-element',
+
+    properties: {
+      element: {
+        type: Object,
+        observer: '_elementChanged',
+      },
+
+      headerColor: {
+        type: String,
+        value: "#cfcfcf",
+        computed: '_calculateHeaderColor(element)'
+      },
+
+      /**
+       * Toggle icon names.
+       */
+      _toggleButtonIconNames: {
+        type: Array,
+        value: ['bookmark-border', 'bookmark'],
+      },
+    },
+
+    behaviors: [
+      Polymer.CTreeToolbarBehavior,
+    ],
+
+    _onToggleButton: function() {
+      this.element.bookmarked = !this.element.bookmarked;
+    },
+
+    _getToggleButtonValue: function() {
+      return this.element ? (this.element.bookmarked ? true : false) : undefined;
+    },
+
+    _calculateHeaderColor: function(element) {
+      var headerColor = "#cfcfcf";//this.headerColor;
+      if (element) {
+        if (element.color) {
+          headerColor = element.color;
+        } else if (element.type && element.type.color) {
+          headerColor = element.type.color;
+        }
+      }
+      return headerColor;
+    },
+
+    _elementChanged: function(element) {
+      this._updateToggleButtonIcon();
+    },
+  });
+  </script>
+</dom-module>

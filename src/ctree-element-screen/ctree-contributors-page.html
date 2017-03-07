@@ -1,0 +1,216 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+
+<!-- internal -->
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+
+<dom-module id="ctree-contributors-page">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .page {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      iron-list {
+        position: absolute;
+        top: 24px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .contributor {
+        display: inline-block;
+        vertical-align: top;
+        position: relative;
+        width: 92px;
+        margin: 0;
+        padding: 4px;
+        text-align: center;
+      }
+      .contributor .avatar {
+        display: block;
+        margin: auto;
+        min-width: 48px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: url(../../images/no-avatar.png);
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      table {
+        display: inline-table;
+        width: calc(100% - 100px);
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-spacing: 0;
+      }
+      table td {
+        width: 50%;
+        vertical-align: top;
+        position: relative;
+        padding: 4px;
+      }
+      .labels td {
+        font-weight: bold;
+        font-size: medium;
+      }
+      .rating {
+        display: inline-block;
+        padding-right: 4px;
+      }
+      .count {
+        display: inline-block;
+        vertical-align: text-bottom;
+      }
+    </style>
+
+    <ctree-user-dialog-accessor id="userDialog"></ctree-user-dialog-accessor>
+
+    <!-- TODO: only include if there are multiple description variations -->
+    <div class="contributor"></div><table class="labels"><tr>
+      <td>Variation</td>
+      <td>Element</td>
+    </tr></table>
+
+    <!-- TODO: make list scroll instead of entire page, so we can efficiently list all contributors -->
+    <iron-list id="contributors" items="[[contributors]]" as="contributor">
+      <template><div test="[[val1]]">
+        <!-- TODO: add divider between contributors -->
+        <div class="contributor" on-tap="contributorTapped" test="[[val2]]"><paper-ripple></paper-ripple>
+          <div class="avatar"></div>
+          <div>Contributor</div>
+        </div><table><tr>
+          <td on-tap="variationContributionsTapped" test="[[val3]]"><paper-ripple></paper-ripple>
+            <div>
+              <div class="rating"><iron-icon icon="thumbs-up" title="liked"></iron-icon><div class="count">30</div></div>
+              <div class="rating"><iron-icon icon="thumbs-down" title="disliked"></iron-icon><div class="count">40</div></div>
+            </div>
+            <div><iron-icon icon="comment" title="feedback"></iron-icon><div class="count">3</div></div>
+            <div><iron-icon icon="description" title="edits"></iron-icon><div class="count">5</div></div>
+          </td>
+          <!-- TODO: only include if there are multiple description variations -->
+          <td on-tap="elementContributionsTapped" test="[[val4]]"><paper-ripple></paper-ripple>
+            <div>
+              <div class="rating"><iron-icon icon="thumbs-up" title="liked"></iron-icon><div class="count">30</div></div>
+              <div class="rating"><iron-icon icon="thumbs-down" title="disliked"></iron-icon><div class="count">40</div></div>
+            </div>
+            <div><iron-icon icon="comment" title="feedback"></iron-icon><div class="count">3</div></div>
+            <div><iron-icon icon="description" title="edits"></iron-icon><div class="count">5</div></div>
+            <div><iron-icon icon="relations" title="relations"></iron-icon><div class="count">1</div></div>
+          </td>
+        </tr></table>
+      </div></template>
+    </iron-list>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-contributors-page',
+
+   /**
+    * Fired when a the history summary for a contributor is tapped.
+    *
+    * @event history-tapped
+    * @param {{
+    *   contributor: contributorData, // detail Contains data for contributor whos history summary was tapped.
+    *   generalHistory: Boolean       // true if the general element history summary was tapped.
+    * }}
+    */
+
+    properties: {
+      contributors: {
+        type: Array,
+        value: ["c1", "c2", "c3", "c4", "c5"],
+      },
+      val1: {
+        type: String,
+        value: 'val1',
+      },
+      val2: {
+        type: String,
+        value: 'val2',
+      },
+      val3: {
+        type: String,
+        value: 'val3',
+      },
+      val4: {
+        type: String,
+        value: 'val4',
+      },
+      val5: {
+        type: String,
+        value: 'val5',
+      },
+      val6: {
+        type: String,
+        value: 'val6',
+      },
+
+      descriptionConfigId: {
+        type: Number,
+        observer: '_onDescriptionConfigChanged',
+      },
+    },
+
+    contributorTapped: function(e) {
+      // TODO: fill with contributor's user data
+      this.$.userDialog.open();
+    },
+
+    variationContributionsTapped: function(e) {
+      this.fire('history-tapped', {contributor: e.model.contributor, generalHistory: false});
+    },
+
+    elementContributionsTapped: function(e) {
+      this.fire('history-tapped', {contributor: e.model.contributor, generalHistory: true});
+    },
+
+    _onDescriptionConfigChanged: function(descriptionConfigId) {
+      // TODO: refresh contributor list
+    },
+  });
+  </script>
+</dom-module>
