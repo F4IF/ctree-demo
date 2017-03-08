@@ -6,6 +6,12 @@ on, will be able to function as independent sites or as part of other sites.
 Even though this is a demo, the components developed for it should be clean and
 complete enough to use for the fully functional site.
 
+This project is based on Google's [Polymer Project](https://www.polymer-project.org/1.0/),
+which is a collection of highly polished [web components](https://www.webcomponents.org/).
+We chose web components because we want people to be able to easily integrate
+cTree elements into existing sites, and Polymer does a lot of the heavy lifting
+for creating a modern responsive site.
+
 One aspiration of this project is to follow the "PRPL pattern".  This pattern
 allows fast first delivery and interaction with the content at the initial route
 requested by the user, along with fast subsequent navigation by pre-caching the
@@ -18,6 +24,10 @@ The PRPL pattern, in a nutshell:
 * **Render** initial route ASAP
 * **Pre-cache** components for remaining routes
 * **Lazy-load** and progressively upgrade next routes on-demand
+
+We've set up a page to showcase the latest code for the demo site at innovativeFuture.org/ctree-demo.  This is just for development testing purposes
+and may not always include the latest code.  If you want to see the latest code
+working your best bet is to clone this project and run it on your local machine.
 
 ## License
 Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
