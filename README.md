@@ -25,9 +25,15 @@ The PRPL pattern, in a nutshell:
 * **Pre-cache** components for remaining routes
 * **Lazy-load** and progressively upgrade next routes on-demand
 
-We've set up a page to showcase the latest code for the demo site at innovativeFuture.org/ctree-demo.  This is just for development testing purposes
+We've set up a page to showcase the latest code for the demo site at
+innovativeFuture.org/ctree-demo.  This is just for development testing purposes
 and may not always include the latest code.  If you want to see the latest code
 working your best bet is to clone this project and run it on your local machine.
+
+If you're interested in doing more than minor changes, a video introduction to
+the project may be helpful.  To request one please email
+[contact@innovativeFuture.org](mailto:contact@innovativeFuture.org). If an up to
+date video isn't available, a video call may be arranged.
 
 ## License
 Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
