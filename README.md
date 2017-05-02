@@ -82,22 +82,21 @@ this license.
 
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
-    npm install -g polymer-cli
+	npm install -g polymer-cli
 
 #### Checkout project
 
-##### Create project folder in workspace (ex. cTree)
+##### Open workspace folder in command prompt where you want the project
 
-##### Open project folder in command prompt
-
-	cd <WORKSPACE>\cTree
+	cd <WORKSPACE>
 
 ##### Clone from GitHub
-	...
 
-##### Open command prompt to war folder of project
+	git clone https://github.com/F4IF/ctree-demo.git
 
-	cd <WORKSPACE>\cTree\war
+##### Open command prompt to folder of project
+
+	cd ctree-demo
 
 ##### Insall 3rd party dependencies
 
