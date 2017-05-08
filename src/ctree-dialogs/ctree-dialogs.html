@@ -77,7 +77,7 @@ this license.
     <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
 
     <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
-      <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="[[element]]" element-id="{{queryParams.e}}" description-config-id="{{queryParams.c}}" description-segment-variation-ids="{{descriptionSegmentVariationIds}}"></ctree-element-screen>
+      <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="[[element]]" element-id="{{queryParams.e}}" description-config="{{queryParams.c}}" description-segments="{{descriptionSegmentIds}}"></ctree-element-screen>
     </paper-dialog>
 
     <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
@@ -122,9 +122,9 @@ this license.
         observer: '_descriptionConfigIdChanged',
       },
 
-      descriptionSegmentVariationIds: {
+      descriptionSegmentIds: {
         type: Array,
-        observer: '_descriptionSegmentVariationIdsChanged',
+        observer: '_descriptionSegmentIdsChanged',
       },
 
       feedbackSegment: Number,
@@ -206,10 +206,10 @@ this license.
       } else if (this.queryParams.hasOwnProperty('c')) {
         delete this.queryParams.c;
       }
-      if (isElement && this.descriptionSegmentVariationIds && this.descriptionSegmentVariationIds.length > 0) {
+      if (isElement && this.descriptionSegmentIds && this.descriptionSegmentIds.length > 0) {
         // TODO: use this for Polymer 2.0
-        //this.queryParams.s = this.descriptionSegmentVariationIds.join(',');
-        this.set('queryParams.s', this.descriptionSegmentVariationIds.join(','));
+        //this.queryParams.s = this.descriptionSegmentIds.join(',');
+        this.set('queryParams.s', this.descriptionSegmentIds.join(','));
       } else if (this.queryParams.hasOwnProperty('s')) {
         delete this.queryParams.s;
       }
@@ -283,19 +283,19 @@ this license.
       }
     },
 
-    _descriptionSegmentVariationsParamChanged: function(descriptionSegmentVariationIdsStr) {
-      if (descriptionSegmentVariationIdsStr) {
-        var descriptionSegmentVariationIds = descriptionSegmentVariationIdsStr.split(',');
-        for (var i = 0; i < descriptionSegmentVariationIds.length; i++) {
-          var id = parseInt(descriptionSegmentVariationIds[i]);
+    _descriptionSegmentVariationsParamChanged: function(descriptionSegmentIdsStr) {
+      if (descriptionSegmentIdsStr) {
+        var descriptionSegmentIds = descriptionSegmentIdsStr.split(',');
+        for (var i = 0; i < descriptionSegmentIds.length; i++) {
+          var id = parseInt(descriptionSegmentIds[i]);
           if (id != NaN) {
-            descriptionSegmentVariationIds[i] = id;
+            descriptionSegmentIds[i] = id;
           } else {
-            descriptionSegmentVariationIds.splice(i, 1);
+            descriptionSegmentIds.splice(i, 1);
             i--;
           }
         }
-        this.descriptionSegmentVariationIds = descriptionSegmentVariationIds;
+        this.descriptionSegmentIds = descriptionSegmentIds;
 
       } else if (this.queryParams.d === 'element' && this.queryParams.hasOwnProperty('s')) {
         delete this.queryParams.s;
@@ -367,10 +367,10 @@ this license.
       // TODO:
     },
 
-    _descriptionSegmentVariationIdsChanged: function(descriptionSegmentVariationIds) {
+    _descriptionSegmentIdsChanged: function(descriptionSegmentIds) {
       if (this.queryParams.d === 'element') {
-        if (descriptionSegmentVariationIds.length > 0) {
-          this.set('queryParams.s', descriptionSegmentVariationIds.join(','));
+        if (descriptionSegmentIds.length > 0) {
+          this.set('queryParams.s', descriptionSegmentIds.join(','));
         } else if (this.queryParams.hasOwnProperty('s')) {
           delete this.queryParams.s;
           // TODO: use this for Polymer 2.0

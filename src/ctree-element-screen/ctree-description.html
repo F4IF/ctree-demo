@@ -1,0 +1,300 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="ctree-segment-container.html">
+
+<dom-module id="ctree-description">
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      paper-icon-button {
+        display: block;
+        margin: 8px auto;
+      }
+      ctree-segment-container {
+        width: 100%;
+      }
+      div {
+        width: 100%;
+      }
+    </style>
+    <div id="container"></div>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-description',
+
+    /**
+     * Fired when a the feedback button is tapped for a segment.
+     *
+     * @event feedback-tapped
+     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+     */
+
+    properties: {
+      /**
+       * Segments data
+       *
+       * Structure:
+       *   [{
+       *     id: Number,
+       *     type: SegmentType,
+       *     variations: [{
+       *       id: Number,
+       *       data: dynamic,	// data type depends on segment type
+       *     }, ...],
+       *   }, ...],
+       */
+      segments: {
+        type: Array,
+        notify: true,
+        observer: '_segmentsChanged',
+      },
+
+      segmentIds: {
+        type: Array,
+        notify: true,
+        observer: '_segmentIdsChanged',
+      },
+    },
+
+    __LISTENER_MAPS: {
+      'PAPER-ICON-BUTTON': {
+        tap: '_addClicked',
+      },
+      'CTREE-SEGMENT-CONTAINER': {
+
+      },
+    },
+
+    __updateListeners: function(element, func) {
+      var eventListeners = this.__LISTENER_MAPS[element.tagName];
+      for (var key in eventListeners) {
+        if (eventListeners.hasOwnProperty(key)) {
+          func.call(this, element, key, eventListeners[key]);
+        }
+      }
+    },
+
+    attached: function() {
+      var children = this.$.container.children;
+      for (var i = 0; i < children.length; i++) {
+        this.__updateListeners(children[i], this.listen);
+      }
+    },
+
+    detached: function() {
+      var children = this.$.container.children;
+      for (var i = 0; i < children.length; i++) {
+        this.__updateListeners(children[i], this.unlisten);
+      }
+    },
+
+    _addClicked: function(e) {
+      //console.log('click: ' + e.currentTarget.index);
+      // TODO: show dialog to let user select which segment type to add
+    },
+
+    _segmentsChanged: function(segments) {
+      // clear segments
+      var root = this.$.container;
+      var child;
+      while (child = root.firstChild) {
+        this._removeElement(root, child);
+      }
+      this._segmentIdsChanged(this.segmentIds);
+    },
+
+    _addElement: function(parent, name, properties, beforeChild) {
+      var element = document.createElement(name);
+      this.__updateListeners(element, this.listen);
+      for (var key in properties) {
+        if (properties.hasOwnProperty(key)) {
+          element.set(key, properties[key]);
+        }
+      }
+      if (beforeChild) {
+        parent.insertBefore(element, beforeChild);
+      } else {
+        parent.appendChild(element);
+      }
+      return element;
+    },
+
+    _removeElement: function(parent, element) {
+      this.__updateListeners(element, this.unlisten);
+      parent.removeChild(element);
+    },
+
+    __ensureHasPlusButton: function(parent, elementIndex, segmentContainerElement) {
+      // even numbers should be + button, not segment containers
+      if (elementIndex % 2 !== 0) return false;
+
+      var properties = {
+        index: elementIndex,
+        icon: 'add-circle',
+        title: 'Add Segment',
+      };
+      this._addElement(parent, 'paper-icon-button', properties, segmentContainerElement);
+
+      return true;
+    },
+
+    __addSegmentContainer: function(parent, index, beforeChild) {
+      var properties = {
+        segment: this.segments[index],
+        variationId: this.segmentIds && index < this.segmentIds.length ? this.segmentIds[index] : 0,
+        firstSegment: (index == 0),
+        lastSegment: (index == this.segments.length - 1),
+      };
+      return this._addElement(parent, 'ctree-segment-container', properties, beforeChild);
+    },
+
+    _segmentIdsChanged: function(segmentIds) {
+      if (!this.segments) return;
+
+      var segments = this.segments;
+      var root = this.$.container;
+      var children = root.children;
+      var childIndex = 0;
+
+      var previousChildWasButton = false;
+      for (var i = 0; i < segments.length; i++) {
+        var segment = segments[i];
+        var added = false;
+        while (!added && childIndex < children.length) {
+          var child = children[childIndex];
+          if (child.tagName === 'CTREE-SEGMENT-CONTAINER') {
+            var childId = child.segment.id;
+            if (childId === segment.id) {
+              if (this.__ensureHasPlusButton(root, childIndex, child)) {
+                childIndex++;
+              }
+              childIndex++;
+              added = true;
+            } else {
+              // no match, check if child should be removed
+              var remove = true;
+              for (var j = i + 1; j < segments.length; j++) {
+                if (segments[j].id === childId) {
+                  remove = false;
+                  break;
+                }
+              }
+              if (remove) {
+                this._removeElement(root, child);
+              } else {
+                for (var j = childIndex + 1; j < children.length; j++) {
+                  var testChild = children[j];
+                  if (child.tagName === 'CTREE-SEGMENT-CONTAINER' && child.segment.id === segment.id) {
+                    added = true;
+                    this._removeElement(root, testChild);
+                    root.insertBefore(testChild, child);
+                    child = testChild;
+                    testChild = children[j];
+                    if (testChild.tagName !== 'CTREE-SEGMENT-CONTAINER') {
+                      // remove + button before moved element, will add back later
+                      this._removeElement(root, testChild);
+                    }
+                    break;
+                  }
+                }
+                if (!added) {
+                  // not found later, add new child
+                  child = this.__addSegmentContainer(root, i, child);
+                  added = true;
+                }
+                // can't remove child (used later), look for segment in later child
+                if (this.__ensureHasPlusButton(root, childIndex, child)) {
+                  childIndex++;
+                }
+                childIndex++;
+              }
+            }
+            if (added) {
+              previousChildWasButton = false;
+            }
+          } else {
+            // child is + button
+            if (previousChildWasButton) {
+              // multiple + buttons in a row aren't allowed
+              this._removeElement(root, child);
+            } else {
+              // update index
+              child.index = childIndex;
+              childIndex++
+              previousChildWasButton = true;
+            }
+          }
+        }
+        if (!added) {
+          // reached end of children without adding, so add to end
+          if (this.__ensureHasPlusButton(root, childIndex)) {
+            childIndex++;
+          }
+          this.__addSegmentContainer(root, i);
+          previousChildWasButton = false;
+          childIndex++;
+        }
+      }
+
+      // remove trailing children
+      for (var i = childIndex; i < children.length; i++) {
+        var child = children[childIndex];
+        if (child.tagName === 'ctree-segment-container' || previousChildWasButton) {
+          this._removeElement(root, child);
+        } else {
+          previousChildWasButton = true;
+          child.index = childIndex;
+          childIndex++;
+        }
+      }
+
+      // ensure ends with + button
+      if (!previousChildWasButton) {
+        this.__ensureHasPlusButton(root, children.length);
+      }
+    },
+
+    _fireFeedbackTapped: function(e, detail) {
+      // TODO: figure out segment data from e or detail & pass as detail segmentData
+      this.fire('feedback-tapped', {segmentData: {}});
+    },
+  });
+  </script>
+</dom-module>

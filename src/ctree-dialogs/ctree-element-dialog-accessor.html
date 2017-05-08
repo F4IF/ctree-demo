@@ -61,7 +61,10 @@ this license.
        *       segments: [{
        *         id: Number,
        *         type: SegmentType,
-       *         variations: [],	// data type depends on type
+       *         variations: [{
+       *           id: Number,
+       *           data: dynamic,	// data type depends on segment type
+       *         }, ...],
        *       }, ...],
        *     }, ...],
        *     feedback: [{
@@ -71,19 +74,11 @@ this license.
        *     bookmarked: Boolean,
        *   }
        */
-      element: {
-        type: Object,
-      },
+      element: Object,
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_descriptionConfigIdChanged',
-      },
+      descriptionConfigId: Number,
 
-      descriptionSegmentIds: {
-        type: Array,
-        observer: '_descriptionSegmentIdsChanged',
-      },
+      descriptionSegmentIds: Array,
 
       feedbackSegment: Number,
 

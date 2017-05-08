@@ -110,7 +110,10 @@ this license.
        *       segments: [{
        *         id: Number,
        *         type: SegmentType,
-       *         variations: [],	// data type depends on type
+       *         variations: [{
+       *           id: Number,
+       *           data: dynamic,	// data type depends on segment type
+       *         }, ...],
        *       }, ...],
        *     }, ...],
        *     feedback: [{

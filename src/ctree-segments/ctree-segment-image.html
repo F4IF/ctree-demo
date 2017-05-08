@@ -86,6 +86,7 @@ this license.
     _heightPercentageChanged: function(heightPercentage) {
       if (heightPercentage && heightPercentage.length > 0) {
         this.$.image.style.height = '100%';
+        this.$.image.sizing = 'cover';
         this.$.container.style.paddingTop = heightPercentage;
       } else {
         this.$.image.style.height = 'auto';
