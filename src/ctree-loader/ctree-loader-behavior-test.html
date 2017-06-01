@@ -425,7 +425,7 @@ this license.
 
     _keyChanged: function(cTreeKey, previousKey) {
       var cTreeData = cTreesData[cTreeKey];
-      var createCTree = !this._cTreeData;
+      var createCTree = !cTreeData;
       if (createCTree) {
         cTreeData = {
           url: this.url,
