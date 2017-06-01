@@ -31,8 +31,10 @@ this license.
 <link rel="import" href="../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="../ctree-element/ctree-element-description-behavior.html">
 <link rel="import" href="../ctree-element/ctree-element-header.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="ctree-description.html">
 
 <dom-module id="ctree-details-page">
   <template>
@@ -45,58 +47,21 @@ this license.
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
+        right: 16px;
       }
-      iron-list {
+      ctree-description {
         position: absolute;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0;
         padding-top: 64px;
-      }
-      table {
-        width: 100%;
-        border: 0;
-        border-spacing: 0;
-      }
-      table td {
-        vertical-align: middle;
-        padding: 0;
-      }
-      .content {
-        width: 100%;
-      }
-      .move {
-        width: 100%;
-        text-align: center;
-      }
-      ctree-feedback-bar {
-        text-align: right;
-        white-space: nowrap;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
     </style>
 
-    <!-- TODO: hide second row unless in edit mode for row -->
-    <!-- TODO: hide left/right arrows if no more variations -->
-    <!-- TODO: consider using dom-repeat instead of iron-list because we don't have a huge number of items and recycling them could be costly since they contain different segment types -->
-    <iron-list id="description" items="[[segments]]" as="segment">
-      <template><div>
-        <table id="nav"><tr>
-          <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$="false"></paper-icon-button></td>
-          <td class="content"></td>
-          <td><paper-icon-button id="next" icon="navigate-next" title="next element variation" hidden$="false"></paper-icon-button></td>
-        </tr></table>
-        <table><tr>
-          <td><paper-icon-button id="delete" icon="delete" title="delete"></td>
-          <td class="move">
-            <paper-icon-button id="move-up" icon="move-up" title="move up"></paper-icon-button>
-            <paper-icon-button id="move-down" icon="move-down" title="move down"></paper-icon-button>
-          </td>
-          <td class="feedback"><ctree-feedback-bar on-feedback-tapped="_fireFeedbackTapped"></ctree-feedback-bar></td>
-        </tr></table>
-      </div></template>
-    </iron-list>
+    <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
     <ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>
   </template>
 
@@ -123,20 +88,34 @@ this license.
      * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
      */
 
+    behaviors: [
+      Polymer.CTreeElementDescriptionBehavior,
+    ],
+
     properties: {
+      /**
+       * Segments data
+       *
+       * Structure:
+       *   [{
+       *     id: Number,
+       *     type: SegmentType,
+       *     variations: [{
+       *       id: Number,
+       *       data: dynamic,	// data type depends on segment type
+       *     }, ...],
+       *   }, ...],
+       */
       segments: {
         type: Array,
-        value: ["", "", ""],
+        observer: '__segmentsChanged',
       },
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_onDescriptionConfigChanged',
-      },
+      __tempSegments: Array,
     },
 
-    _onDescriptionConfigChanged: function(descriptionConfigId) {
-      // TODO: refresh description details
+    _descriptionChanged: function(description, descriptionSegments) {
+      this.segments = description.segments; // TODO: copy array using .slice() so we can mutate it separately?
     },
 
     _fireContributorsTapped: function() {
@@ -147,10 +126,15 @@ this license.
       this.fire('related-tapped');
     },
 
-    _fireFeedbackTapped: function(e, detail) {
-      // TODO: figure out segment data from e or detail & pass as detail segmentData
-      this.fire('feedback-tapped', {segmentData: {}});
+    __segmentsChanged: function(e, detail) {
+      if (this.segments) {
+        this.__tempSegments = this.segments.slice();
+      } else {
+        this.__tempSegments = this.segments;
+      }
     },
+
+    // TODO: before close element or switch description check if tempSegments changed, and if ask user if they want to save their changes
   });
   </script>
 </dom-module>

@@ -40,6 +40,7 @@ this license.
   // monostate data
   var cTreesData = {};
   var globalUsersData = {};
+  var nextVariationId = 1;
 
   // test configuration values
   var Test = {
@@ -218,27 +219,27 @@ this license.
       var element = testElements[i];
 
       var description = [];
-      for (var j = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_CONFIGS - 1)) + 1; j >= 0; j--) {
+      for (var j = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_CONFIGS - 1)); j >= 0; j--) {
         var segments = [];
         var contributors = [];  // TODO: add contributors, ordered from most contributions to least (pick contributors for each segment added, also include feedback)
-        for (var k = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENTS - 1)) + 1; k >= 0; k--) {
+        for (var k = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENTS - 1)); k >= 0; k--) {
           var descriptionSegmentTypeId = Math.floor(Math.random() * (segmentTypes.length - 1)) + 1; // no ID 0
           var descriptionSegmentVariations = [];
-          for (var l = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENT_VARIATIONS - 1)) + 1; l >= 0; l--) {
-            var segment;
+          for (var l = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENT_VARIATIONS - 1)); l >= 0; l--) {
+            var segmentData;
             switch (descriptionSegmentTypeId) {
               case 1: // Text (String)
-                segment = Lorem.generate('2-5s');
+                segmentData = Lorem.generate('2-5s');
                 break;
               case 2: // Image (String)
-                segment = Lorem.imageUrl();
-                if (!segment.startsWith('http')) {
-                  segment = imagePath + segment;
+                segmentData = Lorem.imageUrl();
+                if (!segmentData.startsWith('http')) {
+                  segmentData = imagePath + segmentData;
                 }
                 break;
             }
-            if (segment) {
-              descriptionSegmentVariations.push(segment);
+            if (segmentData) {
+              descriptionSegmentVariations.push({id: nextVariationId++, data: segmentData});
             } else {
               console.warn('failed to create segment');
             }
@@ -395,7 +396,10 @@ this license.
        *       segments: [{
        *         id: Number,
        *         type: SegmentType,
-       *         variations: [],	// data type depends on type
+       *         variations: [{
+       *           id: Number,
+       *           data: dynamic,	// data type depends on segment type
+       *         }, ...],
        *       }, ...],
        *     }, ...],
        *     feedback: [{
@@ -425,7 +429,7 @@ this license.
 
     _keyChanged: function(cTreeKey, previousKey) {
       var cTreeData = cTreesData[cTreeKey];
-      var createCTree = !this._cTreeData;
+      var createCTree = !cTreeData;
       if (createCTree) {
         cTreeData = {
           url: this.url,
@@ -531,6 +535,16 @@ this license.
     SIBLING: 32,
   };
 
+  /**
+   * Gets the first object from the array with the id property equal to the id
+   * parameter passed to this function.  If defaultToFirst is true this will
+   * return the first item from the array if no matching item is found, else
+   * will return undefined.
+   *
+   * @param {Array} array
+   * @param {number} id
+   * @param {boolean} [defaultToFirst=true]
+   */
   Polymer.CTreeLoader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
     if (!array) return undefined;
 

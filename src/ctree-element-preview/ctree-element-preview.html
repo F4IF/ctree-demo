@@ -34,6 +34,7 @@ this license.
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-element/ctree-element.html">
 <link rel="import" href="../ctree-element/ctree-element-header.html">
+<link rel="import" href="../ctree-element/ctree-element-description-behavior.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 <link rel="import" href="../ctree-loader/ctree-element-loader-test.html">
 
@@ -117,7 +118,7 @@ this license.
     </style>
 
     <ctree-element-loader-test ctree-key="[[ctreeKey]]" list-item="[[listItem]]" element="[[element]]" description-config="{{descriptionConfig}}" description-segments="{{descriptionSegments}}" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
-    <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]" element="[[element]]" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]"></ctree-element-dialog-accessor>
+    <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]" element="[[element]]" description-config-id="[[descriptionConfig]]" description-segment-ids="[[descriptionSegments]]"></ctree-element-dialog-accessor>
     <ctree-element id="element" element="[[element]]" noclose>
       <div id="content" on-tap="_clickContent">
         <div id="segments"></div>
@@ -138,6 +139,10 @@ this license.
   <script>
   Polymer({
     is: 'ctree-element-preview',
+
+    behaviors: [
+      Polymer.CTreeElementDescriptionBehavior,
+    ],
 
     properties: {
       /**
@@ -167,60 +172,6 @@ this license.
       },
 
       /**
-       * Element data
-       *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: ElementType,
-       *     title: String,
-       *     parents: [Number],
-       *     children: [Number],
-       *     childrenSearchComplete: Boolean,
-       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-       *     description: [{
-       *       id: Number,
-       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-       *       segments: [{
-       *         id: Number,
-       *         type: SegmentType,
-       *         variations: [],	// data type depends on type
-       *       }, ...],
-       *     }, ...],
-       *     feedback: [{
-       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-       *       text: String,
-       *     }, ...],
-       *     bookmarked: Boolean,
-       *   }
-       */
-      element: {
-        type: Object,
-        observer: '_elementChanged',
-      },
-
-      /**
-       * ID of description config to show.  If this ID isn't included in the
-       * element the first config from the element is used.
-       */
-      descriptionConfig: {
-        type: Number,
-        observer: '_descriptionConfigChanged',
-      },
-
-      /**
-       * IDs of variation to show for each segment.  For any segments where the
-       * ID isn't included in the description config the first variation is used.
-       *
-       * Structure:
-       *   [Number, ...]
-       */
-      descriptionSegments: {
-        type: Array,
-        observer: '_descriptionSegmentsChanged',
-      },
-
-      /**
        * Comment to display at the bottom of the element preview.
        */
       comment: String,
@@ -240,8 +191,6 @@ this license.
         value: false,
         observer: '_viewedChanged',
       },
-
-      _bulkChange: Boolean,
     },
 
     _isEmpty: function(str) {
@@ -249,57 +198,21 @@ this license.
     },
 
     _listItemChanged: function(listItem) {
-      var descriptionChanged = false;
-
-      this._bulkChange = true;
-      if (typeof listItem.element !== 'undefined' && listItem.element !== this.element) {
-        this.element = listItem.element;
-        descriptionChanged = true;
-      }
-      if (typeof listItem.descriptionConfig !== 'undefined' && listItem.descriptionConfig !== this.descriptionConfig) {
-        this.descriptionConfig = listItem.descriptionConfig;
-        descriptionChanged = true;
-      }
-      if (typeof listItem.descriptionSegments !== 'undefined' && listItem.descriptionSegments !== this.descriptionSegments) {
-        this.descriptionSegments = listItem.descriptionSegments;
-        descriptionChanged = true;
-      }
-      this._bulkChange = false;
-
-      if (descriptionChanged) {
-        this._updateDescription(this.element, this.descriptionConfig, this.descriptionSegments);
-      }
+      this._bulkUpdateDescriptionProperties(listItem.element, listItem.descriptionConfig, listItem.descriptionSegments);
 
       this.viewed = listItem.viewed;
     },
 
     _elementChanged: function(element) {
-      // TODO: remove this call once make _updateDescription an explicit observer after updating to Polymer 2.0
-      this._updateDescription(element, this.descriptionConfig, this.descriptionSegments);
-
       this.viewed = element.viewed;
     },
 
-    // TODO: remove these individual observers and make _updateDescription an explicit observer once update to Polymer 2.0
-    _descriptionConfigChanged: function(descriptionConfig) {
-      this._updateDescription(this.element, descriptionConfig, this.descriptionSegments);
-    },
-
-    _descriptionSegmentsChanged: function(descriptionSegments) {
-      this._updateDescription(this.element, this.descriptionConfig, descriptionSegments);
-    },
-
-    _getFromArrayWithId: Polymer.CTreeLoader.getFromArrayWithId,
-
-    _updateDescription: function(element, descriptionConfig, descriptionSegments) {
-      if (this._bulkChange || !this.element.description || this.element.description.length == 0) return;
-      var description = this._getFromArrayWithId(this.element.description, this.descriptionConfig);
-      if (!description || !description.segments || (descriptionSegments && description.segments.length != descriptionSegments.length)) return;
-
+    _descriptionChanged: function(description, descriptionSegments) {
       // clear segments
       var segmentsElement = this.$.segments;
-      while (segmentsElement.firstChild) {
-          segmentsElement.removeChild(segmentsElement.firstChild);
+      var child;
+      while (child = segmentsElement.firstChild) {
+        segmentsElement.removeChild(child);
       }
 
       // add thumbnail
@@ -311,7 +224,8 @@ this license.
         if (type.canBeThumbnail) {
           thumbnailIndex = i;
           var component = document.createElement(type.componentName);
-          component.data = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          component.data = variation.data;
           component.scale = '80%';
           component.heightPercent = '56.25%';
           segmentsElement.appendChild(component);
@@ -327,7 +241,8 @@ this license.
           var segment = segments[i];
           var type = segment.type;
           var component = document.createElement(type.componentName);
-          component.data = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+          component.data = variation.data;
           component.scale = '80%';
           segmentsElement.appendChild(component);
         }
