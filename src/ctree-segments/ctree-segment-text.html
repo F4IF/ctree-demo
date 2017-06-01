@@ -28,6 +28,9 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
 
 <link rel="import" href="ctree-segment-behavior.html">
 <link rel="import" href="../ctree-loader/lorem.html">
@@ -38,12 +41,39 @@ this license.
       :host {
         display: block;
       }
-      #text {
+      .text {
+        width: calc(100% - 16px);
         padding: 4px 8px;
+      }
+      #input {
+        width: 100%;
+      }
+      #buttons > div {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+      }
+      #buttons > div[hidden] {
+        display: none !important;
       }
     </style>
 
-    <div id="text"></div>
+    <div id="text" class="text" hidden$="[[editing]]"></div>
+    <div id="edit" class="text" hidden$="[[!editing]]">
+      <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
+      <div id="buttons" align="right">
+        <div on-tap="_editSaveClicked" hidden$="[[!validChangeMade]]">
+          <iron-icon icon="segment-save"></iron-icon>
+          Save
+          <paper-ripple></paper-ripple>
+        </div>
+        <div on-tap="_editCancelClicked">
+          <iron-icon icon="segment-cancel"></iron-icon>
+          Cancel
+          <paper-ripple></paper-ripple>
+        </div>
+      </div>
+    </div>
   </template>
 
   <script>
@@ -55,24 +85,58 @@ this license.
     ],
 
     properties: {
-      data: {
-        type: Object,
-        observer: '_dataChanged',
-      },
+      _updatedText: String,
+    },
 
-      scale: {
-        type: String,
-        value: '100%',
-        observer: '_scaleChanged',
-      },
+    observers: [
+      '_editingChanged(editing)',
+      '_dataChanged(data)',
+      '_scaleChanged(scale)',
+    ],
+
+    ready: function() {
+      this._editUpdateDelay = 250;
+    },
+
+    _editingChanged: function(editing) {
+      if (editing) {
+        this.$.input.focus();
+      }
     },
 
     _dataChanged: function(data) {
+      this.validChangeMade = false;
       this.$.text.textContent = data;
+      this._updatedText = data;
+      this.$.input.value = data;
     },
 
     _scaleChanged: function(scale) {
       this.$.text.style.fontSize = scale;
+      this.$.edit.style.fontSize = scale;
+    },
+
+    _inputChanged: function() {
+      this.validChangeMade = false;
+      if (this.$.input.value === this._updatedText) {
+        this._cancelEditUpdate();
+      } else {
+        this._delayEditUpdate();
+      }
+    },
+
+    _editUpdate: function() {
+      var value = this.$.input.value.trim();
+      this._updatedText = value;
+      this.validChangeMade = (value !== this.data && value.length > 0);
+    },
+
+    _editSaveClicked: function() {
+      this._addSegmentVariation(this._updatedText);
+    },
+
+    _editCancelClicked: function() {
+      this.editing = false;
     },
   });
 

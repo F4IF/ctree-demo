@@ -87,15 +87,15 @@ this license.
     </style>
 
     <ctree-import id="importPage" href="/src/ctree-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>
-    <ctree-element-loader-test ctree-key="[[ctreeKey]]" element="{{element}}" element-id="[[elementId]]" description-config="{{descriptionConfig}}" description-segments="{{descriptionSegments}}" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
+    <ctree-element-loader-test ctree-key="[[ctreeKey]]" element="{{element}}" element-id="[[elementId]]" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
 
     <ctree-element id="element" element="[[element]]" noclose="[[noclose]]" on-close-tapped="_closeClicked">
       <iron-pages id="pages" selected="[[page]]" attr-for-selected="name">
-        <ctree-details-page name="details" descriptionConfigId="[[descriptionConfigId]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
-        <ctree-contributors-page name="contributors" descriptionConfigId="[[descriptionConfigId]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
-        <ctree-history-page name="history" descriptionConfigId="[[descriptionConfigId]]" contributor="[[historyContributor]]"></ctree-history-page>
+        <ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
+        <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
+        <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
         <ctree-related-page name="related"></ctree-related-page>
-        <ctree-feedback-page name="feedback" descriptionConfigId="[[descriptionConfigId]]" segment="[[feedbackSegment]]"></ctree-feedback-page>
+        <ctree-feedback-page name="feedback" description-config="[[descriptionConfig]]" segment="[[feedbackSegment]]"></ctree-feedback-page>
       </iron-pages>
       <table id="nav" hidden$="[[!_descriptionVersionBarVisible]]"><tr>
         <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$=""></paper-icon-button></td>
@@ -137,15 +137,15 @@ this license.
         notify: true,
       },
 
-      descriptionConfigId: {
+      descriptionConfig: {
         type: Number,
-        observer: '_descriptionConfigIdChanged',
+        observer: '_descriptionConfigChanged',
         notify: true,
       },
 
-      descriptionSegmentVariationIds: {
+      descriptionSegments: {
         type: Array,
-        observer: '_descriptionSegmentVariationIdsChanged',
+        observer: '_descriptionSegmentsChanged',
         notify: true,
       },
 
@@ -180,7 +180,7 @@ this license.
         this._ensureDescriptionConfigSet();
       } else if (page == 'related') {
         // applies to entire element so enter general state instead of specific description config state
-        this.descriptionConfigId = null;
+        this.descriptionConfig = null;
       }
       this.$.importPage.load();
     },
@@ -189,21 +189,21 @@ this license.
       if (element) {
         this.elementId = element.id;
       }
-      if (!this.descriptionConfigId && element) {
+      if (!this.descriptionConfig && element) {
         this._pageChanged(this.page);
       }
       // TODO:
     },
 
-    _descriptionConfigIdChanged: function(descriptionConfigId) {
-      this._descriptionVersionBarVisible = (descriptionConfigId ? true : false);
-      if (!descriptionConfigId && this.element) {
+    _descriptionConfigChanged: function(descriptionConfig) {
+      this._descriptionVersionBarVisible = (descriptionConfig ? true : false);
+      if (!descriptionConfig && this.element) {
         this._pageChanged(this.page);
       }
       // TODO:
     },
 
-    _descriptionSegmentVariationIdsChanged: function(descriptionSegmentVariationIds) {
+    _descriptionSegmentsChanged: function(descriptionSegments) {
       // TODO:
     },
 
@@ -219,9 +219,9 @@ this license.
     },
 
     _ensureDescriptionConfigSet: function() {
-      if (!this.descriptionConfigId) {
+      if (!this.descriptionConfig) {
         // TODO: get first config ID from element data
-        this.descriptionConfigId = 1;
+        this.descriptionConfig = 1;
       }
     },
 
@@ -243,7 +243,7 @@ this license.
       this.historyContributor = detail.contributor;
       if (detail.generalHistory) {
         // history shown should be for the entire element, not a specific description config
-        this.descriptionConfigId = null;
+        this.descriptionConfig = null;
       }
       this.page = 'history';
     },

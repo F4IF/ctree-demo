@@ -67,11 +67,26 @@ this license.
      */
 
     properties: {
+      /**
+       * Segments data
+       *
+       * Structure:
+       *   {
+       *     id: Number,
+       *     type: SegmentType,
+       *     variations: [{
+       *       id: Number,
+       *       data: dynamic,	// data type depends on segment type
+       *     }, ...],
+       *   }
+       */
+      segment: {
+        type: Object,
+      },
     },
 
     _fireFeedbackTapped: function() {
-      // TODO: figure out segment data & pass as detail segmentData
-      this.fire('feedback-tapped', {segmentData: {}});
+      this.fire('feedback-tapped', {segment: this.segment});
     },
   });
   </script>

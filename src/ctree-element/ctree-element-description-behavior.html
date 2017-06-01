@@ -1,0 +1,160 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-segments/ctree-segment-image.html">
+<link rel="import" href="../ctree-segments/ctree-segment-text.html">
+
+<script>
+  'use strict';
+
+  Polymer.CTreeElementDescriptionBehavior = {
+    properties: {
+      /**
+       * Element data
+       *
+       * Structure:
+       *   {
+       *     id: Number,
+       *     type: ElementType,
+       *     title: String,
+       *     parents: [Number],
+       *     children: [Number],
+       *     childrenSearchComplete: Boolean,
+       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+       *     description: [{
+       *       id: Number,
+       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+       *       segments: [{
+       *         id: Number,
+       *         type: SegmentType,
+       *         variations: [{
+       *           id: Number,
+       *           data: dynamic,	// data type depends on segment type
+       *         }, ...],
+       *       }, ...],
+       *     }, ...],
+       *     feedback: [{
+       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+       *       text: String,
+       *     }, ...],
+       *     bookmarked: Boolean,
+       *   }
+       */
+      element: {
+        type: Object,
+        observer: '__elementChanged',
+      },
+
+      /**
+       * ID of description config to show.  If this ID isn't included in the
+       * element the first config from the element is used.
+       */
+      descriptionConfig: {
+        type: Number,
+        observer: '__descriptionConfigChanged',
+      },
+
+      /**
+       * IDs of variation to show for each segment.  For any segments where the
+       * ID isn't included in the description config the first variation is used.
+       *
+       * Structure:
+       *   [Number, ...]
+       */
+      descriptionSegments: {
+        type: Array,
+        observer: '__descriptionSegmentsChanged',
+      },
+
+      __bulkChange: Boolean,
+    },
+
+    /**
+     * Gets the first object from the array with the id property equal to the id
+     * parameter passed to this function.  If defaultToFirst is true this will
+     * return the first item from the array if no matching item is found, else
+     * will return undefined.
+     *
+     * @param {Array} array
+     * @param {number} id
+     * @param {boolean} [defaultToFirst=true]
+     */
+    _getFromArrayWithId: Polymer.CTreeLoader.getFromArrayWithId,
+
+    _bulkUpdateDescriptionProperties: function(element, descriptionConfig, descriptionSegments) {
+      var descriptionChanged = false;
+
+      this.__bulkChange = true;
+      if (typeof element !== 'undefined' && element !== this.element) {
+        this.element = element;
+        descriptionChanged = true;
+      }
+      if (typeof descriptionConfig !== 'undefined' && descriptionConfig !== this.descriptionConfig) {
+        this.descriptionConfig = descriptionConfig;
+        descriptionChanged = true;
+      }
+      if (typeof descriptionSegments !== 'undefined' && descriptionSegments !== this.descriptionSegments) {
+        this.descriptionSegments = descriptionSegments;
+        descriptionChanged = true;
+      }
+      this.__bulkChange = false;
+
+      if (descriptionChanged) {
+        this.__updateDescription(this.element, this.descriptionConfig, this.descriptionSegments);
+      }
+    },
+
+    __elementChanged: function(element) {
+      // TODO: remove this call once make _updateDescription an explicit observer after updating to Polymer 2.0
+      this.__updateDescription(element, this.descriptionConfig, this.descriptionSegments);
+
+      if (this._elementChanged) this._elementChanged(element);
+    },
+
+    // TODO: remove these individual observers and make _updateDescription an explicit observer once update to Polymer 2.0
+    __descriptionConfigChanged: function(descriptionConfig) {
+      this.__updateDescription(this.element, descriptionConfig, this.descriptionSegments);
+    },
+
+    __descriptionSegmentsChanged: function(descriptionSegments) {
+      this.__updateDescription(this.element, this.descriptionConfig, descriptionSegments);
+    },
+
+    __updateDescription: function(element, descriptionConfig, descriptionSegments) {
+      if (this.__bulkChange || !element || !element.description || element.description.length == 0) return;
+      var description = this._getFromArrayWithId(element.description, descriptionConfig);
+      if (!description || !description.segments || (descriptionSegments && description.segments.length != descriptionSegments.length)) return;
+
+      if (this._descriptionChanged) this._descriptionChanged(description, descriptionSegments);
+    },
+  };
+  </script>
+</dom-module>

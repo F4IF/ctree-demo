@@ -29,6 +29,9 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="ctree-segment-behavior.html">
 <link rel="import" href="../ctree-loader/lorem.html">
@@ -52,10 +55,35 @@ this license.
         width: 100%;
         background-color: #000;
       }
+      #url {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 8px;
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+      #loadingIndicator {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      paper-input[hidden] {
+        display: none !important;
+      }
+      paper-icon-button[hidden] {
+        display: none !important;
+      }
     </style>
 
     <div id="container">
-      <iron-image preload fade id="image" sizing="cover"></iron-image>
+      <iron-image preload fade id="image" sizing="cover" loading="{{loading}}" error="{{error}}"></iron-image>
+      <paper-spinner id="loadingIndicator" active$="[[loadingChangeMade]]" hidden$="[[!loadingChangeMade]]"></paper-spinner>
+      <paper-input label="Image URL" id="url" on-value-changed="_inputChanged" on-keydown="_checkForEnter" hidden$="[[!editing]]">
+        <paper-icon-button suffix on-tap="_editSaveClicked" icon="segment-save" alt="Save" title="Save" hidden$="[[!validChangeMade]]"></paper-icon-button>
+        <paper-icon-button suffix on-tap="_editCancelClicked" icon="segment-cancel" alt="Cancel" title="Cancel"></paper-icon-button>
+      </paper-input>
     </div>
   </template>
 
@@ -68,28 +96,80 @@ this license.
     ],
 
     properties: {
-      data: {
-        type: Object,
-        observer: '_dataChanged',
-      },
-
-      heightPercent: {
-        type: String,
-        observer: '_heightPercentageChanged',
+      _changed: {
+        type: Boolean,
+        value: false,
       },
     },
 
+    observers: [
+      '_editingChanged(editing)',
+      '_dataChanged(data)',
+      '_heightPercentageChanged(heightPercent)',
+      '__updateValidChangeMade(_changed, loading, error)',
+      '__updatLoadingChangeMade(editing, loading)',
+    ],
+
+    _editingChanged: function(editing) {
+      if (editing) {
+        this.$.url.focus();
+      }
+    },
+
     _dataChanged: function(data) {
+      this.validChangeMade = false;
+      this.loadingChangeMade = false;
+      this._changed = false;
       this.$.image.src = data;
+      this.$.url.value = data;
     },
 
     _heightPercentageChanged: function(heightPercentage) {
       if (heightPercentage && heightPercentage.length > 0) {
         this.$.image.style.height = '100%';
+        this.$.image.sizing = 'cover';
         this.$.container.style.paddingTop = heightPercentage;
       } else {
         this.$.image.style.height = 'auto';
       }
+    },
+
+    _inputChanged: function(value) {
+      if (this.$.url.value === this.$.image.src) {
+        this._cancelEditUpdate();
+        this._waiting = false;
+      } else {
+        this._delayEditUpdate();
+      }
+    },
+
+    _checkForEnter: function(e) {
+      // check if 'enter' was pressed
+      if (e.keyCode === 13) {
+        this._editSaveClicked();
+      }
+    },
+
+    _editUpdate: function() {
+      var value = this.$.url.value.trim();
+      this.$.image.src = value;
+      this._changed = (value !== this.data);
+    },
+
+    _editSaveClicked: function() {
+      this._addSegmentVariation(this.$.image.src);
+    },
+
+    _editCancelClicked: function() {
+      this.editing = false;
+    },
+
+    __updateValidChangeMade: function(changed, loading, error) {
+      this.validChangeMade = changed && !loading && !error;
+    },
+
+    __updatLoadingChangeMade: function(editing, loading) {
+      this.loadingChangeMade = editing && loading;
     },
   });
   </script>
