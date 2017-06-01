@@ -29,6 +29,7 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
 
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 
@@ -47,7 +48,8 @@ this license.
         vertical-align: middle;
         padding: 0;
       }
-      #componentContainer {
+      #content {
+        position: relative;
         width: 100%;
       }
       .move {
@@ -55,6 +57,9 @@ this license.
         text-align: center;
       }
       paper-icon-button[hidden] {
+        display: none !important;
+      }
+      paper-ripple[hidden] {
         display: none !important;
       }
       ctree-feedback-bar {
@@ -66,22 +71,31 @@ this license.
     <!-- TODO: hide second row unless in edit mode for row -->
     <table id="nav"><tr>
       <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$="[[_firstVariation(_variationIndex)]]" on-tap="previous"></paper-icon-button></td>
-      <td id="componentContainer"></td>
+      <td id="content" on-tap="_contentClicked"><div id="container"></div><paper-ripple hidden$=[[editing]]></paper-ripple></td>
       <td><paper-icon-button id="next" icon="navigate-next" title="next element variation" hidden$="[[_lastVariation(_variationIndex)]]" on-tap="next"></paper-icon-button></td>
     </tr></table>
     <table><tr hidden$="[[!editing]]">
-      <td><paper-icon-button id="delete" icon="delete" title="delete" hidden$="[[!_canDelete(first, last)]]" on-tap="_fireDeleteTapped"></td>
+      <td><paper-icon-button id="delete" icon="delete" title="delete" hidden$="[[!_canDelete(firstSegment, lastSegment)]]" on-tap="_fireDeleteTapped"></td>
       <td class="move">
-        <paper-icon-button id="move-up" icon="move-up" title="move up" hidden$="[[!first]]" on-tap="_fireMoveUpTapped"></paper-icon-button>
-        <paper-icon-button id="move-down" icon="move-down" title="move down" hidden$="[[!last]]" on-tap="_fireMoveDownTapped"></paper-icon-button>
+        <paper-icon-button id="move-up" icon="move-up" title="move up" hidden$="[[firstSegment]]" on-tap="_fireMoveUpTapped"></paper-icon-button>
+        <paper-icon-button id="move-down" icon="move-down" title="move down" hidden$="[[lastSegment]]" on-tap="_fireMoveDownTapped"></paper-icon-button>
       </td>
-      <td class="feedback"><ctree-feedback-bar on-feedback-tapped="_fireFeedbackTapped"></ctree-feedback-bar></td>
+      <td class="feedback"><ctree-feedback-bar segment="[[segment]]"></ctree-feedback-bar></td>
     </tr></table>
   </template>
 
   <script>
   Polymer({
     is: 'ctree-segment-container',
+
+    /**
+     * Fired when a the delete button is tapped.
+     *
+     * @event editing-segment-changed
+     * @param {{value: Boolean, segment: segmentData}} detail
+     *   value: New value of editing parameter.
+     *   segment: Contains data for segment held by container.
+     */
 
     /**
      * Fired when a the delete button is tapped.
@@ -104,15 +118,6 @@ this license.
      * @param {{segment: segmentData}} detail Contains data for segment held by container.
      */
 
-    /**
-     * Fired when a the feedback button is tapped.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData, variationId: Number}} detail
-     *    segment: Contains data for segment held by container.
-     *    variationId: ID of segment variation shown when button tapped.
-     */
-
     properties: {
       /**
        * Segments data
@@ -133,7 +138,6 @@ this license.
         observer: '_segmentChanged',
       },
 
-      // TODO: segments should probably be ID based, but the use of an array of data doesn't make that possible
       variationId: {
         type: Number,
         notify: true,
@@ -147,6 +151,7 @@ this license.
       editing: {
         type: Boolean,
         value: false,
+        observer: '__editingChanged',
       },
 
       _variationIndex: {
@@ -158,6 +163,22 @@ this license.
         type: Boolean,
         value: false,
       },
+    },
+
+    attached: function() {
+      var component = this.$$('#component');
+      if (component) {
+        this.listen(component, 'editing-changed', '__editingComponentChanged');
+        this.listen(component, 'add-segment-variation', '_addSegmentVariation');
+      }
+    },
+
+    detached: function() {
+      var component = this.$$('#component');
+      if (component) {
+        this.unlisten(component, 'editing-changed', '__editingComponentChanged');
+        this.unlisten(component, 'add-segment-variation', '_addSegmentVariation');
+      }
     },
 
     previous: function() {
@@ -177,17 +198,41 @@ this license.
       var type = segment.type;
       var component = this.$$('#component');
       if (!type || !component || component.tagName.toLowerCase() !== type.componentName) {
-        var parent = this.$.componentContainer;
+        var parent = this.$.container;
         var child;
+        if (component) {
+          this.unlisten(component, 'editing-changed', '__editingComponentChanged');
+          this.unlisten(component, 'add-segment-variation', '_addSegmentVariation');
+        }
         while (child = parent.firstChild) {
           parent.removeChild(child);
         }
         if (type) {
           component = document.createElement(type.componentName);
           component.id = 'component';
+          this.listen(component, 'editing-changed', '__editingComponentChanged');
+          this.listen(component, 'add-segment-variation', '_addSegmentVariation');
           parent.appendChild(component);
         }
       }
+    },
+
+    _contentClicked: function() {
+      if (this.editing) return;
+
+      this.editing = true;
+    },
+
+    _addSegmentVariation: function(e, detail) {
+      var segmentData = detail.data;
+      var id = Math.floor(Math.random() * 2000000000) + 1;  // TODO: this would come from loading when uploading it
+      this.segment.variations.splice(this._variationIndex + 1, 0, {id: id, data: segmentData});
+      this._variationIndex = this._variationIndex + 1;
+      this.editing = false;
+
+      this.__updatingVariation = true;
+      this.variationId = id;
+      this.__updatingVariation = false;
     },
 
     __variationIdChanged: function(id) {
@@ -210,6 +255,30 @@ this license.
       this._variationIndex = index;
 
       this.__updatingVariation = false;
+    },
+
+    __editingChanged: function(value) {
+      var component = this.$$('#component');
+      if (component) {
+        component.editing = value;
+        this.fire('editing-segment-changed', {value: value, segment: this.segment});
+      }
+    },
+
+    __editingComponentChanged: function() {
+      this.async(this.__updateEditingFromComponent);
+    },
+
+    __updateEditingFromComponent: function() {
+      var component = this.$$('#component');
+      if (!component || this.editing === component.editing) return;
+
+      this.editing = component.editing;
+      if (!this.editing) {
+        component.notifyPath('data');
+        // TODO: should be able to remove after update to Polymer 2.0
+        component._dataChanged(component.data);
+      }
     },
 
     __variationIndexChanged: function(index) {
@@ -254,10 +323,6 @@ this license.
 
     _fireMoveDownTapped: function() {
       this.fire('move-down-tapped', {segment: this.segment});
-    },
-
-    _fireFeedbackTapped: function() {
-      this.fire('feedback-tapped', {segment: this.segment, variation: this.variationId});
     },
   });
   </script>

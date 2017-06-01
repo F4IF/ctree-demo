@@ -47,7 +47,7 @@ this license.
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
+        right: 16px;
       }
       ctree-description {
         position: absolute;
@@ -61,7 +61,7 @@ this license.
       }
     </style>
 
-    <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]" on-feedback-tapped="_fireFeedbackTapped"></ctree-description>
+    <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
     <ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>
   </template>
 
@@ -108,7 +108,10 @@ this license.
        */
       segments: {
         type: Array,
+        observer: '__segmentsChanged',
       },
+
+      __tempSegments: Array,
     },
 
     _descriptionChanged: function(description, descriptionSegments) {
@@ -123,10 +126,15 @@ this license.
       this.fire('related-tapped');
     },
 
-    _fireFeedbackTapped: function(e, detail) {
-      // TODO: figure out segment data from e or detail & pass as detail segmentData
-      this.fire('feedback-tapped', {segmentData: {}});
+    __segmentsChanged: function(e, detail) {
+      if (this.segments) {
+        this.__tempSegments = this.segments.slice();
+      } else {
+        this.__tempSegments = this.segments;
+      }
     },
+
+    // TODO: before close element or switch description check if tempSegments changed, and if ask user if they want to save their changes
   });
   </script>
 </dom-module>

@@ -43,7 +43,7 @@ var CTreeSegments = {};
  * static getText(data)
  *
  * Gets text interpretation of data for segment type.  If no text interpretation
- * is possible this may function may not be defined or may return an undefined
+ * is possible this function may not be defined or may return an undefined
  * result.
  *
  * @param  {Object} data Segment type specific data to get text interpretation for
@@ -51,7 +51,71 @@ var CTreeSegments = {};
  */
 
 Polymer.CTreeSegmentBehavior = {
-  // TODO: add shared behavior code for segments
+  /**
+   * Notify segment container that a new variation should be added.
+   *
+   * @event add-segment-variation
+   * @param {{data: variationData}} detail New segment variation data.
+   */
+
+  properties: {
+    data: Object,
+
+    editing: {
+      type: Boolean,
+      value: false,
+      notify: true,
+    },
+
+    validChangeMade: {
+      type: Boolean,
+      value: false,
+    },
+
+    loadingChangeMade: {
+      type: Boolean,
+      value: false,
+    },
+
+    heightPercent: String,
+
+    scale: {
+      type: String,
+      value: '100%',
+    },
+
+    _editUpdateDelay: {
+      type: Number,
+      value: 800,
+    },
+
+    __editUpdateHandle: Number,
+  },
+
+  _addSegmentVariation: function(data) {
+    if (!this.validChangeMade) return;
+
+    this.validChangeMade = false;
+    // TODO: prompt user to select reason for new segment (list of default reasons from behavior & custom reasons from type)
+    // TODO: may be able to remove this once saving variation to loader
+    this.fire('add-segment-variation', {data: data});
+  },
+
+  _delayEditUpdate: function() {
+    this.cancelAsync(this.__editUpdateHandle);
+    this.__editUpdateHandle = this.async(() => {
+      this.__editUpdateHandle = undefined;
+      this._editUpdate();
+    }, this._editUpdateDelay);
+  },
+
+  _cancelEditUpdate: function() {
+    this.cancelAsync(this.__editUpdateHandle);
+  },
+
+  _editUpdate: function() {
+    // TODO: override to add custom logic when edit update timer elapsed
+  },
 };
 
 </script>

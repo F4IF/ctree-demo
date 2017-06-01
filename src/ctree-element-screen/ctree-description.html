@@ -33,13 +33,30 @@ this license.
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 <link rel="import" href="ctree-segment-container.html">
 
+/**
+ * TODO: use template instead of manually adding items, so we can automatically
+ * use data binding.  An example of using multiple templates ca be found at
+ * https://github.com/Polymer/polymer/issues/3755:
+ *   this.templatize(tplA);
+ *   this.templatize(tplB);
+ *   for(let i = 0 ; i < 3 ; i++) {
+ *     this._templatized = tplA;
+ *     this.ctor = tplA._content._ctor;
+ *     this.appendChild(this.stamp({nameA: i}).root);
+ *
+ *     this._templatized = tplB;
+ *     this.ctor = tplB._content._ctor;
+ *     this.appendChild(this.stamp({nameB: i}).root);
+ *   }
+ *
+ * TODO: try making + buttons only visible while editing, and make them a new
+ * component type (to allow selection of segment type when clicked)
+ */
 <dom-module id="ctree-description">
   <template>
     <style>
       :host {
         display: block;
-        width: 100%;
-        height: 100%;
       }
       paper-icon-button {
         display: block;
@@ -51,6 +68,9 @@ this license.
       div {
         width: 100%;
       }
+      paper-icon-button[hidden] {
+        display: none !important;
+      }
     </style>
     <div id="container"></div>
   </template>
@@ -58,13 +78,6 @@ this license.
   <script>
   Polymer({
     is: 'ctree-description',
-
-    /**
-     * Fired when a the feedback button is tapped for a segment.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
-     */
 
     properties: {
       /**
@@ -91,14 +104,22 @@ this license.
         notify: true,
         observer: '_segmentIdsChanged',
       },
+
+      editingSegmentId: {
+        type: Number,
+        notify: true,
+      },
     },
 
     __LISTENER_MAPS: {
       'PAPER-ICON-BUTTON': {
-        tap: '_addClicked',
+        'tap': '_addClicked',
       },
       'CTREE-SEGMENT-CONTAINER': {
-
+        'editing-segment-changed': '_editingChanged',
+        'delete-tapped': '_deleteTapped',
+        'move-up-tapped': '_moveUpTapped',
+        'move-down-tapped': '_moveDownTapped',
       },
     },
 
@@ -130,6 +151,96 @@ this license.
       // TODO: show dialog to let user select which segment type to add
     },
 
+    _editingChanged: function(e, detail) {
+      // ignore update if segment not really changing editing state
+      if (detail.value === (this.editingSegmentId === detail.segment.id)) return;
+
+      var segments = this.segments;
+      var components = this.$.container.children;
+      if (detail.value) {
+        // editing
+        var segmentId = detail.segment.id;
+        this.editingSegmentId = segmentId;
+        for (var i = 0; i < segments.length; i++) {
+          var segment = segments[i];
+          if (segment.id !== segmentId) {
+            var component = components[i * 2 + 1];
+            if (component.editing) {
+              component.set('editing', false);
+            }
+          }
+        }
+      } else {
+        // not editing
+        this.editingSegmentId = undefined;
+      }
+      for (var i = 0; i <= segments.length; i++) {
+        var component = components[i * 2];
+        if (!this.editingSegmentId || this.editingSegmentId < 0) {
+          component.setAttribute('hidden', 'true');
+        } else {
+          component.removeAttribute('hidden');
+        }
+      }
+    },
+
+    _getIndex: function(segment) {
+      var segmentId = segment.id;
+      var segments = this.segments;
+      for (var i = 0; i < segments.length; i++) {
+        if (segments[i].id === segmentId) {
+          return i;
+        }
+      }
+      return null;
+    },
+
+    _deleteTapped: function(e, detail) {
+      var index = this._getIndex(detail.segment);
+      if (index !== null) {
+        this.splice('segments', index, 1);
+        if (this.segmentIds && index < this.segmentIds.length) {
+          this.splice('segmentIds', index, 1);
+        } else {
+          this._segmentIdsChanged(this.segmentIds);
+        }
+      }
+    },
+
+    _moveUpTapped: function(e, detail) {
+      var index = this._getIndex(detail.segment);
+      if (index !== null && index > 0) {
+        this.__swapSegments(index, index - 1);
+      }
+    },
+
+    _moveDownTapped: function(e, detail) {
+      var index = this._getIndex(detail.segment);
+      if (index !== null && index < this.segments.length - 1) {
+        this.__swapSegments(index, index + 1);
+      }
+    },
+
+    __swapSegments: function(i1, i2) {
+      if (i1 == i2) return;
+
+      if (i1 > i2) {
+        var temp = i1;
+        i1 = i2;
+        i2 = temp;
+      }
+
+      var temp = this.segments[i1];
+      this.segments[i1] = this.segments[i2];
+      this.segments[i2] = temp;
+      if (this.segmentIds && i2 < this.segmentIds.length) {
+        temp = this.segmentIds[i1];
+        this.segmentIds[i1] = this.segmentIds[i2];
+        this.segmentIds[i2] = temp;
+      }
+      this._segmentIdsChanged(this.segmentIds);
+    },
+
     _segmentsChanged: function(segments) {
       // clear segments
       var root = this.$.container;
@@ -137,6 +248,7 @@ this license.
       while (child = root.firstChild) {
         this._removeElement(root, child);
       }
+      this.editingSegmentId = undefined;
       this._segmentIdsChanged(this.segmentIds);
     },
 
@@ -147,6 +259,9 @@ this license.
         if (properties.hasOwnProperty(key)) {
           element.set(key, properties[key]);
         }
+      }
+      if (this.editingSegmentId && properties.segment && this.editingSegmentId === properties.segment.id) {
+        element.set('editing', true);
       }
       if (beforeChild) {
         parent.insertBefore(element, beforeChild);
@@ -170,7 +285,10 @@ this license.
         icon: 'add-circle',
         title: 'Add Segment',
       };
-      this._addElement(parent, 'paper-icon-button', properties, segmentContainerElement);
+      var button = this._addElement(parent, 'paper-icon-button', properties, segmentContainerElement);
+      if (!this.editingSegmentId || this.editingSegmentId < 0) {
+        button.setAttribute('hidden', 'true');
+      }
 
       return true;
     },
@@ -205,6 +323,8 @@ this license.
               if (this.__ensureHasPlusButton(root, childIndex, child)) {
                 childIndex++;
               }
+              child.set('firstSegment', i == 0);
+              child.set('lastSegment', i == segments.length - 1);
               childIndex++;
               added = true;
             } else {
@@ -274,7 +394,7 @@ this license.
       }
 
       // remove trailing children
-      for (var i = childIndex; i < children.length; i++) {
+      while (childIndex < children.length) {
         var child = children[childIndex];
         if (child.tagName === 'ctree-segment-container' || previousChildWasButton) {
           this._removeElement(root, child);
@@ -289,11 +409,6 @@ this license.
       if (!previousChildWasButton) {
         this.__ensureHasPlusButton(root, children.length);
       }
-    },
-
-    _fireFeedbackTapped: function(e, detail) {
-      // TODO: figure out segment data from e or detail & pass as detail segmentData
-      this.fire('feedback-tapped', {segmentData: {}});
     },
   });
   </script>
