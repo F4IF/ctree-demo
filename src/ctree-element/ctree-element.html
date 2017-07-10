@@ -47,7 +47,7 @@ this license.
         --paper-toolbar-height: 48px;
         --paper-toolbar-sm-height: 48px;
 
-        @apply(--shadow-elevation-2dp);
+        @apply --shadow-elevation-2dp;
       }
       .title {
         font-size: 16px !important;
@@ -75,7 +75,7 @@ this license.
       <paper-tooltip for="close" offset="-8">Close</paper-tooltip>
       <paper-tooltip for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
     </paper-toolbar>
-    <div class="content"><content></content></div>
+    <div class="content"><slot></slot></div>
   </template>
 
   <script>
