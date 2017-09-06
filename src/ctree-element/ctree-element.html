@@ -64,72 +64,74 @@ this license.
     </style>
 
     <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
-      <iron-icon id="typeIcon" src="[[element.type.iconUrl]]"></iron-icon>
-      <span class="title">[[element.title]]</span>
+      <iron-icon slot="top" id="typeIcon" src="[[element.type.iconUrl]]"></iron-icon>
+      <span slot="top" class="title">[[element.title]]</span>
       <!-- TODO: see if some of the button attributes can be set by the behavior -->
-      <paper-icon-button id="bookmarkButton" icon="[[_toggleButtonIcon]]" alt="favorite" on-tap="_toggleButton"></paper-icon-button>
-      <paper-icon-button id="share" icon="share" alt="share" on-tap="_showShare"></paper-icon-button>
-      <paper-icon-button id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
-      <paper-tooltip for="bookmarkButton" offset="-8">Bookmark</paper-tooltip>
-      <paper-tooltip for="share" offset="-8">Share</paper-tooltip>
-      <paper-tooltip for="close" offset="-8">Close</paper-tooltip>
-      <paper-tooltip for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+      <paper-icon-button slot="top" id="bookmarkButton" icon="[[_toggleButtonIcon]]" alt="favorite" on-tap="_toggleButton"></paper-icon-button>
+      <paper-icon-button slot="top" id="share" icon="share" alt="share" on-tap="_showShare"></paper-icon-button>
+      <paper-icon-button slot="top" id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
+      <paper-tooltip slot="top" for="bookmarkButton" offset="-8">Bookmark</paper-tooltip>
+      <paper-tooltip slot="top" for="share" offset="-8">Share</paper-tooltip>
+      <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
+      <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
     </paper-toolbar>
     <div class="content"><slot></slot></div>
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-element',
+    class CTreeElement extends Polymer.mixinBehaviors([Polymer.CTreeToolbarBehavior], Polymer.Element) {
 
-    properties: {
-      element: {
-        type: Object,
-        observer: '_elementChanged',
-      },
+      static get is() { return 'ctree-element'; }
 
-      headerColor: {
-        type: String,
-        value: "#cfcfcf",
-        computed: '_calculateHeaderColor(element)'
-      },
+      static get properties() {
+        return {
+          element: {
+            type: Object,
+            observer: '_elementChanged',
+          },
 
-      /**
-       * Toggle icon names.
-       */
-      _toggleButtonIconNames: {
-        type: Array,
-        value: ['bookmark-border', 'bookmark'],
-      },
-    },
+          headerColor: {
+            type: String,
+            value: "#cfcfcf",
+            computed: '_calculateHeaderColor(element)'
+          },
 
-    behaviors: [
-      Polymer.CTreeToolbarBehavior,
-    ],
-
-    _onToggleButton: function() {
-      this.element.bookmarked = !this.element.bookmarked;
-    },
-
-    _getToggleButtonValue: function() {
-      return this.element ? (this.element.bookmarked ? true : false) : undefined;
-    },
-
-    _calculateHeaderColor: function(element) {
-      var headerColor = "#cfcfcf";//this.headerColor;
-      if (element) {
-        if (element.color) {
-          headerColor = element.color;
-        } else if (element.type && element.type.color) {
-          headerColor = element.type.color;
-        }
+          /**
+           * Toggle icon names.
+           */
+          _toggleButtonIconNames: {
+            type: Array,
+            value: ['bookmark-border', 'bookmark'],
+          },
+        };
       }
-      return headerColor;
-    },
 
-    _elementChanged: function(element) {
-      this._updateToggleButtonIcon();
-    },
-  });
+      _onToggleButton() {
+        this.element.bookmarked = !this.element.bookmarked;
+      }
+
+      _getToggleButtonValue() {
+        return this.element ? (this.element.bookmarked ? true : false) : undefined;
+      }
+
+      _calculateHeaderColor(element) {
+        var headerColor = "#cfcfcf";//this.headerColor;
+        if (element) {
+          if (element.color) {
+            headerColor = element.color;
+          } else if (element.type && element.type.color) {
+            headerColor = element.type.color;
+          }
+        }
+        return headerColor;
+      }
+
+      _elementChanged(element) {
+        this._updateToggleButtonIcon();
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeElement.is, CTreeElement);
   </script>
 </dom-module>

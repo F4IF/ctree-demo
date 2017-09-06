@@ -27,7 +27,8 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
 
@@ -85,245 +86,251 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-segment-container',
+    class CTreeSegmentContainer extends Polymer.Element {
 
-    /**
-     * Fired when a the delete button is tapped.
-     *
-     * @event editing-segment-changed
-     * @param {{value: Boolean, segment: segmentData}} detail
-     *   value: New value of editing parameter.
-     *   segment: Contains data for segment held by container.
-     */
+      static get is() { return 'ctree-segment-container'; }
 
-    /**
-     * Fired when a the delete button is tapped.
-     *
-     * @event delete-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment held by container.
-     */
-
-    /**
-     * Fired when a the move up button is tapped.
-     *
-     * @event move-up-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment held by container.
-     */
-
-    /**
-     * Fired when a the move down button is tapped.
-     *
-     * @event move-down-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment held by container.
-     */
-
-    properties: {
       /**
-       * Segments data
+       * Fired when a the delete button is tapped.
        *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: SegmentType,
-       *     variations: [{
-       *       id: Number,
-       *       data: dynamic,	// data type depends on segment type
-       *     }, ...],
-       *   }
+       * @event editing-segment-changed
+       * @param {{value: Boolean, segment: segmentData}} detail
+       *   value: New value of editing parameter.
+       *   segment: Contains data for segment held by container.
        */
-      segment: {
-        type: Object,
-        notify: true,
-        observer: '_segmentChanged',
-      },
 
-      variationId: {
-        type: Number,
-        notify: true,
-        observer: '__variationIdChanged',
-      },
+      /**
+       * Fired when a the delete button is tapped.
+       *
+       * @event delete-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment held by container.
+       */
 
-      firstSegment: Boolean,
+      /**
+       * Fired when a the move up button is tapped.
+       *
+       * @event move-up-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment held by container.
+       */
 
-      lastSegment: Boolean,
+      /**
+       * Fired when a the move down button is tapped.
+       *
+       * @event move-down-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment held by container.
+       */
 
-      editing: {
-        type: Boolean,
-        value: false,
-        observer: '__editingChanged',
-      },
+      static get properties() {
+        return {
+          /**
+           * Segments data
+           *
+           * Structure:
+           *   {
+           *     id: Number,
+           *     type: SegmentType,
+           *     variations: [{
+           *       id: Number,
+           *       data: dynamic,	// data type depends on segment type
+           *     }, ...],
+           *   }
+           */
+          segment: {
+            type: Object,
+            notify: true,
+            observer: '_segmentChanged',
+          },
 
-      _variationIndex: {
-        type: Number,
-        observer: '__variationIndexChanged',
-      },
+          variationId: {
+            type: Number,
+            notify: true,
+            observer: '__variationIdChanged',
+          },
 
-      __updatingVariation: {
-        type: Boolean,
-        value: false,
-      },
-    },
+          firstSegment: Boolean,
 
-    attached: function() {
-      var component = this.$$('#component');
-      if (component) {
-        this.listen(component, 'editing-changed', '__editingComponentChanged');
-        this.listen(component, 'add-segment-variation', '_addSegmentVariation');
+          lastSegment: Boolean,
+
+          editing: {
+            type: Boolean,
+            value: false,
+            observer: '__editingChanged',
+          },
+
+          _variationIndex: {
+            type: Number,
+            observer: '__variationIndexChanged',
+          },
+
+          __updatingVariation: {
+            type: Boolean,
+            value: false,
+          },
+        };
       }
-    },
 
-    detached: function() {
-      var component = this.$$('#component');
-      if (component) {
-        this.unlisten(component, 'editing-changed', '__editingComponentChanged');
-        this.unlisten(component, 'add-segment-variation', '_addSegmentVariation');
-      }
-    },
-
-    previous: function() {
-      if (this._variationIndex <= 0) return;
-
-      this._variationIndex--;
-    },
-
-    next: function() {
-      if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
-
-      this._variationIndex++;
-    },
-
-    _segmentChanged: function(segment) {
-      // validate component type
-      var type = segment.type;
-      var component = this.$$('#component');
-      if (!type || !component || component.tagName.toLowerCase() !== type.componentName) {
-        var parent = this.$.container;
-        var child;
+      attached() {
+        var component = this.shadowRoot.querySelector('#component');
         if (component) {
-          this.unlisten(component, 'editing-changed', '__editingComponentChanged');
-          this.unlisten(component, 'add-segment-variation', '_addSegmentVariation');
-        }
-        while (child = parent.firstChild) {
-          parent.removeChild(child);
-        }
-        if (type) {
-          component = document.createElement(type.componentName);
-          component.id = 'component';
-          this.listen(component, 'editing-changed', '__editingComponentChanged');
-          this.listen(component, 'add-segment-variation', '_addSegmentVariation');
-          parent.appendChild(component);
+          component.addEventListener('editing-changed', e => __editingComponentChanged(e));
+          component.addEventListener('add-segment-variation', e => _addSegmentVariation(e));
         }
       }
-    },
 
-    _contentClicked: function() {
-      if (this.editing) return;
-
-      this.editing = true;
-    },
-
-    _addSegmentVariation: function(e, detail) {
-      var segmentData = detail.data;
-      var id = Math.floor(Math.random() * 2000000000) + 1;  // TODO: this would come from loading when uploading it
-      this.segment.variations.splice(this._variationIndex + 1, 0, {id: id, data: segmentData});
-      this._variationIndex = this._variationIndex + 1;
-      this.editing = false;
-
-      this.__updatingVariation = true;
-      this.variationId = id;
-      this.__updatingVariation = false;
-    },
-
-    __variationIdChanged: function(id) {
-      if (!this.segment || this.__updatingVariation) return;
-
-      this.__updatingVariation = true;
-
-      var index = -1;
-      var variations = this.segment.variations;
-      for (var i = 0; i < variations.length; i++) {
-        if (variations[i].id == id) {
-          index = i;
-          break;
+      detached() {
+        var component = this.shadowRoot.querySelector('#component');
+        if (component) {
+          component.removeEventListener('editing-changed', e => __editingComponentChanged(e));
+          component.removeEventListener('add-segment-variation', e => _addSegmentVariation(e));
         }
       }
-      if (index < 0) {
-        index = 0;
-        this.variationId = variations[0].id;
-      }
-      this._variationIndex = index;
 
-      this.__updatingVariation = false;
-    },
+      previous() {
+        if (this._variationIndex <= 0) return;
 
-    __editingChanged: function(value) {
-      var component = this.$$('#component');
-      if (component) {
-        component.editing = value;
-        this.fire('editing-segment-changed', {value: value, segment: this.segment});
-      }
-    },
-
-    __editingComponentChanged: function() {
-      this.async(this.__updateEditingFromComponent);
-    },
-
-    __updateEditingFromComponent: function() {
-      var component = this.$$('#component');
-      if (!component || this.editing === component.editing) return;
-
-      this.editing = component.editing;
-      if (!this.editing) {
-        component.notifyPath('data');
-        // TODO: should be able to remove after update to Polymer 2.0
-        component._dataChanged(component.data);
-      }
-    },
-
-    __variationIndexChanged: function(index) {
-      if (!this.segment) return;
-
-      var variation = this.segment.variations[index];
-      var component = this.$$('#component');
-      if (component) {
-        component.set('data', variation.data);
-        // TODO: don't set height percentage, let full image size be visible
-        component.set('heightPercent', '56.25%');
+        this._variationIndex--;
       }
 
-      if (!this.__updatingVariation) {
+      next() {
+        if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
+
+        this._variationIndex++;
+      }
+
+      _segmentChanged(segment) {
+        // validate component type
+        var type = segment.type;
+        var component = this.shadowRoot.querySelector('#component');
+        if (!type || !component || component.tagName.toLowerCase() !== type.componentName) {
+          var parent = this.$.container;
+          var child;
+          if (component) {
+            component.addEventListener('editing-changed', e => __editingComponentChanged(e));
+            component.addEventListener('add-segment-variation', e => _addSegmentVariation(e));
+          }
+          while (child = parent.firstChild) {
+            parent.removeChild(child);
+          }
+          if (type) {
+            component = document.createElement(type.componentName);
+            component.id = 'component';
+            component.removeEventListener('editing-changed', e => __editingComponentChanged(e));
+            component.removeEventListener('add-segment-variation', e => _addSegmentVariation(e));
+            parent.appendChild(component);
+          }
+        }
+      }
+
+      _contentClicked() {
+        if (this.editing) return;
+
+        this.editing = true;
+      }
+
+      _addSegmentVariation(e, detail) {
+        var segmentData = detail.data;
+        var id = Math.floor(Math.random() * 2000000000) + 1;  // TODO: this would come from loading when uploading it
+        this.segment.variations.splice(this._variationIndex + 1, 0, {id: id, data: segmentData});
+        this._variationIndex = this._variationIndex + 1;
+        this.editing = false;
+
+        this.__updatingVariation = true;
+        this.variationId = id;
+        this.__updatingVariation = false;
+      }
+
+      __variationIdChanged(id) {
+        if (!this.segment || this.__updatingVariation) return;
+
         this.__updatingVariation = true;
 
-        this._variationId = variation.id;
+        var index = -1;
+        var variations = this.segment.variations;
+        for (var i = 0; i < variations.length; i++) {
+          if (variations[i].id == id) {
+            index = i;
+            break;
+          }
+        }
+        if (index < 0) {
+          index = 0;
+          this.variationId = variations[0].id;
+        }
+        this._variationIndex = index;
 
         this.__updatingVariation = false;
       }
-    },
 
-    _firstVariation: function(index) {
-      return index === 0;
-    },
+      __editingChanged(value) {
+        var component = this.shadowRoot.querySelector('#component');
+        if (component) {
+          component.editing = value;
+          this.dispatchEvent(new CustomEvent('editing-segment-changed', {detail: {value: value, segment: this.segment}, bubbles: true, composed: true}));
+        }
+      }
 
-    _lastVariation: function(index) {
-      return !this.segment || !this.segment.variations || index === this.segment.variations.length - 1;
-    },
+      __editingComponentChanged() {
+        Polymer.Async.microTask.run(() => this.__updateEditingFromComponent());
+      }
 
-    _canDelete: function(first, last) {
-      return !first || !last;
-    },
+      __updateEditingFromComponent() {
+        var component = this.shadowRoot.querySelector('#component');
+        if (!component || this.editing === component.editing) return;
 
-    _fireDeleteTapped: function() {
-      this.fire('delete-tapped', {segment: this.segment});
-    },
+        this.editing = component.editing;
+        if (!this.editing) {
+          component.notifyPath('data');
+          // TODO: should be able to remove after update to Polymer 2.0
+          component._dataChanged(component.data);
+        }
+      }
 
-    _fireMoveUpTapped: function() {
-      this.fire('move-up-tapped', {segment: this.segment});
-    },
+      __variationIndexChanged(index) {
+        if (!this.segment) return;
 
-    _fireMoveDownTapped: function() {
-      this.fire('move-down-tapped', {segment: this.segment});
-    },
-  });
+        var variation = this.segment.variations[index];
+        var component = this.shadowRoot.querySelector('#component');
+        if (component) {
+          component.set('data', variation.data);
+          // TODO: don't set height percentage, let full image size be visible
+          component.set('heightPercent', '56.25%');
+        }
+
+        if (!this.__updatingVariation) {
+          this.__updatingVariation = true;
+
+          this._variationId = variation.id;
+
+          this.__updatingVariation = false;
+        }
+      }
+
+      _firstVariation(index) {
+        return index === 0;
+      }
+
+      _lastVariation(index) {
+        return !this.segment || !this.segment.variations || index === this.segment.variations.length - 1;
+      }
+
+      _canDelete(first, last) {
+        return !first || !last;
+      }
+
+      _fireDeleteTapped() {
+        this.dispatchEvent(new CustomEvent('delete-tapped', {detail: {segment: this.segment}, bubbles: true, composed: true}));
+      }
+
+      _fireMoveUpTapped() {
+        this.dispatchEvent(new CustomEvent('move-up-tapped', {detail: {segment: this.segment}, bubbles: true, composed: true}));
+      }
+
+      _fireMoveDownTapped() {
+        this.dispatchEvent(new CustomEvent('move-down-tapped', {detail: {segment: this.segment}, bubbles: true, composed: true}));
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeSegmentContainer.is, CTreeSegmentContainer);
   </script>
 </dom-module>

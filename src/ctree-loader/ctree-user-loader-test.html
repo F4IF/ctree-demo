@@ -43,29 +43,31 @@ this license.
     LOAD_DELAY: 2500,
   };
 
-  Polymer.CTreeUserLoader = Polymer({
-    is: 'ctree-user-loader-test',
+  class CTreeUserLoader extends Polymer.mixinBehaviors([Polymer.CTreeLoaderBehavior], Polymer.Element) {
 
-    behaviors: [
-      Polymer.CTreeLoaderBehavior,
-    ],
+    static get is() { return 'ctree-user-loader-test'; }
 
-    properties: {
-    },
+    static get properties() {
+      return {};
+    }
 
-    _urlChanged: function(url) {
+    _urlChanged(url) {
       // do nothing for test loader
-    },
+    }
 
-    _cTreeDataChanged: function(cTreeData) {
+    _cTreeDataChanged(cTreeData) {
       this.cTreeData = cTreeData;
       // TODO: set/clear data as needed
-    },
+    }
 
-    _userChanged: function(user) {
+    _userChanged(user) {
       // do nothing for test loader
-    },
-  });
+    }
+  }
+  Polymer.CTreeUserLoader = CTreeUserLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeUserLoader.is, CTreeUserLoader);
 
 })();
 

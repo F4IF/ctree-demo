@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
@@ -61,20 +61,26 @@ this license.
   </template>
 
   <script>
-    Polymer({
-      is: 'ctree-structure-list-node-list',
-      properties: {
-        elementId: {
-          type: Number,
-          observer: '_elementIdChanged'
-        }
-      },
-      loadChildren: function() {
+    class CTreeStructureListNodeList extends Polymer.Element {
+
+      static get is() { return 'ctree-structure-list-node-list'; }
+
+      static get properties() {
+        return {
+          elementId: {
+            type: Number,
+            observer: '_elementIdChanged'
+          }
+        };
+      }
+
+      loadChildren() {
         this.$.expand.style.display = "none";
         this.$.spinner.style.display = "inline-block";
         // TODO: load more children
-      },
-      _elementIdChanged: function(elementId) {
+      }
+
+      _elementIdChanged(elementId) {
         var parent = ctreeElements[elementId];
         if (parent) {
           var childContainer = this.$.children;
@@ -94,6 +100,9 @@ this license.
           this.$.expand.style.display = parent.childrenSearchComplete ? "none" : "inline-block";
         }
       }
-    });
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeStructureListNodeList.is, CTreeStructureListNodeList);
   </script>
 </dom-module>

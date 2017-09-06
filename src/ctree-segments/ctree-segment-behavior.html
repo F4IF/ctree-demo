@@ -28,6 +28,7 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
 
 <script>
 'use strict';
@@ -98,19 +99,19 @@ Polymer.CTreeSegmentBehavior = {
     this.validChangeMade = false;
     // TODO: prompt user to select reason for new segment (list of default reasons from behavior & custom reasons from type)
     // TODO: may be able to remove this once saving variation to loader
-    this.fire('add-segment-variation', {data: data});
+    this.dispatchEvent(new CustomEvent('add-segment-variation', {detail: {data: data}, bubbles: true, composed: true}));
   },
 
   _delayEditUpdate: function() {
-    this.cancelAsync(this.__editUpdateHandle);
-    this.__editUpdateHandle = this.async(() => {
+    Polymer.Async.microTask.cancel(this.__editUpdateHandle);
+    this.__editUpdateHandle = Polymer.Async.microTask.run(() => {
       this.__editUpdateHandle = undefined;
       this._editUpdate();
     }, this._editUpdateDelay);
   },
 
   _cancelEditUpdate: function() {
-    this.cancelAsync(this.__editUpdateHandle);
+    Polymer.Async.microTask.cancel(this.__editUpdateHandle);
   },
 
   _editUpdate: function() {

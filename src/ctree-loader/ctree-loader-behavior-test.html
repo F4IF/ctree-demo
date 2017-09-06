@@ -451,7 +451,7 @@ this license.
       this._setSegmentTypes(cTreeData.segmentTypes);
 
       if (createCTree) {
-        this.async(function() {
+        setTimeout(() => {
           // TODO: enable async (wait to load items until done loading types)
           // types (can replace/alter to test other type configurations)
           var rootPath = document.createElement('iron-meta').byKey('rootPath');

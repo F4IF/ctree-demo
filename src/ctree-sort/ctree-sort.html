@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../ctree-icons/ctree-icons.html">
@@ -51,20 +51,26 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-sort',
+    class CTreeSort extends Polymer.Element {
 
-    properties: {
-      type: {
-        type: String,
-        notify: true,
-      },
+      static get is() { return 'ctree-sort'; }
 
-      ascending: {
-        type: Boolean,
-        notify: true,
-      },
-    },
-  });
+      static get properties() {
+        return {
+          type: {
+            type: String,
+            notify: true,
+          },
+
+          ascending: {
+            type: Boolean,
+            notify: true,
+          },
+        };
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeSort.is, CTreeSort);
   </script>
 </dom-module>

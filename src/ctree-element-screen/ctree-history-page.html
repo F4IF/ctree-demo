@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
 <!-- internal -->
@@ -93,54 +93,60 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-history-page',
+    class CTreeHistoryPage extends Polymer.Element {
 
-    properties: {
-      items: {
-        type: Array,
-        value: [
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-        ],
-      },
+      static get is() { return 'ctree-history-page'; }
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_onDescriptionConfigChanged',
-      },
+      static get properties() {
+        return {
+          items: {
+            type: Array,
+            value: [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+          },
 
-      contributor: {
-        type: Object,
-        observer: '_contributorChanged',
-      },
-    },
+          descriptionConfigId: {
+            type: Number,
+            observer: '_onDescriptionConfigChanged',
+          },
 
-    _onDescriptionConfigChanged: function(descriptionConfigId) {
-      // TODO: refresh history list
-      // TODO: consider how to eliminate network cost of case when change both description config and contributor
-    },
-
-    _contributorChanged: function(contributor) {
-      // TODO: refresh history list
-    },
-
-    _onFeedbackResized: function() {
-      this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
-    },
-
-    _onItemResized: function(e) {
-      item = e.target.item;
-      if (item) {
-        this.$.feedback.updateSizeForItem(item);
+          contributor: {
+            type: Object,
+            observer: '_contributorChanged',
+          },
+        };
       }
-    },
-  });
+
+      _onDescriptionConfigChanged(descriptionConfigId) {
+        // TODO: refresh history list
+        // TODO: consider how to eliminate network cost of case when change both description config and contributor
+      }
+
+      _contributorChanged(contributor) {
+        // TODO: refresh history list
+      }
+
+      _onFeedbackResized() {
+        this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
+      }
+
+      _onItemResized(e) {
+        item = e.target.item;
+        if (item) {
+          this.$.feedback.updateSizeForItem(item);
+        }
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeHistoryPage.is, CTreeHistoryPage);
   </script>
 </dom-module>

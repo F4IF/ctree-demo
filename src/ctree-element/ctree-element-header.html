@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
@@ -118,88 +118,96 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-element-header',
+    class CTreeElementHeader extends Polymer.Element {
 
-    /**
-     * Fired when a the contributors are tapped.
-     *
-     * @event contributors-tapped
-     */
+      static get is() { return 'ctree-element-header'; }
 
-    /**
-     * Fired when a the related elements are tapped.
-     *
-     * @event related-tapped
-     */
+      /**
+       * Fired when a the contributors are tapped.
+       *
+       * @event contributors-tapped
+       */
 
-    properties: {
-      noclick: {
-        type: Boolean,
-        reflectToAttribute: true,
-        value: false,
-        observer: '_updateClickable',
-      },
+      /**
+       * Fired when a the related elements are tapped.
+       *
+       * @event related-tapped
+       */
 
-      norelations: {
-        type: Boolean,
-        reflectToAttribute: true,
-        value: false,
-        observer: '_updateRelationsVisible',
-      },
-    },
+      static get properties() {
+        return {
+          noclick: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+            observer: '_updateClickable',
+          },
 
-    ready: function() {
-      // TODO: remove test images
-      var imagePath = document.createElement('iron-meta').byKey('rootPath') + "/images/";
-      this.$.designer.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
-      var contributors = this.$.contributors.children;
-      for (var i = 0; i < contributors.length; i++) {
-        var contributor = contributors[i];
-        if (contributor.tagName == 'DIV') {
-          contributor.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
+          norelations: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+            observer: '_updateRelationsVisible',
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+
+        // TODO: remove test images
+        var imagePath = document.createElement('iron-meta').byKey('rootPath') + "/images/";
+        this.$.designer.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
+        var contributors = this.$.contributors.children;
+        for (var i = 0; i < contributors.length; i++) {
+          var contributor = contributors[i];
+          if (contributor.tagName == 'DIV') {
+            contributor.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
+          }
         }
       }
-    },
 
-    designerClicked: function() {
-      if (this.noclick) return;
+      designerClicked() {
+        if (this.noclick) return;
 
-      // TODO: populate with designer data
-      this.$.userDialog.open();
-    },
-
-    contributorsClicked: function() {
-      if (this.noclick) return;
-
-      this.fire('contributors-tapped');
-    },
-
-    relatedClicked: function() {
-      if (this.noclick) return;
-
-      this.fire('related-tapped');
-    },
-
-    _updateClickable: function(noClick) {
-      this.$.designer.raised = !noClick;
-      this.$.designer.noink = noClick;
-      this.$.designer.style.cursor = noClick ? "default" : "pointer";
-      if (noClick) {
-        // HACK: force shadow when noclick set since we're removing raised
-        this.$.designer.style.boxShadow = "0 3px 4px 0 rgba(0, 0, 0, 0.14),"
-                                        + "0 1px 8px 0 rgba(0, 0, 0, 0.12),"
-                                        + "0 3px 3px -2px rgba(0, 0, 0, 0.4)";
+        // TODO: populate with designer data
+        this.$.userDialog.open();
       }
-      this.$.contributors.firstChild.noink = noClick;
-      this.$.contributors.style.cursor = noClick ? "default" : "pointer";
-      this.$.related.firstChild.noink = noClick;
-      this.$.related.style.cursor = noClick ? "default" : "pointer";
-    },
 
-    _updateRelationsVisible: function(noRelations) {
-      this.$.related.style.display = noRelations ? "none" : "inline-block";
+      contributorsClicked() {
+        if (this.noclick) return;
+
+        this.dispatchEvent(new CustomEvent('contributors-tapped', {bubbles: true, composed: true}));
+      }
+
+      relatedClicked() {
+        if (this.noclick) return;
+
+        this.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
+      }
+
+      _updateClickable(noClick) {
+        this.$.designer.raised = !noClick;
+        this.$.designer.noink = noClick;
+        this.$.designer.style.cursor = noClick ? "default" : "pointer";
+        if (noClick) {
+          // HACK: force shadow when noclick set since we're removing raised
+          this.$.designer.style.boxShadow = "0 3px 4px 0 rgba(0, 0, 0, 0.14),"
+                                          + "0 1px 8px 0 rgba(0, 0, 0, 0.12),"
+                                          + "0 3px 3px -2px rgba(0, 0, 0, 0.4)";
+        }
+        this.$.contributors.firstChild.noink = noClick;
+        this.$.contributors.style.cursor = noClick ? "default" : "pointer";
+        this.$.related.firstChild.noink = noClick;
+        this.$.related.style.cursor = noClick ? "default" : "pointer";
+      }
+
+      _updateRelationsVisible(noRelations) {
+        this.$.related.style.display = noRelations ? "none" : "inline-block";
+      }
     }
-  });
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeElementHeader.is, CTreeElementHeader);
   </script>
 </dom-module>

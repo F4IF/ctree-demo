@@ -66,75 +66,77 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-details-page',
+    class CTreeDetailsPage extends Polymer.mixinBehaviors([Polymer.CTreeElementDescriptionBehavior], Polymer.Element) {
 
-    /**
-     * Fired when a the contributors in the header are tapped.
-     *
-     * @event contributors-tapped
-     */
+      static get is() { return 'ctree-details-page'; }
 
-    /**
-     * Fired when a the related elements in the header are tapped.
-     *
-     * @event related-tapped
-     */
-
-    /**
-     * Fired when a the feedback button is tapped for a segment.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
-     */
-
-    behaviors: [
-      Polymer.CTreeElementDescriptionBehavior,
-    ],
-
-    properties: {
       /**
-       * Segments data
+       * Fired when a the contributors in the header are tapped.
        *
-       * Structure:
-       *   [{
-       *     id: Number,
-       *     type: SegmentType,
-       *     variations: [{
-       *       id: Number,
-       *       data: dynamic,	// data type depends on segment type
-       *     }, ...],
-       *   }, ...],
+       * @event contributors-tapped
        */
-      segments: {
-        type: Array,
-        observer: '__segmentsChanged',
-      },
 
-      __tempSegments: Array,
-    },
+      /**
+       * Fired when a the related elements in the header are tapped.
+       *
+       * @event related-tapped
+       */
 
-    _descriptionChanged: function(description, descriptionSegments) {
-      this.segments = description.segments; // TODO: copy array using .slice() so we can mutate it separately?
-    },
+      /**
+       * Fired when a the feedback button is tapped for a segment.
+       *
+       * @event feedback-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+       */
 
-    _fireContributorsTapped: function() {
-      this.fire('contributors-tapped');
-    },
+      static get properties() {
+        return {
+          /**
+           * Segments data
+           *
+           * Structure:
+           *   [{
+           *     id: Number,
+           *     type: SegmentType,
+           *     variations: [{
+           *       id: Number,
+           *       data: dynamic,	// data type depends on segment type
+           *     }, ...],
+           *   }, ...],
+           */
+          segments: {
+            type: Array,
+            observer: '__segmentsChanged',
+          },
 
-    _fireRelatedTapped: function() {
-      this.fire('related-tapped');
-    },
-
-    __segmentsChanged: function(e, detail) {
-      if (this.segments) {
-        this.__tempSegments = this.segments.slice();
-      } else {
-        this.__tempSegments = this.segments;
+          __tempSegments: Array,
+        };
       }
-    },
 
-    // TODO: before close element or switch description check if tempSegments changed, and if ask user if they want to save their changes
-  });
+      _descriptionChanged(description, descriptionSegments) {
+        this.segments = description.segments; // TODO: copy array using .slice() so we can mutate it separately?
+      }
+
+      _fireContributorsTapped() {
+        this.dispatchEvent(new CustomEvent('contributors-tapped', {bubbles: true, composed: true}));
+      }
+
+      _fireRelatedTapped() {
+        this.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
+      }
+
+      __segmentsChanged(e, detail) {
+        if (this.segments) {
+          this.__tempSegments = this.segments.slice();
+        } else {
+          this.__tempSegments = this.segments;
+        }
+      }
+
+      // TODO: before close element or switch description check if tempSegments changed, and if ask user if they want to save their changes
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeDetailsPage.is, CTreeDetailsPage);
   </script>
 </dom-module>

@@ -99,7 +99,7 @@ this license.
     },
 
     _closeClicked: function() {
-      this.fire('close-tapped');
+      this.dispatchEvent(new CustomEvent('close-tapped', {bubbles: true, composed: true}));
     },
   };
   </script>

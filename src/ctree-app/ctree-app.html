@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
@@ -73,6 +73,9 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         display: block;
         --app-primary-color: #5F9F00;
         --app-secondary-color: black;
+      }
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
       }
       app-drawer app-toolbar {
         background-color: #4F7F00;
@@ -206,11 +209,11 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
     <app-drawer-layout fullbleed>
 
       <!-- Navigation drawer -->
-      <app-drawer id="navDrawer" class="nav-drawer" swipe-open>
+      <app-drawer slot="drawer" id="navDrawer" class="nav-drawer" swipe-open>
         <app-toolbar>cTrees</app-toolbar>
         <div class="nav-content">
           <paper-input label="Search" no-label-float>
-            <iron-icon icon="search" prefix></iron-icon>
+            <iron-icon icon="search" slot="prefix"></iron-icon>
           </paper-input>
 
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="all" role="navigation">
@@ -229,10 +232,10 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       </app-drawer>
 
       <app-header-layout id="mainLayout" has-scrolling-region>
-        <app-header fixed effects="waterfall">
+        <app-header slot="header" fixed effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div title>cTree.org</div>
+            <div main-title>cTree.org</div>
             <paper-icon-button icon="search" on-tap="showSearch"></paper-icon-button>
             <paper-icon-button icon="account-circle" on-tap="showAccountDialog"></paper-icon-button>
             <paper-icon-button icon="account-stats" on-tap="showAccountStats"></paper-icon-button>
@@ -300,94 +303,101 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
   </template>
 
   <script>
-    Polymer({
-      is: 'ctree-app',
+    class CTreeApp extends Polymer.Element {
 
-      properties: {
-        rootPath: {
-          type: String,
-          value: '',
-          observer: '_rootChanged',
-        },
+      static get is() { return 'ctree-app'; }
 
-        page: {
-          type: String,
-          observer: '_pageChanged',
-        },
+      static get properties() {
+        return {
+          rootPath: {
+            type: String,
+            value: '',
+            observer: '_rootChanged',
+          },
 
-        navList: Array,
+          page: {
+            type: String,
+            observer: '_pageChanged',
+          },
 
-        notifications: Array,
-      },
+          navList: Array,
 
-      observers: [
-        '_dialogParamChanged(queryParams.d)',
-        '_pathChanged(path)',
-        '_subpageChanged(subpage)',
-        '_loadingListItemsChanged(loadingListItems)',
-      ],
+          notifications: Array,
+        };
+      }
 
-      ready: function() {
+      static get observers() {
+        return [
+          '_dialogParamChanged(queryParams.d)',
+          '_pathChanged(path)',
+          '_subpageChanged(subpage)',
+          '_loadingListItemsChanged(loadingListItems)',
+        ];
+      }
+
+      ready() {
+        super.ready();
+
         this._updateNavList();
         // TODO:
-      },
+      }
 
-      showSearch: function() {
+      showSearch() {
         // TODO: initiate search input
-      },
+      }
 
-      showNotifications: function() {
+      showNotifications() {
         // TODO: show notifications in dialog below button when larger width (i.e. not on phones)
     	   this.$.notificationsDrawer.toggle();
-      },
+      }
 
-      notificationsDrawerTransitioned: function() {
+      notificationsDrawerTransitioned() {
         this.$.elementPreviewList.style.overflowY = this.$.notificationsDrawer.opened ? "hidden" : "auto";
-      },
+      }
 
-      clearNotifications: function() {
+      clearNotifications() {
         // TODO: clear all notifications & update notifications indicator in header
-      },
+      }
 
-      showAccountDialog: function() {
+      showAccountDialog() {
         var dialog = this.$.userDialog;
         // TODO: show account details in account dialog
         dialog.page = 'details';
         dialog.open();
-      },
+      }
 
-      showAccountStats: function() {
+      showAccountStats() {
         var dialog = this.$.userDialog;
         // TODO: show account stats in account dialog
         dialog.page = 'stats';
         dialog.open();
-      },
+      }
 
-      _rootChanged: function (path) {
+      _rootChanged(path) {
         this._updateNavList();
-      },
+      }
 
-      loadMoreListItems: function() {
+      loadMoreListItems() {
         if (this.$.importLoader.loaded) {
           this.$.loader.loadCurrent();
         } else {
           this.$.importLoader.load();
         }
-      },
+      }
 
-      _importLoaderLoadingChanged: function(e) {
+      _importLoaderLoadingChanged(e) {
         if (!e.detail.value && this.$.importLoader.loaded
             && !this.$.importPreview.loading && !this.$.importPreview.loaded) {
           this.$.importPreview.load();
           this.loadMoreListItems();
         }
-      },
+      }
 
-      _loadingListItemsChanged: function(loadingListItems) {
+      _loadingListItemsChanged(loadingListItems) {
         this.$.scrollThreshold.clearTriggers();
-      },
+      }
 
-      _updateNavList: function() {
+      _updateNavList() {
         // TODO: make conditional on if search is active and what search text is
         /*if (this.navList) {
           this.navList.length = 0;
@@ -404,27 +414,29 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
           newNavList.push({name: name, data: pageData});
         }
         this.navList = newNavList;
-      },
+      }
 
-      _dialogParamChanged: function(dialogParam) {
+      _dialogParamChanged(dialogParam) {
         if (dialogParam === 'element') {
           this.$.elementDialog.open();
         } else if (dialogParam === 'user') {
           this.$.userDialog.open();
         }
-      },
+      }
 
-      _pathChanged: function(fullPath) {
+      _pathChanged(fullPath) {
         if (fullPath.startsWith(this.rootPath)) {
           fullPath = fullPath.substr(this.rootPath.length);
         }
         var pathSegments = fullPath.split('/');
         if (pathSegments.length > 1) {
+          var page;
           if (ctreeSavedPages.indexOf(pathSegments[1]) < 0) {
             page = ctreeSavedPages[0];
           } else {
             page = pathSegments[1];
           }
+          var subpage;
           if (pathSegments.length > 2) {
             subpage = pathSegments[2];
             if (subpage != 'bookmarked' && subpage != 'history') {
@@ -443,13 +455,13 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         if (forceSubpageChanged) {
           this._subpageChanged(subpage);
         }
-      },
+      }
 
-      _pageChanged: function(page) {
+      _pageChanged(page) {
         this.ctreeKey = this.rootPath + (page && page.length > 0 ? '/' + page : '');
-      },
+      }
 
-      _subpageChanged: function(subpage) {
+      _subpageChanged(subpage) {
         this.$.loader.currentName = subpage;
         this.$.scrollThreshold.clearTriggers();
         // This must be delayed to prevent issue with rootPath being set after trying to load items, which triggers loading component
@@ -458,29 +470,32 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
             this.loadMoreListItems();
           }
         });
-      },
+      }
 
       // TODO: respond to element changes via the ctree element loader
-      _bookmarkChanged: function(event) {
+      _bookmarkChanged(event) {
         var element = event.detail.element;
         // TODO: remove event from bookmarked list (may not be found)
         if (event.detail.bookmarked) {
           // TODO: add event to top of bookmarked list
         }
         // TODO: start checking for duplicates as loading bookmarked items (may have added manually)
-      },
+      }
 
-      _getTempNotifications: function() {
+      _getTempNotifications() {
     	  // TODO:
     	  return [];
-      },
+      }
 
-      _addElement: function() {
+      _addElement() {
         var dialog = this.$.elementDialog;
         // TODO: initialize dialog for adding new element (edit title, edit type, get suggested elements)
         dialog.element = undefined;
         dialog.open();
       }
-    });
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeApp.is, CTreeApp);
   </script>
 </dom-module>

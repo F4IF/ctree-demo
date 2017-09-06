@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -146,71 +146,77 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-contributors-page',
+    class CTreeContributorsPage extends Polymer.Element {
 
-   /**
-    * Fired when a the history summary for a contributor is tapped.
-    *
-    * @event history-tapped
-    * @param {{
-    *   contributor: contributorData, // detail Contains data for contributor whos history summary was tapped.
-    *   generalHistory: Boolean       // true if the general element history summary was tapped.
-    * }}
-    */
+      static get is() { return 'ctree-contributors-page'; }
 
-    properties: {
-      contributors: {
-        type: Array,
-        value: ["c1", "c2", "c3", "c4", "c5"],
-      },
-      val1: {
-        type: String,
-        value: 'val1',
-      },
-      val2: {
-        type: String,
-        value: 'val2',
-      },
-      val3: {
-        type: String,
-        value: 'val3',
-      },
-      val4: {
-        type: String,
-        value: 'val4',
-      },
-      val5: {
-        type: String,
-        value: 'val5',
-      },
-      val6: {
-        type: String,
-        value: 'val6',
-      },
+      /**
+       * Fired when a the history summary for a contributor is tapped.
+       *
+       * @event history-tapped
+       * @param {{
+       *   contributor: contributorData, // detail Contains data for contributor whos history summary was tapped.
+       *   generalHistory: Boolean       // true if the general element history summary was tapped.
+       * }}
+       */
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_onDescriptionConfigChanged',
-      },
-    },
+      static get properties() {
+        return {
+          contributors: {
+            type: Array,
+            value: ["c1", "c2", "c3", "c4", "c5"],
+          },
+          val1: {
+            type: String,
+            value: 'val1',
+          },
+          val2: {
+            type: String,
+            value: 'val2',
+          },
+          val3: {
+            type: String,
+            value: 'val3',
+          },
+          val4: {
+            type: String,
+            value: 'val4',
+          },
+          val5: {
+            type: String,
+            value: 'val5',
+          },
+          val6: {
+            type: String,
+            value: 'val6',
+          },
 
-    contributorTapped: function(e) {
-      // TODO: fill with contributor's user data
-      this.$.userDialog.open();
-    },
+          descriptionConfigId: {
+            type: Number,
+            observer: '_onDescriptionConfigChanged',
+          },
+        };
+      }
 
-    variationContributionsTapped: function(e) {
-      this.fire('history-tapped', {contributor: e.model.contributor, generalHistory: false});
-    },
+      contributorTapped(e) {
+        // TODO: fill with contributor's user data
+        this.$.userDialog.open();
+      }
 
-    elementContributionsTapped: function(e) {
-      this.fire('history-tapped', {contributor: e.model.contributor, generalHistory: true});
-    },
+      variationContributionsTapped(e) {
+        this.dispatchEvent(new CustomEvent('history-tapped', {detail: {contributor: e.model.contributor, generalHistory: false}, bubbles: true, composed: true}));
+      }
 
-    _onDescriptionConfigChanged: function(descriptionConfigId) {
-      // TODO: refresh contributor list
-    },
-  });
+      elementContributionsTapped(e) {
+        this.dispatchEvent(new CustomEvent('history-tapped', {detail: {contributor: e.model.contributor, generalHistory: true}, bubbles: true, composed: true}));
+      }
+
+      _onDescriptionConfigChanged(descriptionConfigId) {
+        // TODO: refresh contributor list
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeContributorsPage.is, CTreeContributorsPage);
   </script>
 </dom-module>

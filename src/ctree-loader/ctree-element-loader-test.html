@@ -43,124 +43,123 @@ this license.
     LOAD_DELAY: 2500,
   };
 
-  Polymer.CTreeElementLoader = Polymer({
-    is: 'ctree-element-loader-test',
+  class CTreeElementLoader extends Polymer.mixinBehaviors([Polymer.CTreeLoaderBehavior], Polymer.Element) {
 
-    behaviors: [
-      Polymer.CTreeLoaderBehavior,
-    ],
+    static get is() { return 'ctree-element-loader-test'; }
 
-    properties: {
-      /**
-       * List item to load data for.
-       *
-       * Structure:
-       *   {
-       *     element: Element,
-       *     feedback: Feedback,
-       *     descriptionConfig: Number,
-       *     descriptionSegments: [Number],
-       *     commentCode: Number,
-       *     commentData: Object,	// type depends on commentCode
-       *   }
-       */
-      listItem: {
-        type: Object,
-        observer: '_listItemChanged',
-      },
+    static get properties() {
+      return {
+        /**
+         * List item to load data for.
+         *
+         * Structure:
+         *   {
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: Number,
+         *     descriptionSegments: [Number],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }
+         */
+        listItem: {
+          type: Object,
+          observer: '_listItemChanged',
+        },
 
-      maxCommentLength: {
-        type: Number,
-        value: 100,
-      },
+        maxCommentLength: {
+          type: Number,
+          value: 100,
+        },
 
-      /**
-       * Comment generated from list item data.  Some additonal content may need
-       * to be loaded before the comment can be generated.
-       */
-      itemComment: {
-        type: String,
-        notify: true,
-      },
+        /**
+         * Comment generated from list item data.  Some additonal content may need
+         * to be loaded before the comment can be generated.
+         */
+        itemComment: {
+          type: String,
+          notify: true,
+        },
 
-      /**
-       * Name of icon or URL of image to accompany item comment.
-       */
-      itemCommentIcon: {
-        type: String,
-        notify: true,
-      },
+        /**
+         * Name of icon or URL of image to accompany item comment.
+         */
+        itemCommentIcon: {
+          type: String,
+          notify: true,
+        },
 
-      /**
-       * Element to load data for.  Events will be fired for this element as
-       * data is loaded into it.
-       *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: ElementType,
-       *     title: String,
-       *     parents: [Numbers],
-       *     children: [Numbers],
-       *     childrenSearchComplete: Boolean,
-       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-       *     description: [{
-       *       id: Number,
-       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-       *       segments: [{
-       *         id: Number,
-       *         type: SegmentType,
-       *         variations: [{
-       *           id: Number,
-       *           data: dynamic,	// data type depends on segment type
-       *         }, ...],
-       *       }, ...],
-       *     }, ...],
-       *     feedback: [{
-       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-       *       text: String,
-       *     }, ...],
-       *     bookmarked: Boolean,
-       *   }
-       */
-      element: {
-        type: Object,
-        notify: true,
-        observer: '_elementChanged',
-      },
+        /**
+         * Element to load data for.  Events will be fired for this element as
+         * data is loaded into it.
+         *
+         * Structure:
+         *   {
+         *     id: Number,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Numbers],
+         *     children: [Numbers],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: Number,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: Number,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: Number,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }
+         */
+        element: {
+          type: Object,
+          notify: true,
+          observer: '_elementChanged',
+        },
 
-      elementId: {
-        type: Number,
-        observer: '_elementIdChanged',
-      },
-    },
+        elementId: {
+          type: Number,
+          observer: '_elementIdChanged',
+        },
+      };
+    }
 
-    _listItemChanged: function(listItem) {
+    _listItemChanged(listItem) {
       if (!listItem) return;
 
       this.element = listItem.element;
       this.itemComment = undefined;
       this.itemCommentIcon = undefined;
       this._updateComment();
-    },
+    }
 
-    _elementChanged: function(element) {
+    _elementChanged(element) {
       if (!element) return;
 
       if (this.listItem && this.listItem.element !== element) {
         this.listItem = undefined;
       }
       this.elementId = element.id;
-    },
+    }
 
-    _elementIdChanged: function(elementId) {
+    _elementIdChanged(elementId) {
       if (!elementId || (this.element && elementId == this.element.id) || !this._cTreeData) return;
 
       var cTreeData = this._cTreeData;
       this.element = cTreeData.elements[elementId];
 
       if (!this.element) {
-        this.async(function() {
+        setTimeout(() => {
           if (this.element || this.elementId != elementId) return; // element or elementId updated
 
           // TODO: this should simulate reality better by only returning the pieces of the element needed for suggestedItem (id, type, name, description config, description segments)
@@ -172,9 +171,9 @@ this license.
           }
         }, Test.LOAD_DELAY);
       }
-    },
+    }
 
-    _updateComment: function() {
+    _updateComment() {
       var item = this.listItem;
       if (!item.commentCode) return;
 
@@ -364,21 +363,25 @@ this license.
         case CATEGORY.SIMILAR_TO: this.itemComment = 'Similar to ' + subjectData; break;
         case CATEGORY.OPPOSING: this.itemComment = 'Opposing ' + subjectData; break;
       }
-    },
+    }
 
-    _urlChanged: function(url) {
+    _urlChanged(url) {
       // do nothing for test loader
-    },
+    }
 
-    _cTreeDataChanged: function(cTreeData) {
+    _cTreeDataChanged(cTreeData) {
       this.cTreeData = cTreeData;
       // TODO: set/clear data as needed
-    },
+    }
 
-    _userChanged: function(user) {
+    _userChanged(user) {
       // do nothing for test loader
-    },
-  });
+    }
+  }
+  Polymer.CTreeElementLoader = CTreeElementLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeElementLoader.is, CTreeElementLoader);
 
 })();
 

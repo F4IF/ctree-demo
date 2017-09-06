@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
 <script>
@@ -35,47 +35,50 @@ this license.
 
   'use strict';
 
-  Polymer({
-    is: 'ctree-import',
+  class CTreeImport extends Polymer.Element {
 
-    properties: {
-      href: {
-        type: String,
-        observer: '_hrefChanged',
-      },
+    static get is() { return 'ctree-import'; }
 
-      loading: {
-        type: Boolean,
-        notify: true,
-        observer: '_loadingChanged',
-      },
+    static get properties() {
+      return {
+        href: {
+          type: String,
+          observer: '_hrefChanged',
+        },
 
-      loaded: {
-        type: Boolean,
-        notify: true,
-        readOnly: true,
-      },
-    },
+        loading: {
+          type: Boolean,
+          notify: true,
+          observer: '_loadingChanged',
+        },
 
-    load: function() {
+        loaded: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+      };
+    }
+
+    load() {
       if (!this.loading && !this.loaded) {
         this.loading = true;
       }
-    },
+    }
 
-    _hrefChanged: function() {
+    _hrefChanged() {
       this.loading = false;
       this._setLoaded(false);
-    },
+    }
 
-    _loadingChanged: function(loading, previousLoading) {
+    _loadingChanged(loading, previousLoading) {
       if (!loading || previousLoading) return;
 
       if (!this.href || this.href.length === 0) {
         this.loading = false;
       } else {
         var href = this.href;
-        this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + href), () => {
+        Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + href), () => {
           if (this.href === href) {
             this._setLoaded(true);
             this.loading = false;
@@ -84,8 +87,11 @@ this license.
           this.loading = false;
         }, true);
       }
-    },
-  });
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeImport.is, CTreeImport);
 
 })();
 

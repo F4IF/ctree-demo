@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../ctree-icons/ctree-icons.html">
@@ -56,38 +56,44 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-feedback-bar',
+    class CTreeFeedbackBar extends Polymer.Element {
 
-    /**
-     * Fired when a the feedback button is tapped.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
-     */
+      static get is() { return 'ctree-feedback-bar'; }
 
-    properties: {
       /**
-       * Segments data
+       * Fired when a the feedback button is tapped.
        *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: SegmentType,
-       *     variations: [{
-       *       id: Number,
-       *       data: dynamic,	// data type depends on segment type
-       *     }, ...],
-       *   }
+       * @event feedback-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
        */
-      segment: {
-        type: Object,
-      },
-    },
 
-    _fireFeedbackTapped: function() {
-      this.fire('feedback-tapped', {segment: this.segment});
-    },
-  });
+      static get properties() {
+        return {
+          /**
+           * Segments data
+           *
+           * Structure:
+           *   {
+           *     id: Number,
+           *     type: SegmentType,
+           *     variations: [{
+           *       id: Number,
+           *       data: dynamic,	// data type depends on segment type
+           *     }, ...],
+           *   }
+           */
+          segment: {
+            type: Object,
+          },
+        };
+      }
+
+      _fireFeedbackTapped() {
+        this.dispatchEvent(new CustomEvent('feedback-tapped', {detail: {segment: this.segment}, bubbles: true, composed: true}));
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeFeedbackBar.is, CTreeFeedbackBar);
   </script>
 </dom-module>
