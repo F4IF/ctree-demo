@@ -43,7 +43,7 @@ this license.
     LOAD_DELAY: 2500,
   };
 
-  class CTreeElementLoader extends Polymer.mixinBehaviors([Polymer.CTreeLoaderBehavior], Polymer.Element) {
+  class CTreeElementLoader extends CTree.LoaderBehavior {
 
     static get is() { return 'ctree-element-loader-test'; }
 
@@ -177,8 +177,8 @@ this license.
       var item = this.listItem;
       if (!item.commentCode) return;
 
-      var SUBJECT = Polymer.CTreeLoader.COMMENT_SUBJECT;
-      var CATEGORY = Polymer.CTreeLoader.COMMENT_CATEGORY;
+      var SUBJECT = CTree.Loader.COMMENT_SUBJECT;
+      var CATEGORY = CTree.Loader.COMMENT_CATEGORY;
       var subjectCode = item.commentCode % 100;
       var categoryCode = item.commentCode - subjectCode;
       var subjectData;

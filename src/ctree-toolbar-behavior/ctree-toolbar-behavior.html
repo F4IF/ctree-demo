@@ -35,7 +35,12 @@ this license.
 <script>
   'use strict';
 
-  Polymer.CTreeToolbarBehavior = {
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
+  CTree.ToolbarBehavior = class extends Polymer.Element {
 
     /**
      * Fired when the close button is tapped.
@@ -43,46 +48,48 @@ this license.
      * @event close-tapped
      */
 
-    properties: {
-      /**
-       * If true, don't show close button.
-       */
-      noclose: Boolean,
+    static get properties() {
+      return {
+        /**
+         * If true, don't show close button.
+         */
+        noclose: Boolean,
 
-      _toggleButtonIcon: String,
+        _toggleButtonIcon: String,
 
-      /**
-       * Override to contain String icon names.
-       *
-       * Example value:
-       *   ['icon-border', 'icon']
-       */
-      _toggleButtonIconNames: Array,
-    },
+        /**
+         * Override to contain String icon names.
+         *
+         * Example value:
+         *   ['icon-border', 'icon']
+         */
+        _toggleButtonIconNames: Array,
+      };
+    }
 
-    _onToggleButton: function() {
+    _onToggleButton() {
       // Implement to toggle value
       //
       // Example:
       //   this._toggleValue = !this._toggleValue;
-    },
+    }
 
-    _getToggleButtonValue: function() {
+    _getToggleButtonValue() {
       // Implement to return toggle value
       //
       // Example;
       //   return this._toggleValue;
       return false;
-    },
+    }
 
-    _toggleButton: function() {
+    _toggleButton() {
       if (this._toggleButtonIconNames) {
         this._onToggleButton();
         this._updateToggleButtonIcon();
       }
-    },
+    }
 
-    _updateToggleButtonIcon: function() {
+    _updateToggleButtonIcon() {
       var value = this._getToggleButtonValue();
       var isDefined = this._toggleButtonIconNames;
       var valueType = typeof value;
@@ -92,15 +99,15 @@ this license.
         isDefined = false;
       }
       this._toggleButtonIcon = isDefined ? this._toggleButtonIconNames[value] : '';
-    },
+    }
 
-    _showShare: function(button) {
+    _showShare(button) {
       // TODO: show share dialog
-    },
+    }
 
-    _closeClicked: function() {
+    _closeClicked() {
       this.dispatchEvent(new CustomEvent('close-tapped', {bubbles: true, composed: true}));
-    },
+    }
   };
   </script>
 </dom-module>

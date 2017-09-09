@@ -38,7 +38,9 @@ this license.
  * for procedurally accessing static methods for a component type.  Commonly
  * implemented static methods are documented below.
  */
-var CTreeSegments = {};
+ if (!window.CTreeSegments) {
+   window.CTreeSegments = {};
+ }
 
 /**
  * static getText(data)
@@ -51,7 +53,12 @@ var CTreeSegments = {};
  * @return {String}      Text interpretation of data
  */
 
-Polymer.CTreeSegmentBehavior = {
+// Create my namespace, if it doesn't exist
+if (!window.CTree) {
+  window.CTree = {};
+}
+
+CTree.SegmentBehavior = class extends Polymer.Element {
   /**
    * Notify segment container that a new variation should be added.
    *
@@ -59,64 +66,66 @@ Polymer.CTreeSegmentBehavior = {
    * @param {{data: variationData}} detail New segment variation data.
    */
 
-  properties: {
-    data: Object,
+  static get properties() {
+    return {
+      data: Object,
 
-    editing: {
-      type: Boolean,
-      value: false,
-      notify: true,
-    },
+      editing: {
+        type: Boolean,
+        value: false,
+        notify: true,
+      },
 
-    validChangeMade: {
-      type: Boolean,
-      value: false,
-    },
+      validChangeMade: {
+        type: Boolean,
+        value: false,
+      },
 
-    loadingChangeMade: {
-      type: Boolean,
-      value: false,
-    },
+      loadingChangeMade: {
+        type: Boolean,
+        value: false,
+      },
 
-    heightPercent: String,
+      heightPercent: String,
 
-    scale: {
-      type: String,
-      value: '100%',
-    },
+      scale: {
+        type: String,
+        value: '100%',
+      },
 
-    _editUpdateDelay: {
-      type: Number,
-      value: 800,
-    },
+      _editUpdateDelay: {
+        type: Number,
+        value: 800,
+      },
 
-    __editUpdateHandle: Number,
-  },
+      __editUpdateHandle: Number,
+    };
+  }
 
-  _addSegmentVariation: function(data) {
+  _addSegmentVariation(data) {
     if (!this.validChangeMade) return;
 
     this.validChangeMade = false;
     // TODO: prompt user to select reason for new segment (list of default reasons from behavior & custom reasons from type)
     // TODO: may be able to remove this once saving variation to loader
     this.dispatchEvent(new CustomEvent('add-segment-variation', {detail: {data: data}, bubbles: true, composed: true}));
-  },
+  }
 
-  _delayEditUpdate: function() {
+  _delayEditUpdate() {
     Polymer.Async.microTask.cancel(this.__editUpdateHandle);
     this.__editUpdateHandle = Polymer.Async.microTask.run(() => {
       this.__editUpdateHandle = undefined;
       this._editUpdate();
     }, this._editUpdateDelay);
-  },
+  }
 
-  _cancelEditUpdate: function() {
+  _cancelEditUpdate() {
     Polymer.Async.microTask.cancel(this.__editUpdateHandle);
-  },
+  }
 
-  _editUpdate: function() {
+  _editUpdate() {
     // TODO: override to add custom logic when edit update timer elapsed
-  },
+  }
 };
 
 </script>

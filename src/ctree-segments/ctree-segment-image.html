@@ -88,90 +88,97 @@ this license.
   </template>
 
   <script>
-  CTreeSegments['ctree-segment-image'] = Polymer({
-    is: 'ctree-segment-image',
+    class CTreeSegmentImage extends CTree.SegmentBehavior {
 
-    behaviors: [
-      Polymer.CTreeSegmentBehavior,
-    ],
+      static get is() { return 'ctree-segment-image'; }
 
-    properties: {
-      _changed: {
-        type: Boolean,
-        value: false,
-      },
-    },
-
-    observers: [
-      '_editingChanged(editing)',
-      '_dataChanged(data)',
-      '_heightPercentageChanged(heightPercent)',
-      '__updateValidChangeMade(_changed, loading, error)',
-      '__updatLoadingChangeMade(editing, loading)',
-    ],
-
-    _editingChanged: function(editing) {
-      if (editing) {
-        this.$.url.focus();
+      static get properties() {
+        return {
+          _changed: {
+            type: Boolean,
+            value: false,
+          },
+        };
       }
-    },
 
-    _dataChanged: function(data) {
-      this.validChangeMade = false;
-      this.loadingChangeMade = false;
-      this._changed = false;
-      // TODO: should this use imagePath or rootPath for Polymer 2.0?
-      this.$.image.src = data;
-      this.$.url.value = data;
-    },
-
-    _heightPercentageChanged: function(heightPercentage) {
-      if (heightPercentage && heightPercentage.length > 0) {
-        this.$.image.style.height = '100%';
-        this.$.image.sizing = 'cover';
-        this.$.container.style.paddingTop = heightPercentage;
-      } else {
-        this.$.image.style.height = 'auto';
+      static get observers() {
+        return [
+          '_editingChanged(editing)',
+          '_dataChanged(data)',
+          '_heightPercentageChanged(heightPercent)',
+          '__updateValidChangeMade(_changed, loading, error)',
+          '__updatLoadingChangeMade(editing, loading)',
+        ];
       }
-    },
 
-    _inputChanged: function(value) {
-      if (this.$.url.value === this.$.image.src) {
-        this._cancelEditUpdate();
-        this._waiting = false;
-      } else {
-        this._delayEditUpdate();
+      _editingChanged(editing) {
+        if (editing) {
+          this.$.url.focus();
+        }
       }
-    },
 
-    _checkForEnter: function(e) {
-      // check if 'enter' was pressed
-      if (e.keyCode === 13) {
-        this._editSaveClicked();
+      _dataChanged(data) {
+        this.validChangeMade = false;
+        this.loadingChangeMade = false;
+        this._changed = false;
+        // TODO: should this use imagePath or rootPath for Polymer 2.0?
+        this.$.image.src = data;
+        this.$.url.value = data;
       }
-    },
 
-    _editUpdate: function() {
-      var value = this.$.url.value.trim();
-      this.$.image.src = value;
-      this._changed = (value !== this.data);
-    },
+      _heightPercentageChanged(heightPercentage) {
+        if (heightPercentage && heightPercentage.length > 0) {
+          this.$.image.style.height = '100%';
+          this.$.image.sizing = 'cover';
+          this.$.container.style.paddingTop = heightPercentage;
+        } else {
+          this.$.image.style.height = 'auto';
+        }
+      }
 
-    _editSaveClicked: function() {
-      this._addSegmentVariation(this.$.image.src);
-    },
+      _inputChanged(value) {
+        if (this.$.url.value === this.$.image.src) {
+          super._cancelEditUpdate();
+          this._waiting = false;
+        } else {
+          super._delayEditUpdate();
+        }
+      }
 
-    _editCancelClicked: function() {
-      this.editing = false;
-    },
+      _checkForEnter(e) {
+        // check if 'enter' was pressed
+        if (e.keyCode === 13) {
+          this._editSaveClicked();
+        }
+      }
 
-    __updateValidChangeMade: function(changed, loading, error) {
-      this.validChangeMade = changed && !loading && !error;
-    },
+      _editUpdate() {
+        var value = this.$.url.value.trim();
+        this.$.image.src = value;
+        this._changed = (value !== this.data);
+      }
 
-    __updatLoadingChangeMade: function(editing, loading) {
-      this.loadingChangeMade = editing && loading;
-    },
-  });
+      _editSaveClicked() {
+        super._addSegmentVariation(this.$.image.src);
+      }
+
+      _editCancelClicked() {
+        this.editing = false;
+      }
+
+      __updateValidChangeMade(changed, loading, error) {
+        this.validChangeMade = changed && !loading && !error;
+      }
+
+      __updatLoadingChangeMade(editing, loading) {
+        this.loadingChangeMade = editing && loading;
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeSegmentImage.is, CTreeSegmentImage);
+
+    // Register as cTree segment
+    CTreeSegments['ctree-segment-image'] = CTreeSegmentImage
   </script>
 </dom-module>

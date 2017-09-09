@@ -120,7 +120,7 @@ this license.
     <ctree-element-loader-test ctree-key="[[ctreeKey]]" list-item="[[listItem]]" element="[[element]]" description-config="{{descriptionConfig}}" description-segments="{{descriptionSegments}}" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
     <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]" element="[[element]]" description-config-id="[[descriptionConfig]]" description-segment-ids="[[descriptionSegments]]"></ctree-element-dialog-accessor>
     <ctree-element id="element" element="[[element]]" noclose>
-      <div id="content" on-tap="_clickContent">
+      <div id="content" on-click="_clickContent">
         <div id="segments"></div>
         <div id="footer">
           <div id="shadow"></div>
@@ -137,7 +137,7 @@ this license.
   </template>
 
   <script>
-    class CTreeElementPreview extends Polymer.mixinBehaviors([Polymer.CTreeElementDescriptionBehavior], Polymer.Element) {
+    class CTreeElementPreview extends CTree.ElementDescriptionBehavior {
 
       static get is() { return 'ctree-element-preview'; }
 
@@ -197,7 +197,7 @@ this license.
       }
 
       _listItemChanged(listItem) {
-        this._bulkUpdateDescriptionProperties(listItem.element, listItem.descriptionConfig, listItem.descriptionSegments);
+        super._bulkUpdateDescriptionProperties(listItem.element, listItem.descriptionConfig, listItem.descriptionSegments);
 
         this.viewed = listItem.viewed;
       }
@@ -223,7 +223,7 @@ this license.
           if (type.canBeThumbnail) {
             thumbnailIndex = i;
             var component = document.createElement(type.componentName);
-            var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+            var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
             component.data = variation.data;
             component.scale = '80%';
             component.heightPercent = '56.25%';
@@ -240,7 +240,7 @@ this license.
             var segment = segments[i];
             var type = segment.type;
             var component = document.createElement(type.componentName);
-            var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+            var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
             component.data = variation.data;
             component.scale = '80%';
             segmentsElement.appendChild(component);

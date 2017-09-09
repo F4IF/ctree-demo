@@ -56,8 +56,8 @@ this license.
         var commentCode = commentCodes[Math.floor(Math.random() * commentCodes.length)];
         item.commentCode =  commentCode;
 
-        var CATEGORY = Polymer.CTreeLoader.COMMENT_CATEGORY;
-        var SUBJECT = Polymer.CTreeLoader.COMMENT_SUBJECT;
+        var CATEGORY = CTree.Loader.COMMENT_CATEGORY;
+        var SUBJECT = CTree.Loader.COMMENT_SUBJECT;
         var subjectCode = commentCode % 100;
         var categoryCode = commentCode - subjectCode;
         if (!categoryCode != CATEGORY.NEEDS) {
@@ -92,7 +92,7 @@ this license.
     return items;
   }
 
-  class CTreeListLoader extends Polymer.mixinBehaviors([Polymer.CTreeLoaderBehavior], Polymer.Element) {
+  class CTreeListLoader extends CTree.LoaderBehavior {
 
     static get is() { return 'ctree-list-loader-test'; }
 

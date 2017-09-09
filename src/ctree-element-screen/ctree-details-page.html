@@ -66,7 +66,7 @@ this license.
   </template>
 
   <script>
-    class CTreeDetailsPage extends Polymer.mixinBehaviors([Polymer.CTreeElementDescriptionBehavior], Polymer.Element) {
+    class CTreeDetailsPage extends CTree.ElementDescriptionBehavior {
 
       static get is() { return 'ctree-details-page'; }
 
@@ -118,11 +118,11 @@ this license.
       }
 
       _fireContributorsTapped() {
-        this.dispatchEvent(new CustomEvent('contributors-tapped', {bubbles: true, composed: true}));
+        super.dispatchEvent(new CustomEvent('contributors-tapped', {bubbles: true, composed: true}));
       }
 
       _fireRelatedTapped() {
-        this.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
+        super.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
       }
 
       __segmentsChanged(e, detail) {

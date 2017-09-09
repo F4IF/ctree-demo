@@ -79,7 +79,7 @@ this license.
   </template>
 
   <script>
-    class CTreeElement extends Polymer.mixinBehaviors([Polymer.CTreeToolbarBehavior], Polymer.Element) {
+    class CTreeElement extends CTree.ToolbarBehavior {
 
       static get is() { return 'ctree-element'; }
 
@@ -127,7 +127,7 @@ this license.
       }
 
       _elementChanged(element) {
-        this._updateToggleButtonIcon();
+        super._updateToggleButtonIcon();
       }
     }
 

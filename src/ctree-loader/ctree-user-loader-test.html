@@ -43,7 +43,7 @@ this license.
     LOAD_DELAY: 2500,
   };
 
-  class CTreeUserLoader extends Polymer.mixinBehaviors([Polymer.CTreeLoaderBehavior], Polymer.Element) {
+  class CTreeUserLoader extends CTree.LoaderBehavior {
 
     static get is() { return 'ctree-user-loader-test'; }
 

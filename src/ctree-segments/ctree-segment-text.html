@@ -77,77 +77,85 @@ this license.
   </template>
 
   <script>
-  CTreeSegments['ctree-segment-text'] = Polymer({
-    is: 'ctree-segment-text',
+    class CTreeSegmentText extends CTree.SegmentBehavior {
 
-    behaviors: [
-      Polymer.CTreeSegmentBehavior,
-    ],
+      static get is() { return 'ctree-segment-text'; }
 
-    properties: {
-      _updatedText: String,
-    },
-
-    observers: [
-      '_editingChanged(editing)',
-      '_dataChanged(data)',
-      '_scaleChanged(scale)',
-    ],
-
-    ready: function() {
-      this._editUpdateDelay = 250;
-    },
-
-    _editingChanged: function(editing) {
-      if (editing) {
-        this.$.input.focus();
+      /**
+       * Gets text interpretation of data for segment type.
+       *
+       * @param  {Object} data Segment type specific data to get text interpretation for
+       * @return {String}      Text interpretation of data
+       */
+      static getText(data) {
+        return data;
       }
-    },
 
-    _dataChanged: function(data) {
-      this.validChangeMade = false;
-      this.$.text.textContent = data;
-      this._updatedText = data;
-      this.$.input.value = data;
-    },
-
-    _scaleChanged: function(scale) {
-      this.$.text.style.fontSize = scale;
-      this.$.edit.style.fontSize = scale;
-    },
-
-    _inputChanged: function() {
-      this.validChangeMade = false;
-      if (this.$.input.value === this._updatedText) {
-        this._cancelEditUpdate();
-      } else {
-        this._delayEditUpdate();
+      static get properties() {
+        return {
+          _updatedText: String,
+        };
       }
-    },
 
-    _editUpdate: function() {
-      var value = this.$.input.value.trim();
-      this._updatedText = value;
-      this.validChangeMade = (value !== this.data && value.length > 0);
-    },
+      static get observers() {
+        return [
+          '_editingChanged(editing)',
+          '_dataChanged(data)',
+          '_scaleChanged(scale)',
+        ];
+      }
 
-    _editSaveClicked: function() {
-      this._addSegmentVariation(this._updatedText);
-    },
+      ready() {
+        super.ready();
+        this._editUpdateDelay = 250;
+      }
 
-    _editCancelClicked: function() {
-      this.editing = false;
-    },
-  });
+      _editingChanged(editing) {
+        if (editing) {
+          this.$.input.focus();
+        }
+      }
 
-  /**
-   * Gets text interpretation of data for segment type.
-   *
-   * @param  {Object} data Segment type specific data to get text interpretation for
-   * @return {String}      Text interpretation of data
-   */
-  CTreeSegments['ctree-segment-text'].getText = function(data) {
-    return data;
-  }
+      _dataChanged(data) {
+        this.validChangeMade = false;
+        this.$.text.textContent = data;
+        this._updatedText = data;
+        this.$.input.value = data;
+      }
+
+      _scaleChanged(scale) {
+        this.$.text.style.fontSize = scale;
+        this.$.edit.style.fontSize = scale;
+      }
+
+      _inputChanged() {
+        this.validChangeMade = false;
+        if (this.$.input.value === this._updatedText) {
+          super._cancelEditUpdate();
+        } else {
+          super._delayEditUpdate();
+        }
+      }
+
+      _editUpdate() {
+        var value = this.$.input.value.trim();
+        this._updatedText = value;
+        this.validChangeMade = (value !== this.data && value.length > 0);
+      }
+
+      _editSaveClicked() {
+        super._addSegmentVariation(this._updatedText);
+      }
+
+      _editCancelClicked() {
+        this.editing = false;
+      }
+    };
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeSegmentText.is, CTreeSegmentText);
+
+    // Register as cTree segment
+    CTreeSegments['ctree-segment-text'] = CTreeSegmentText
   </script>
 </dom-module>
