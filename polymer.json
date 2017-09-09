@@ -5,15 +5,15 @@
     "src/ctree-dialogs/ctree-dialogs.html",
     "src/ctree-element-preview/ctree-element-preview.html",
     "src/ctree-element-screen/ctree-element-screen.html",
-    "src/ctree-element-screen/ctree-user-screen.html",
     "src/ctree-element-screen/ctree-contributors-page.html",
     "src/ctree-element-screen/ctree-details-page.html",
     "src/ctree-element-screen/ctree-feedback-page.html",
     "src/ctree-element-screen/ctree-history-page.html",
     "src/ctree-element-screen/ctree-related-page.html",
-    "src/ctree-loader/ctree-list-loader-test.html"
+    "src/ctree-loader/ctree-list-loader-test.html",
+    "src/ctree-user-screen/ctree-user-screen.html"
   ],
-  "includeDependencies": [
+  "extraDependencies": [
     "bower_components/webcomponentsjs/webcomponents-lite.min.js"
   ]
 }

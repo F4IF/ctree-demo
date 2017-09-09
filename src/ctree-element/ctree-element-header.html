@@ -107,12 +107,12 @@ this license.
     <div id="related" on-tap="relatedClicked"><paper-ripple></paper-ripple>
       <div id="children">
         <iron-icon icon="relation-from"></iron-icon>
-        <div class="type-count">3</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
-        <div class="type-count">1</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
+        <div class="type-count">3</div><iron-icon class="type-icon" src="[[testTypeIcon]]"></iron-icon>
+        <div class="type-count">1</div><iron-icon class="type-icon" src="[[testTypeIcon]]"></iron-icon>
       </div>
       <div id="parents">
         <iron-icon icon="relation-to"></iron-icon>
-        <div class="type-count">2</div><iron-icon class="type-icon" src="../../images/app-icon-32.png"></iron-icon>
+        <div class="type-count">2</div><iron-icon class="type-icon" src="[[testTypeIcon]]"></iron-icon>
       </div>
     </div>
   </template>
@@ -149,6 +149,9 @@ this license.
             value: false,
             observer: '_updateRelationsVisible',
           },
+
+          // TODO: remove test icon
+          testTypeIcon: String,
         };
       }
 
@@ -165,6 +168,7 @@ this license.
             contributor.style.backgroundImage = "url('" + imagePath + Lorem.avatarUrl() + "')";
           }
         }
+        this.testTypeIcon = imagePath + "app-icon-32.png";
       }
 
       designerClicked() {
