@@ -35,67 +35,74 @@ this license.
 <script>
   'use strict';
 
-  Polymer.CTreeElementDescriptionBehavior = {
-    properties: {
-      /**
-       * Element data
-       *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: ElementType,
-       *     title: String,
-       *     parents: [Number],
-       *     children: [Number],
-       *     childrenSearchComplete: Boolean,
-       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-       *     description: [{
-       *       id: Number,
-       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-       *       segments: [{
-       *         id: Number,
-       *         type: SegmentType,
-       *         variations: [{
-       *           id: Number,
-       *           data: dynamic,	// data type depends on segment type
-       *         }, ...],
-       *       }, ...],
-       *     }, ...],
-       *     feedback: [{
-       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-       *       text: String,
-       *     }, ...],
-       *     bookmarked: Boolean,
-       *   }
-       */
-      element: {
-        type: Object,
-        observer: '__elementChanged',
-      },
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
 
-      /**
-       * ID of description config to show.  If this ID isn't included in the
-       * element the first config from the element is used.
-       */
-      descriptionConfig: {
-        type: Number,
-        observer: '__descriptionConfigChanged',
-      },
+  CTree.ElementDescriptionBehavior = class extends Polymer.Element {
+    static get properties() {
+      return {
+        /**
+         * Element data
+         *
+         * Structure:
+         *   {
+         *     id: Number,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Number],
+         *     children: [Number],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: Number,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: Number,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: Number,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }
+         */
+        element: {
+          type: Object,
+          observer: '__elementChanged',
+        },
 
-      /**
-       * IDs of variation to show for each segment.  For any segments where the
-       * ID isn't included in the description config the first variation is used.
-       *
-       * Structure:
-       *   [Number, ...]
-       */
-      descriptionSegments: {
-        type: Array,
-        observer: '__descriptionSegmentsChanged',
-      },
+        /**
+         * ID of description config to show.  If this ID isn't included in the
+         * element the first config from the element is used.
+         */
+        descriptionConfig: {
+          type: Number,
+          observer: '__descriptionConfigChanged',
+        },
 
-      __bulkChange: Boolean,
-    },
+        /**
+         * IDs of variation to show for each segment.  For any segments where the
+         * ID isn't included in the description config the first variation is used.
+         *
+         * Structure:
+         *   [Number, ...]
+         */
+        descriptionSegments: {
+          type: Array,
+          observer: '__descriptionSegmentsChanged',
+        },
+
+        __bulkChange: Boolean,
+      };
+    }
 
     /**
      * Gets the first object from the array with the id property equal to the id
@@ -107,9 +114,11 @@ this license.
      * @param {number} id
      * @param {boolean} [defaultToFirst=true]
      */
-    _getFromArrayWithId: Polymer.CTreeLoader.getFromArrayWithId,
+    _getFromArrayWithId(array, id, defaultToFirst=true) {
+      return CTree.Loader.getFromArrayWithId(array, id, defaultToFirst);
+    }
 
-    _bulkUpdateDescriptionProperties: function(element, descriptionConfig, descriptionSegments) {
+    _bulkUpdateDescriptionProperties(element, descriptionConfig, descriptionSegments) {
       var descriptionChanged = false;
 
       this.__bulkChange = true;
@@ -130,31 +139,39 @@ this license.
       if (descriptionChanged) {
         this.__updateDescription(this.element, this.descriptionConfig, this.descriptionSegments);
       }
-    },
+    }
 
-    __elementChanged: function(element) {
+    __elementChanged(element) {
       // TODO: remove this call once make _updateDescription an explicit observer after updating to Polymer 2.0
       this.__updateDescription(element, this.descriptionConfig, this.descriptionSegments);
 
-      if (this._elementChanged) this._elementChanged(element);
-    },
+      this._elementChanged(element);
+    }
+
+    _elementChanged(element) {
+      // override
+    }
 
     // TODO: remove these individual observers and make _updateDescription an explicit observer once update to Polymer 2.0
-    __descriptionConfigChanged: function(descriptionConfig) {
+    __descriptionConfigChanged(descriptionConfig) {
       this.__updateDescription(this.element, descriptionConfig, this.descriptionSegments);
-    },
+    }
 
-    __descriptionSegmentsChanged: function(descriptionSegments) {
+    __descriptionSegmentsChanged(descriptionSegments) {
       this.__updateDescription(this.element, this.descriptionConfig, descriptionSegments);
-    },
+    }
 
-    __updateDescription: function(element, descriptionConfig, descriptionSegments) {
+    __updateDescription(element, descriptionConfig, descriptionSegments) {
       if (this.__bulkChange || !element || !element.description || element.description.length == 0) return;
       var description = this._getFromArrayWithId(element.description, descriptionConfig);
       if (!description || !description.segments || (descriptionSegments && description.segments.length != descriptionSegments.length)) return;
 
-      if (this._descriptionChanged) this._descriptionChanged(description, descriptionSegments);
-    },
+      this._descriptionChanged(description, descriptionSegments);
+    }
+
+    _descriptionChanged(description, descriptionSegments) {
+      // override
+    }
   };
   </script>
 </dom-module>

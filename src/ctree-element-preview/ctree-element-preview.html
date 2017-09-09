@@ -50,7 +50,7 @@ this license.
       }
       ctree-element {
         box-sizing: border-box;
-        @apply(--shadow-elevation-4dp);
+        @apply --shadow-elevation-4dp;
 
         width: 100%;
         height: 100%;
@@ -120,7 +120,7 @@ this license.
     <ctree-element-loader-test ctree-key="[[ctreeKey]]" list-item="[[listItem]]" element="[[element]]" description-config="{{descriptionConfig}}" description-segments="{{descriptionSegments}}" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
     <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]" element="[[element]]" description-config-id="[[descriptionConfig]]" description-segment-ids="[[descriptionSegments]]"></ctree-element-dialog-accessor>
     <ctree-element id="element" element="[[element]]" noclose>
-      <div id="content" on-tap="_clickContent">
+      <div id="content" on-click="_clickContent">
         <div id="segments"></div>
         <div id="footer">
           <div id="shadow"></div>
@@ -137,150 +137,152 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-element-preview',
+    class CTreeElementPreview extends CTree.ElementDescriptionBehavior {
 
-    behaviors: [
-      Polymer.CTreeElementDescriptionBehavior,
-    ],
+      static get is() { return 'ctree-element-preview'; }
 
-    properties: {
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: String,
+      static get properties() {
+        return {
+          /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: String,
 
-      /**
-       * List item data for element. Using this prevents doing multiple updates
-       * as element and descriptionConfig are changed.
-       *
-       * Structure:
-       *   {
-       *     element: Element,
-       *     feedback: Feedback,
-       *     descriptionConfig: Number,
-       *     descriptionSegments: [Number],
-       *     reason: Number,
-       *     related: Object,	// type depends on reason
-       *     changeType: Number,
-       *   }
-       */
-      listItem: {
-        type: Object,
-        observer: '_listItemChanged',
-      },
+          /**
+           * List item data for element. Using this prevents doing multiple updates
+           * as element and descriptionConfig are changed.
+           *
+           * Structure:
+           *   {
+           *     element: Element,
+           *     feedback: Feedback,
+           *     descriptionConfig: Number,
+           *     descriptionSegments: [Number],
+           *     reason: Number,
+           *     related: Object,	// type depends on reason
+           *     changeType: Number,
+           *   }
+           */
+          listItem: {
+            type: Object,
+            observer: '_listItemChanged',
+          },
 
-      /**
-       * Comment to display at the bottom of the element preview.
-       */
-      comment: String,
+          /**
+           * Comment to display at the bottom of the element preview.
+           */
+          comment: String,
 
-      /**
-       * Icon to display before comment.
-       */
-      commentIcon: String,
+          /**
+           * Icon to display before comment.
+           */
+          commentIcon: String,
 
-      /**
-       * True if user has viewed this item.  Normally this will be taken from
-       * the element data, but can be changed here to update the element or get
-       * the value from the element.
-       */
-      viewed: {
-        type: Boolean,
-        value: false,
-        observer: '_viewedChanged',
-      },
-    },
-
-    _isEmpty: function(str) {
-      return !str || str.length == 0;
-    },
-
-    _listItemChanged: function(listItem) {
-      this._bulkUpdateDescriptionProperties(listItem.element, listItem.descriptionConfig, listItem.descriptionSegments);
-
-      this.viewed = listItem.viewed;
-    },
-
-    _elementChanged: function(element) {
-      this.viewed = element.viewed;
-    },
-
-    _descriptionChanged: function(description, descriptionSegments) {
-      // clear segments
-      var segmentsElement = this.$.segments;
-      var child;
-      while (child = segmentsElement.firstChild) {
-        segmentsElement.removeChild(child);
+          /**
+           * True if user has viewed this item.  Normally this will be taken from
+           * the element data, but can be changed here to update the element or get
+           * the value from the element.
+           */
+          viewed: {
+            type: Boolean,
+            value: false,
+            observer: '_viewedChanged',
+          },
+        };
       }
 
-      // add thumbnail
-      var thumbnailIndex = null;
-      var segments = description.segments;
-      for (var i = 0; i < segments.length; i++) {
-        var segment = segments[i];
-        var type = segment.type;
-        if (type.canBeThumbnail) {
-          thumbnailIndex = i;
-          var component = document.createElement(type.componentName);
-          var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
-          component.data = variation.data;
-          component.scale = '80%';
-          component.heightPercent = '56.25%';
-          segmentsElement.appendChild(component);
-          break;
+      _isEmpty(str) {
+        return !str || str.length == 0;
+      }
+
+      _listItemChanged(listItem) {
+        super._bulkUpdateDescriptionProperties(listItem.element, listItem.descriptionConfig, listItem.descriptionSegments);
+
+        this.viewed = listItem.viewed;
+      }
+
+      _elementChanged(element) {
+        this.viewed = element.viewed;
+      }
+
+      _descriptionChanged(description, descriptionSegments) {
+        // clear segments
+        var segmentsElement = this.$.segments;
+        var child;
+        while (child = segmentsElement.firstChild) {
+          segmentsElement.removeChild(child);
         }
-      }
 
-      // add additional description segments (max 3)
-      // TODO: add padding to top when not showing thumbnail to push below header
-      var count = Math.min(thumbnailIndex < 3 ? 3 : 2, segments.length);
-      for (var i = 0; i < count; i++) {
-        if (i !== thumbnailIndex) {
+        // add thumbnail
+        var thumbnailIndex = null;
+        var segments = description.segments;
+        for (var i = 0; i < segments.length; i++) {
           var segment = segments[i];
           var type = segment.type;
-          var component = document.createElement(type.componentName);
-          var variation = this._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
-          component.data = variation.data;
-          component.scale = '80%';
-          segmentsElement.appendChild(component);
+          if (type.canBeThumbnail) {
+            thumbnailIndex = i;
+            var component = document.createElement(type.componentName);
+            var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+            component.data = variation.data;
+            component.scale = '80%';
+            component.heightPercent = '56.25%';
+            segmentsElement.appendChild(component);
+            break;
+          }
         }
+
+        // add additional description segments (max 3)
+        // TODO: add padding to top when not showing thumbnail to push below header
+        var count = Math.min(thumbnailIndex < 3 ? 3 : 2, segments.length);
+        for (var i = 0; i < count; i++) {
+          if (i !== thumbnailIndex) {
+            var segment = segments[i];
+            var type = segment.type;
+            var component = document.createElement(type.componentName);
+            var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+            component.data = variation.data;
+            component.scale = '80%';
+            segmentsElement.appendChild(component);
+          }
+        }
+        // TODO: set designer info from element
+        // TODO: set contributors info from description config in element
       }
-      // TODO: set designer info from element
-      // TODO: set contributors info from description config in element
-    },
 
-    // TODO: remove these individual observers and make _updateReason an explicit observer once update to Polymer 2.0
-    _reasonChanged: function(reason) {
-      this._updateReason(reason, this.related, this.changeType);
-    },
+      // TODO: remove these individual observers and make _updateReason an explicit observer once update to Polymer 2.0
+      _reasonChanged(reason) {
+        this._updateReason(reason, this.related, this.changeType);
+      }
 
-    _relatedChanged: function(related) {
-      this._updateReason(this.reason, related, this.changeType);
-    },
+      _relatedChanged(related) {
+        this._updateReason(this.reason, related, this.changeType);
+      }
 
-    _changeTypeChanged: function(changeType) {
-      this._updateReason(this.reason, this.related, changeType);
-    },
+      _changeTypeChanged(changeType) {
+        this._updateReason(this.reason, this.related, changeType);
+      }
 
-    _updateReason: function(reason, related, changeType) {
-      if (this._bulkChange) return;
+      _updateReason(reason, related, changeType) {
+        if (this._bulkChange) return;
 
-      // TODO: populate reason field at bottom if has reason, else show just fade
-    },
+        // TODO: populate reason field at bottom if has reason, else show just fade
+      }
 
-    _viewedChanged: function(viewed) {
-      if (!this.element) return;
+      _viewedChanged(viewed) {
+        if (!this.element) return;
 
-      this.element.viewed = viewed;
-      this.$.overlay.style.backgroundColor = viewed ? "rgba(0, 0, 0, 0.2)" : "transparent";
-    },
+        this.element.viewed = viewed;
+        this.$.overlay.style.backgroundColor = viewed ? "rgba(0, 0, 0, 0.2)" : "transparent";
+      }
 
-    _clickContent: function() {
-      this.viewed = true;
-      this.$.dialog.open();
-    },
-  });
+      _clickContent() {
+        this.viewed = true;
+        this.$.dialog.open();
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeElementPreview.is, CTreeElementPreview);
   </script>
 </dom-module>

@@ -27,41 +27,47 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
 <script>
   'use strict';
 
-  Polymer({
-    is: 'ctree-user-dialog-accessor',
+  class CTreeUserDialogAccessor extends Polymer.Element {
 
-    properties: {
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: String,
+    static get is() { return 'ctree-user-dialog-accessor'; }
 
-      /**
-       * User data
-       *
-       * Structure:
-       *   {
-       *   }
-       */
-      user: Object,
+    static get properties() {
+      return {
+        /**
+         * The unique key identifying a cTree.  If the site only has one cTree
+         * this doesn't need to be set.
+         */
+        ctreeKey: String,
 
-      page: String,
+        /**
+         * User data
+         *
+         * Structure:
+         *   {
+         *   }
+         */
+        user: Object,
 
-      _dialog: Object,
-    },
+        page: String,
 
-    open: function() {
+        _dialog: Object,
+      };
+    }
+
+    open() {
       if (!this._dialog) {
         var dialogs = document.getElementsByTagName('ctree-dialogs');
         if (dialogs.length < 1) {
-          this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'), this._addDialogInternal, null, true);
+          Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'),
+              () => this._addDialogInternal(loadEvent),
+              null,
+              true /* true for async */);
         } else {
           if (dialogs.length > 1) {
             console.warn('Multiple ctree-dialogs tags found. Using first occurrence.');
@@ -72,21 +78,24 @@ this license.
       } else {
         this._openInternal();
       }
-    },
+    }
 
-    _addDialogInternal: function() {
+    _addDialogInternal() {
       this._dialog = document.createElement('ctree-dialogs');
       document.getElementsByTagName('body')[0].appendChild(this._dialog);
       this._openInternal();
-    },
+    }
 
-    _openInternal: function() {
+    _openInternal() {
       // TODO: initialize values & listeners
       if (this._dialog.dialog !== 'user') {// TODO: check open dialog
         this._dialog.user = this.user;
         this._dialog.page = this.page;
         this._dialog.openUserDialog();
       }
-    },
-  });
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeUserDialogAccessor.is, CTreeUserDialogAccessor);
 </script>

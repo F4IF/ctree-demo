@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
 <!-- internal -->
 
@@ -43,12 +43,18 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-related-page',
+    class CTreeRelatedPage extends Polymer.Element {
 
-    properties: {
+      static get is() { return 'ctree-related-page'; }
 
-    },
-  });
+      static get properties() {
+        return {
+
+        };
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeRelatedPage.is, CTreeRelatedPage);
   </script>
 </dom-module>
