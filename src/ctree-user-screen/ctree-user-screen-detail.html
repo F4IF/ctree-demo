@@ -42,7 +42,7 @@ this license.
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
-<dom-module id="ctree-user-screen">
+<dom-module id="ctree-user-screen-detail">
   <template>
     <style include="ctree-toolbar-shared-styles"></style>
     <style>
@@ -143,6 +143,7 @@ this license.
       </paper-toolbar>
     </div>
     <iron-pages id="pages" selected="[[page]]" attr-for-selected="name">
+		
       <!--<ctree-details-page name="details">
 	  </ctree-details-page>
       <ctree-stats-page name="stats"></ctree-stats-page>
@@ -152,7 +153,7 @@ this license.
 
   <script>
   Polymer({
-    is: 'ctree-user-screen',
+    is: 'ctree-user-screen-detail',
 
     /**
      * Fired when the close button is tapped.
@@ -182,6 +183,52 @@ this license.
         notify: true,
         observer: '_pageChanged',
       },
+	  
+	  name: {
+        type: String,
+        notify: true,
+      },
+	  
+	  country: {
+        type: String,
+        notify: true,
+      },
+	  
+	  //check how declare array of string
+	  languages: {
+        type: String, 
+        notify: true,
+      },
+	  
+	  educations: {
+        type: String,
+        notify: true,
+      },
+	  
+	  specializations: {
+        type: String,
+        notify: true,
+      },
+	  
+	  email: {
+        type: String,
+        notify: true,
+      },
+	  
+	  phone: {
+        type: String,
+        notify: true,
+      },
+	  
+	  age: {
+        type: Number,
+        notify: true,
+      },
+	  
+	  gender: {
+        type: String,
+        notify: true,
+      },
 
       /**
        * Toggle icon names.
@@ -200,8 +247,17 @@ this license.
       // TODO: just to test
       this.user = {
         id: 1,
-        name: 'New User',
-        favorited: false
+        name: 'Testing',
+        favorited: false,
+		name: 'Test User',
+		country: 'USA',
+		languages: 'en-US',
+		educations: '',
+		specializations: 'Programming',
+		email: 'test@test.com',
+		phone: '111222333',
+		age: 50,
+		gender: 'Male'
       };
     },
 
