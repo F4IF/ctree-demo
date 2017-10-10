@@ -1,0 +1,209 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-loader/ctree-user-loader-test.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-behavior.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-shared-styles.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<dom-module id="ctree-details-page">
+  <template>
+      <style>
+        :host {
+          display: block;
+        }
+        .text {
+          width: calc(100% - 16px);
+          padding: 4px 8px;
+        }
+        #input {
+          width: 100%;
+        }
+        #buttons > div {
+          display: inline-block;
+          position: relative;
+          padding: 8px;
+        }
+        #buttons > div[hidden] {
+          display: none !important;
+        }
+      </style>
+
+      <div id="text" class="text" hidden$="[[editing]]"></div>
+      <div id="edit" class="text" hidden$="[[!editing]]">
+        <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
+        <div id="buttons" align="right">
+          <div on-tap="_editSaveClicked" hidden$="[[!validChangeMade]]">
+            <iron-icon icon="segment-save"></iron-icon>
+            Save
+            <paper-ripple></paper-ripple>
+          </div>
+          <div on-tap="_editCancelClicked">
+            <iron-icon icon="segment-cancel"></iron-icon>
+            Cancel
+            <paper-ripple></paper-ripple>
+          </div>
+        </div>
+      </div>
+    </template>
+
+  <script>
+  Polymer({
+    is: 'ctree-details-page',
+
+    properties: {
+
+      ctreeKey: String,
+
+      user: {
+        type: Object,
+        observer: '_userChanged',
+      },
+
+      userId: {
+        type: Number,
+        notify: true,
+      },
+
+	  name: {
+        type: String,
+        notify: true,
+      },
+
+	  country: {
+        type: String,
+        notify: true,
+      },
+
+	  //check how declare array of string
+	  languages: {
+        type: String,
+        notify: true,
+      },
+
+	  educations: {
+        type: String,
+        notify: true,
+      },
+
+	  specializations: {
+        type: String,
+        notify: true,
+      },
+
+	  email: {
+        type: String,
+        notify: true,
+      },
+
+	  phone: {
+        type: String,
+        notify: true,
+      },
+
+	  age: {
+        type: Number,
+        notify: true,
+      },
+
+	  gender: {
+        type: String,
+        notify: true,
+      },
+
+    behaviors: [
+      Polymer.CTreeToolbarBehavior,
+    ],
+
+    ready: function() {
+      // TODO: just to test
+      this.user = {
+        id: 1,
+        name: 'Testing',
+        favorited: false,
+    		name: 'Test User',
+    		country: 'USA',
+    		languages: 'en-US',
+    		educations: '',
+    		specializations: 'Programming',
+    		email: 'test@test.com',
+    		phone: '111222333',
+    		age: 50,
+    		gender: 'Male'
+      };
+    },
+
+    _editingChanged(editing) {
+        if (editing) {
+          this.$.input.focus();
+        }
+      }
+      _dataChanged(data) {
+        this.validChangeMade = false;
+        this.$.text.textContent = data;
+        this._updatedText = data;
+        this.$.input.value = data;
+      }
+      _scaleChanged(scale) {
+        this.$.text.style.fontSize = scale;
+        this.$.edit.style.fontSize = scale;
+      }
+      _inputChanged() {
+        this.validChangeMade = false;
+        if (this.$.input.value === this._updatedText) {
+          super._cancelEditUpdate();
+        } else {
+          super._delayEditUpdate();
+        }
+      }
+      _editUpdate() {
+        var value = this.$.input.value.trim();
+        this._updatedText = value;
+        this.validChangeMade = (value !== this.data && value.length > 0);
+      }
+      _editSaveClicked() {
+        super._addSegmentVariation(this._updatedText);
+      }
+      _editCancelClicked() {
+        this.editing = false;
+      }
+
+  });
+  </script>
+</dom-module>
