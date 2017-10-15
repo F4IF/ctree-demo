@@ -42,148 +42,157 @@ this license.
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
-<dom-module id="ctree-details-page">
+<dom-module id="ctree-user-details-page">
   <template>
-      <style>
-        :host {
-          display: block;
-        }
-        .text {
-          width: calc(100% - 16px);
-          padding: 4px 8px;
-        }
-        #input {
-          width: 100%;
-        }
-        #buttons > div {
-          display: inline-block;
-          position: relative;
-          padding: 8px;
-        }
-        #buttons > div[hidden] {
-          display: none !important;
-        }
-      </style>
+    <style>
+      :host {
+        display: block;
+      }
+      .text {
+        width: calc(100% - 16px);
+        padding: 4px 8px;
+      }
+      #input {
+        width: 100%;
+      }
+      #buttons > div {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+      }
+      #buttons > div[hidden] {
+        display: none !important;
+      }
+    </style>
 
-      <div id="text" class="text" hidden$="[[editing]]"></div>
-      <div id="edit" class="text" hidden$="[[!editing]]">
-        <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
-        <div id="buttons" align="right">
-          <div on-tap="_editSaveClicked" hidden$="[[!validChangeMade]]">
-            <iron-icon icon="segment-save"></iron-icon>
-            Save
-            <paper-ripple></paper-ripple>
-          </div>
-          <div on-tap="_editCancelClicked">
-            <iron-icon icon="segment-cancel"></iron-icon>
-            Cancel
-            <paper-ripple></paper-ripple>
-          </div>
+    <div id="text" class="text" hidden$="[[editing]]"></div>
+    <div id="edit" class="text" hidden$="[[!editing]]">
+      <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
+      <div id="buttons" align="right">
+        <div on-tap="_editSaveClicked" hidden$="[[!validChangeMade]]">
+          <iron-icon icon="segment-save"></iron-icon>
+          Save
+          <paper-ripple></paper-ripple>
+        </div>
+        <div on-tap="_editCancelClicked">
+          <iron-icon icon="segment-cancel"></iron-icon>
+          Cancel
+          <paper-ripple></paper-ripple>
         </div>
       </div>
-    </template>
+    </div>
+  </template>
 
   <script>
-  Polymer({
-    is: 'ctree-details-page',
+    class CTreeUserDetailsPage extends CTree.ToolbarBehavior {
 
-    properties: {
+      static get is() { return 'ctree-user-details-page'; }
 
-      ctreeKey: String,
 
-      user: {
-        type: Object,
-        observer: '_userChanged',
-      },
+      static get properties() {
+        return {
+          ctreeKey: String,
 
-      userId: {
-        type: Number,
-        notify: true,
-      },
+          user: {
+            type: Object,
+            observer: '_userChanged',
+          },
 
-	  name: {
-        type: String,
-        notify: true,
-      },
+          userId: {
+            type: Number,
+            notify: true,
+          },
 
-	  country: {
-        type: String,
-        notify: true,
-      },
+      	  name: {
+            type: String,
+            notify: true,
+          },
 
-	  //check how declare array of string
-	  languages: {
-        type: String,
-        notify: true,
-      },
+	        country: {
+            type: String,
+            notify: true,
+          },
 
-	  educations: {
-        type: String,
-        notify: true,
-      },
+      	  //check how declare array of string
+      	  languages: {
+            type: String,
+            notify: true,
+          },
 
-	  specializations: {
-        type: String,
-        notify: true,
-      },
+	        educations: {
+            type: String,
+            notify: true,
+          },
 
-	  email: {
-        type: String,
-        notify: true,
-      },
+    	    specializations: {
+            type: String,
+            notify: true,
+          },
 
-	  phone: {
-        type: String,
-        notify: true,
-      },
+    	    email: {
+            type: String,
+            notify: true,
+          },
 
-	  age: {
-        type: Number,
-        notify: true,
-      },
+    	    phone: {
+            type: String,
+            notify: true,
+          },
 
-	  gender: {
-        type: String,
-        notify: true,
-      },
+    	    age: {
+            type: Number,
+            notify: true,
+          },
 
-    behaviors: [
-      Polymer.CTreeToolbarBehavior,
-    ],
+    	    gender: {
+            type: String,
+            notify: true,
+          },
+        };
+      }
 
-    ready: function() {
-      // TODO: just to test
-      this.user = {
-        id: 1,
-        name: 'Testing',
-        favorited: false,
-    		name: 'Test User',
-    		country: 'USA',
-    		languages: 'en-US',
-    		educations: '',
-    		specializations: 'Programming',
-    		email: 'test@test.com',
-    		phone: '111222333',
-    		age: 50,
-    		gender: 'Male'
-      };
-    },
+      ready() {
+        super.ready();
 
-    _editingChanged(editing) {
+        // TODO: just to test
+        this.user = {
+          id: 1,
+          name: 'Testing',
+          favorited: false,
+      		name: 'Test User',
+      		country: 'USA',
+      		languages: 'en-US',
+      		educations: '',
+      		specializations: 'Programming',
+      		email: 'test@test.com',
+      		phone: '111222333',
+      		age: 50,
+      		gender: 'Male'
+        };
+      }
+
+      _userChanged(user) {
+        // TODO: is this needed?  If not, remove the method and observer for the user property
+      }
+
+      _editingChanged(editing) {
         if (editing) {
           this.$.input.focus();
         }
       }
+
       _dataChanged(data) {
         this.validChangeMade = false;
         this.$.text.textContent = data;
         this._updatedText = data;
         this.$.input.value = data;
       }
+
       _scaleChanged(scale) {
         this.$.text.style.fontSize = scale;
         this.$.edit.style.fontSize = scale;
       }
+
       _inputChanged() {
         this.validChangeMade = false;
         if (this.$.input.value === this._updatedText) {
@@ -192,18 +201,23 @@ this license.
           super._delayEditUpdate();
         }
       }
+
       _editUpdate() {
         var value = this.$.input.value.trim();
         this._updatedText = value;
         this.validChangeMade = (value !== this.data && value.length > 0);
       }
+
       _editSaveClicked() {
         super._addSegmentVariation(this._updatedText);
       }
+
       _editCancelClicked() {
         this.editing = false;
       }
+    }
 
-  });
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeUserDetailsPage.is, CTreeUserDetailsPage);
   </script>
 </dom-module>
