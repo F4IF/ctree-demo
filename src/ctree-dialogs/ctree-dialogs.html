@@ -27,14 +27,14 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-location/iron-location.html">
 <link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
 
-<!-- TODO: try using importHref to load these (had issues when loading link with dialog url) -->
+<!-- TODO: try using Polymer.importHref to load these (had issues when loading link with dialog url) -->
 <link rel="import" href="../ctree-element-screen/ctree-element-screen.html">
 <link rel="import" href="../ctree-user-screen/ctree-user-screen.html">
 
@@ -86,300 +86,308 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-dialogs',
+    class CTreeDialogs extends Polymer.Element {
 
-    properties: {
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: String,
+      static get is() { return 'ctree-dialogs'; }
 
-      dialog: {
-        type: String,
-        readOnly: true,
-        observer: '_dialogChanged',
-      },
+      static get properties() {
+        return {
+          /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: String,
 
-      page: {
-        type: String,
-        observer: '_pageChanged',
-      },
+          dialog: {
+            type: String,
+            readOnly: true,
+            observer: '_dialogChanged',
+          },
 
-      element: {
-        type: Object,
-        observer: '_elementChanged',
-      },
+          page: {
+            type: String,
+            observer: '_pageChanged',
+          },
 
-      elementId: {
-        type: Number,
-        observer: '_elementIdChanged',
-      },
+          element: {
+            type: Object,
+            observer: '_elementChanged',
+          },
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_descriptionConfigIdChanged',
-      },
+          elementId: {
+            type: Number,
+            observer: '_elementIdChanged',
+          },
 
-      descriptionSegmentIds: {
-        type: Array,
-        observer: '_descriptionSegmentIdsChanged',
-      },
+          descriptionConfigId: {
+            type: Number,
+            observer: '_descriptionConfigIdChanged',
+          },
 
-      feedbackSegment: Number,
+          descriptionSegmentIds: {
+            type: Array,
+            observer: '_descriptionSegmentIdsChanged',
+          },
 
-      historyContributor: Number,
+          feedbackSegment: Number,
 
-      _elementPage: {
-        type: String,
-        observer: '_elementPageChanged',
-      },
+          historyContributor: Number,
 
-      _userPage: {
-        type: String,
-        observer: '_userPageChanged',
-      },
-    },
+          _elementPage: {
+            type: String,
+            observer: '_elementPageChanged',
+          },
 
-    observers: [
-      '_dialogParamChanged(queryParams.d)',
-      '_pageParamChanged(queryParams.p)',
-      '_elementParamChanged(queryParams.e)',
-      '_descriptionConfigParamChanged(queryParams.c)',
-      '_descriptionSegmentVariationsParamChanged(queryParams.s)',
-    ],
-
-    openElementDialog: function() {
-      this._setDialog('element');
-    },
-
-    openUserDialog: function() {
-      this._setDialog('user');
-    },
-
-    _elementDialogClosed: function() {
-      if (this.dialog === 'element') {
-        this._setDialog(undefined);
-        this._dialogChanged(undefined);
-      }
-    },
-
-    _userDialogClosed: function() {
-      if (this.dialog === 'user') {
-        this._setDialog(undefined);
-        this._dialogChanged(undefined);
-      }
-    },
-
-    _dialogChanged: function(dialog, previousDialog) {
-      if (dialog === previousDialog) return;
-
-      var isElement = (dialog === 'element');
-      var isUser = (dialog === 'user');
-
-      if ((isElement || isUser) && dialog) {
-        // TODO: use this for Polymer 2.0
-        //this.queryParams.d = dialog;
-        this.set('queryParams.d', dialog);
-      } else if (this.queryParams.hasOwnProperty('d')) {
-        delete this.queryParams.d;
-      }
-      if ((isElement || isUser) && this.page) {
-        // TODO: use this for Polymer 2.0
-        //this.queryParams.p = this.page;
-        this.set('queryParams.p', this.page);
-      } else if (this.queryParams.hasOwnProperty('p')) {
-        delete this.queryParams.p;
-      }
-      if (isElement && this.elementId) {
-        // TODO: use this for Polymer 2.0
-        //this.queryParams.e = this.elementId;
-        this.set('queryParams.e', this.elementId);
-      } else if (this.queryParams.hasOwnProperty('e')) {
-        delete this.queryParams.e;
-      }
-      if (isElement && this.descriptionConfigId) {
-        // TODO: use this for Polymer 2.0
-        //this.queryParams.c = this.descriptionConfigId;
-        this.set('queryParams.c', this.descriptionConfigId);
-      } else if (this.queryParams.hasOwnProperty('c')) {
-        delete this.queryParams.c;
-      }
-      if (isElement && this.descriptionSegmentIds && this.descriptionSegmentIds.length > 0) {
-        // TODO: use this for Polymer 2.0
-        //this.queryParams.s = this.descriptionSegmentIds.join(',');
-        this.set('queryParams.s', this.descriptionSegmentIds.join(','));
-      } else if (this.queryParams.hasOwnProperty('s')) {
-        delete this.queryParams.s;
+          _userPage: {
+            type: String,
+            observer: '_userPageChanged',
+          },
+        };
       }
 
-      // TODO: use this for Polymer 2.0
-      //this.notifyPath('queryParams');
-      this.$.params.paramsObjectChanged();
-
-      if (isElement) {
-        this._elementPage = this.page;
-      } else if (isUser) {
-        this._userPage = this.page;
+      static get observers() {
+        return [
+          '_dialogParamChanged(queryParams.d)',
+          '_pageParamChanged(queryParams.p)',
+          '_elementParamChanged(queryParams.e)',
+          '_descriptionConfigParamChanged(queryParams.c)',
+          '_descriptionSegmentVariationsParamChanged(queryParams.s)',
+        ];
       }
 
-      if (isElement !== this.$.elementDialog.opened) {
-        if (isElement) {
-          // TODO: this causes issues, so for now just import normally
-          //this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-element-screen/ctree-element-screen.html'), () => {this.$.elementDialog.open();}, null);
-          this.$.elementDialog.open();
-        } else {
-          this.$.elementDialog.close();
+      openElementDialog() {
+        this._setDialog('element');
+      }
+
+      openUserDialog() {
+        this._setDialog('user');
+      }
+
+      _elementDialogClosed() {
+        if (this.dialog === 'element') {
+          this._setDialog(undefined);
+          this._dialogChanged(undefined);
         }
       }
-      if (isUser !== this.$.userDialog.opened) {
-        if (isUser) {
-          // TODO: this causes issues, so for now just import normally
-          //this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-user-screen/ctree-user-screen.html'), () => {this.$.userDialog.open();}, null);
-          this.$.userDialog.open();
-        } else {
-          this.$.userDialog.close();
+
+      _userDialogClosed() {
+        if (this.dialog === 'user') {
+          this._setDialog(undefined);
+          this._dialogChanged(undefined);
         }
       }
-    },
 
-    _dialogParamChanged: function(dialog) {
-      this._setDialog(dialog);
-    },
+      _dialogChanged(dialog, previousDialog) {
+        if (dialog === previousDialog) return;
 
-    _pageParamChanged: function(page) {
-      if (this.queryParams.d === 'element' || this.queryParams.d === 'user') {
-        if (this.queryParams.d === 'element') {
-          this._elementPage = page;
-        } else {// if (this.queryParams.d === 'user') {
-          this._userPage = page;
-        }
+        var isElement = (dialog === 'element');
+        var isUser = (dialog === 'user');
 
-        if (!page && this.queryParams.hasOwnProperty('p')) {
-          delete this.queryParams.p;
+        if ((isElement || isUser) && dialog) {
           // TODO: use this for Polymer 2.0
-          //this.notifyPath('queryParams.p');
-          this.$.params.paramsObjectChanged();
+          //this.queryParams.d = dialog;
+          this.set('queryParams.d', dialog);
+        } else if (this.queryParams.hasOwnProperty('d')) {
+          delete this.queryParams.d;
         }
-      }
-    },
-
-    _elementParamChanged: function(elementId) {
-      if (this.queryParams.d === 'element' && !elementId && this.queryParams.hasOwnProperty('e')) {
-        delete this.queryParams.e;
-        // TODO: use this for Polymer 2.0
-        //this.notifyPath('queryParams.e');
-        this.$.params.paramsObjectChanged();
-      }
-    },
-
-    _descriptionConfigParamChanged: function(descriptionConfigId) {
-      if (this.queryParams.d === 'element' && !descriptionConfigId && this.queryParams.hasOwnProperty('c')) {
-        delete this.queryParams.c;
-        // TODO: use this for Polymer 2.0
-        //this.notifyPath('queryParams.c');
-        this.$.params.paramsObjectChanged();
-      }
-    },
-
-    _descriptionSegmentVariationsParamChanged: function(descriptionSegmentIdsStr) {
-      if (descriptionSegmentIdsStr) {
-        var descriptionSegmentIds = descriptionSegmentIdsStr.split(',');
-        for (var i = 0; i < descriptionSegmentIds.length; i++) {
-          var id = parseInt(descriptionSegmentIds[i]);
-          if (id != NaN) {
-            descriptionSegmentIds[i] = id;
-          } else {
-            descriptionSegmentIds.splice(i, 1);
-            i--;
-          }
-        }
-        this.descriptionSegmentIds = descriptionSegmentIds;
-
-      } else if (this.queryParams.d === 'element' && this.queryParams.hasOwnProperty('s')) {
-        delete this.queryParams.s;
-        // TODO: use this for Polymer 2.0
-        //this.notifyPath('queryParams.s');
-        this.$.params.paramsObjectChanged();
-      }
-    },
-
-    _pageChanged: function(page) {
-      if ((this.queryParams.d === 'element' || this.queryParams.d === 'user') && this.queryParams.p !== page) {
-        if (page) {
-          this.set('queryParams.p', page);
+        if ((isElement || isUser) && this.page) {
+          // TODO: use this for Polymer 2.0
+          //this.queryParams.p = this.page;
+          this.set('queryParams.p', this.page);
         } else if (this.queryParams.hasOwnProperty('p')) {
           delete this.queryParams.p;
+        }
+        if (isElement && this.elementId) {
           // TODO: use this for Polymer 2.0
-          //this.notifyPath('queryParams.p');
-          this.$.params.paramsObjectChanged();
+          //this.queryParams.e = this.elementId;
+          this.set('queryParams.e', this.elementId);
+        } else if (this.queryParams.hasOwnProperty('e')) {
+          delete this.queryParams.e;
+        }
+        if (isElement && this.descriptionConfigId) {
+          // TODO: use this for Polymer 2.0
+          //this.queryParams.c = this.descriptionConfigId;
+          this.set('queryParams.c', this.descriptionConfigId);
+        } else if (this.queryParams.hasOwnProperty('c')) {
+          delete this.queryParams.c;
+        }
+        if (isElement && this.descriptionSegmentIds && this.descriptionSegmentIds.length > 0) {
+          // TODO: use this for Polymer 2.0
+          //this.queryParams.s = this.descriptionSegmentIds.join(',');
+          this.set('queryParams.s', this.descriptionSegmentIds.join(','));
+        } else if (this.queryParams.hasOwnProperty('s')) {
+          delete this.queryParams.s;
+        }
+
+        // TODO: use this for Polymer 2.0
+        //this.notifyPath('queryParams');
+        this.$.params.paramsObjectChanged();
+
+        if (isElement) {
+          this._elementPage = this.page;
+        } else if (isUser) {
+          this._userPage = this.page;
+        }
+
+        if (isElement !== this.$.elementDialog.opened) {
+          if (isElement) {
+            // TODO: this causes issues, so for now just import normally
+            //Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-element-screen/ctree-element-screen.html'), () => {this.$.elementDialog.open();}, null);
+            this.$.elementDialog.open();
+          } else {
+            this.$.elementDialog.close();
+          }
+        }
+        if (isUser !== this.$.userDialog.opened) {
+          if (isUser) {
+            // TODO: this causes issues, so for now just import normally
+            //Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-user-screen/ctree-user-screen.html'), () => {this.$.userDialog.open();}, null);
+            this.$.userDialog.open();
+          } else {
+            this.$.userDialog.close();
+          }
         }
       }
-    },
 
-    _elementPageChanged: function(page) {
-      if (this.queryParams.d !== 'element') return;
-
-      this.set('queryParams.p', page);
-    },
-
-    _userPageChanged: function(page) {
-      if (this.queryParams.d !== 'user') return;
-
-      this.set('queryParams.p', page);
-    },
-
-    _elementChanged: function(element) {
-      if (element) {
-        this.elementId = element.id;
+      _dialogParamChanged(dialog) {
+        this._setDialog(dialog);
       }
-    },
 
-    _elementIdChanged: function(elementId) {
-      if (this.queryParams && this.queryParams.d === 'element' && this.queryParams.e !== elementId) {
-        if (elementId) {
-          if (this.element && this.element.id !== elementId) {
-            this.element = undefined;
+      _pageParamChanged(page) {
+        if (this.queryParams.d === 'element' || this.queryParams.d === 'user') {
+          if (this.queryParams.d === 'element') {
+            this._elementPage = page;
+          } else {// if (this.queryParams.d === 'user') {
+            this._userPage = page;
           }
-          this.set('queryParams.e', elementId);
-        } else if (this.queryParams.hasOwnProperty('e')) {
+
+          if (!page && this.queryParams.hasOwnProperty('p')) {
+            delete this.queryParams.p;
+            // TODO: use this for Polymer 2.0
+            //this.notifyPath('queryParams.p');
+            this.$.params.paramsObjectChanged();
+          }
+        }
+      }
+
+      _elementParamChanged(elementId) {
+        if (this.queryParams.d === 'element' && !elementId && this.queryParams.hasOwnProperty('e')) {
           delete this.queryParams.e;
           // TODO: use this for Polymer 2.0
           //this.notifyPath('queryParams.e');
           this.$.params.paramsObjectChanged();
         }
       }
-      // TODO:
-    },
 
-    _descriptionConfigIdChanged: function(descriptionConfigId) {
-      if (this.queryParams.d === 'element' && this.queryParams.c !== descriptionConfigId) {
-        if (descriptionConfigId) {
-          this.set('queryParams.c', descriptionConfigId);
-        } else if (this.queryParams.hasOwnProperty('c')) {
+      _descriptionConfigParamChanged(descriptionConfigId) {
+        if (this.queryParams.d === 'element' && !descriptionConfigId && this.queryParams.hasOwnProperty('c')) {
           delete this.queryParams.c;
           // TODO: use this for Polymer 2.0
           //this.notifyPath('queryParams.c');
           this.$.params.paramsObjectChanged();
         }
       }
-      // TODO:
-    },
 
-    _descriptionSegmentIdsChanged: function(descriptionSegmentIds) {
-      if (this.queryParams.d === 'element') {
-        if (descriptionSegmentIds.length > 0) {
-          this.set('queryParams.s', descriptionSegmentIds.join(','));
-        } else if (this.queryParams.hasOwnProperty('s')) {
+      _descriptionSegmentVariationsParamChanged(descriptionSegmentIdsStr) {
+        if (descriptionSegmentIdsStr) {
+          var descriptionSegmentIds = descriptionSegmentIdsStr.split(',');
+          for (var i = 0; i < descriptionSegmentIds.length; i++) {
+            var id = parseInt(descriptionSegmentIds[i]);
+            if (id != NaN) {
+              descriptionSegmentIds[i] = id;
+            } else {
+              descriptionSegmentIds.splice(i, 1);
+              i--;
+            }
+          }
+          this.descriptionSegmentIds = descriptionSegmentIds;
+
+        } else if (this.queryParams.d === 'element' && this.queryParams.hasOwnProperty('s')) {
           delete this.queryParams.s;
           // TODO: use this for Polymer 2.0
           //this.notifyPath('queryParams.s');
           this.$.params.paramsObjectChanged();
         }
       }
-      // TODO:
-    },
-  });
+
+      _pageChanged(page) {
+        if ((this.queryParams.d === 'element' || this.queryParams.d === 'user') && this.queryParams.p !== page) {
+          if (page) {
+            this.set('queryParams.p', page);
+          } else if (this.queryParams.hasOwnProperty('p')) {
+            delete this.queryParams.p;
+            // TODO: use this for Polymer 2.0
+            //this.notifyPath('queryParams.p');
+            this.$.params.paramsObjectChanged();
+          }
+        }
+      }
+
+      _elementPageChanged(page) {
+        if (this.queryParams.d !== 'element') return;
+
+        this.set('queryParams.p', page);
+      }
+
+      _userPageChanged(page) {
+        if (this.queryParams.d !== 'user') return;
+
+        this.set('queryParams.p', page);
+      }
+
+      _elementChanged(element) {
+        if (element) {
+          this.elementId = element.id;
+        }
+      }
+
+      _elementIdChanged(elementId) {
+        if (this.queryParams && this.queryParams.d === 'element' && this.queryParams.e !== elementId) {
+          if (elementId) {
+            if (this.element && this.element.id !== elementId) {
+              this.element = undefined;
+            }
+            this.set('queryParams.e', elementId);
+          } else if (this.queryParams.hasOwnProperty('e')) {
+            delete this.queryParams.e;
+            // TODO: use this for Polymer 2.0
+            //this.notifyPath('queryParams.e');
+            this.$.params.paramsObjectChanged();
+          }
+        }
+        // TODO:
+      }
+
+      _descriptionConfigIdChanged(descriptionConfigId) {
+        if (this.queryParams.d === 'element' && this.queryParams.c !== descriptionConfigId) {
+          if (descriptionConfigId) {
+            this.set('queryParams.c', descriptionConfigId);
+          } else if (this.queryParams.hasOwnProperty('c')) {
+            delete this.queryParams.c;
+            // TODO: use this for Polymer 2.0
+            //this.notifyPath('queryParams.c');
+            this.$.params.paramsObjectChanged();
+          }
+        }
+        // TODO:
+      }
+
+      _descriptionSegmentIdsChanged(descriptionSegmentIds) {
+        if (this.queryParams.d === 'element') {
+          if (descriptionSegmentIds.length > 0) {
+            this.set('queryParams.s', descriptionSegmentIds.join(','));
+          } else if (this.queryParams.hasOwnProperty('s')) {
+            delete this.queryParams.s;
+            // TODO: use this for Polymer 2.0
+            //this.notifyPath('queryParams.s');
+            this.$.params.paramsObjectChanged();
+          }
+        }
+        // TODO:
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeDialogs.is, CTreeDialogs);
   </script>
 </dom-module>

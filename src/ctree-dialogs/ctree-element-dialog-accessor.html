@@ -27,69 +27,72 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
 <script>
   'use strict';
 
-  Polymer({
-    is: 'ctree-element-dialog-accessor',
+  class CTreeElementDialogAccessor extends Polymer.Element {
 
-    properties: {
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: String,
+    static get is() { return 'ctree-element-dialog-accessor'; }
 
-      /**
-       * Element data
-       *
-       * Structure:
-       *   {
-       *     id: Number,
-       *     type: ElementType,
-       *     title: String,
-       *     parents: [Number],
-       *     children: [Number],
-       *     childrenSearchComplete: Boolean,
-       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-       *     description: [{
-       *       id: Number,
-       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-       *       segments: [{
-       *         id: Number,
-       *         type: SegmentType,
-       *         variations: [{
-       *           id: Number,
-       *           data: dynamic,	// data type depends on segment type
-       *         }, ...],
-       *       }, ...],
-       *     }, ...],
-       *     feedback: [{
-       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-       *       text: String,
-       *     }, ...],
-       *     bookmarked: Boolean,
-       *   }
-       */
-      element: Object,
+    static get properties() {
+      return {
+        /**
+         * The unique key identifying a cTree.  If the site only has one cTree
+         * this doesn't need to be set.
+         */
+        ctreeKey: String,
 
-      descriptionConfigId: Number,
+        /**
+         * Element data
+         *
+         * Structure:
+         *   {
+         *     id: Number,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Number],
+         *     children: [Number],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: Number,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: Number,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: Number,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }
+         */
+        element: Object,
 
-      descriptionSegmentIds: Array,
+        descriptionConfigId: Number,
 
-      feedbackSegment: Number,
+        descriptionSegmentIds: Array,
 
-      historyContributor: Number,
+        feedbackSegment: Number,
 
-      _dialog: Object,
-    },
+        historyContributor: Number,
 
-    open: function() {
+        _dialog: Object,
+      };
+    }
+
+    open() {
       if (!this._dialog) {
-        this.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'), () => {
+        Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'), () => {
           var dialogs = document.getElementsByTagName('ctree-dialogs');
           if (dialogs.length < 1) {
             this._dialog = document.createElement('ctree-dialogs');
@@ -111,6 +114,9 @@ this license.
           this._dialog.openElementDialog();
         }
       }
-    },
-  });
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeElementDialogAccessor.is, CTreeElementDialogAccessor);
 </script>

@@ -56,8 +56,8 @@ this license.
         var commentCode = commentCodes[Math.floor(Math.random() * commentCodes.length)];
         item.commentCode =  commentCode;
 
-        var CATEGORY = Polymer.CTreeLoader.COMMENT_CATEGORY;
-        var SUBJECT = Polymer.CTreeLoader.COMMENT_SUBJECT;
+        var CATEGORY = CTree.Loader.COMMENT_CATEGORY;
+        var SUBJECT = CTree.Loader.COMMENT_SUBJECT;
         var subjectCode = commentCode % 100;
         var categoryCode = commentCode - subjectCode;
         if (!categoryCode != CATEGORY.NEEDS) {
@@ -92,165 +92,165 @@ this license.
     return items;
   }
 
-  Polymer.CTreeListLoader = Polymer({
-    is: 'ctree-list-loader-test',
+  class CTreeListLoader extends CTree.LoaderBehavior {
 
-    behaviors: [
-      Polymer.CTreeLoaderBehavior,
-    ],
+    static get is() { return 'ctree-list-loader-test'; }
 
-    properties: {
-      pageSize: {
-        type: Number,
-        value: 20,
-      },
+    static get properties() {
+      return {
+        pageSize: {
+          type: Number,
+          value: 20,
+        },
 
-      /**
-       * The type of list to load in current properties.  Supported values:
-       *   - suggested
-       *   - bookmarked
-       *   - history
-       */
-      currentName: {
-        type: String,
-        observer: "_currentChanged",
-      },
+        /**
+         * The type of list to load in current properties.  Supported values:
+         *   - suggested
+         *   - bookmarked
+         *   - history
+         */
+        currentName: {
+          type: String,
+          observer: "_currentChanged",
+        },
 
-      /**
-       * All items loaded for the current list.
-       *
-       * Structure:
-       *   [{
-       *     element: Element,
-       *     feedback: Feedback,
-       *     descriptionConfig: Number,
-       *     descriptionSegments: [Number],
-       *     commentCode: Number,
-       *     commentData: Object,	// type depends on commentCode
-       *   }, ...]
-       */
-      currentItems: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * All items loaded for the current list.
+         *
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: Number,
+         *     descriptionSegments: [Number],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }, ...]
+         */
+        currentItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-      /**
-       * Indicates if the next page of items for the current list is loading.
-       */
-      currentLoading: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: false,
-      },
+        /**
+         * Indicates if the next page of items for the current list is loading.
+         */
+        currentLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-      /**
-       * Indicates if the current list has more items to load.
-       */
-      currentHasMore: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: true,
-      },
+        /**
+         * Indicates if the current list has more items to load.
+         */
+        currentHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-      /**
-       * Structure:
-       *   [{
-       *     element: Element,
-       *     feedback: Feedback,
-       *     descriptionConfig: Number,
-       *     descriptionSegments: [Numbers],
-       *     commentCode: Number,
-       *     commentData: Object,	// type depends on commentCode
-       *   }, ...]
-       */
-      suggestedItems: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: Number,
+         *     descriptionSegments: [Numbers],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }, ...]
+         */
+        suggestedItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-      suggestedLoading: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: false,
-      },
+        suggestedLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-      suggestedHasMore: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: true,
-      },
+        suggestedHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-      /**
-       * Structure:
-       *   [{
-       *     element: Element,
-       *   }, ...]
-       */
-      bookmarkedItems: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *   }, ...]
+         */
+        bookmarkedItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-      bookmarkedLoading: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: false,
-      },
+        bookmarkedLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-      bookmarkedHasMore: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: true,
-      },
+        bookmarkedHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-      /**
-       * Structure:
-       *   [{
-       *     element: Element,
-       *     feedback: Feedback,
-       *     commentCode: Number,
-       *     descriptionConfig: Number,
-       *     descriptionSegments: [Numbers],
-       *   }, ...]
-       */
-      historyItems: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     commentCode: Number,
+         *     descriptionConfig: Number,
+         *     descriptionSegments: [Numbers],
+         *   }, ...]
+         */
+        historyItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-      historyLoading: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: false,
-      },
+        historyLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-      historyHasMore: {
-        type: Boolean,
-        readOnly: true,
-        notify: true,
-        value: true,
-      },
-    },
+        historyHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
+      };
+    }
 
-    loadSuggested: function() {
+    loadSuggested() {
       var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
       var listData = cTreeData.lists.suggested;
       if (!listData.hasMore || listData.loading) return;
 
       listData.loading = true;
       this._setLoading('suggested', true);
-      this.async(function() {
+      setTimeout(() => {
         if (!this.ctreeKey) return;
 
         if (!listData.offset) {
@@ -286,16 +286,17 @@ this license.
           this._setLoading('suggested', false);
         }
       }, Test.LOAD_DELAY);
-    },
+    }
 
-    loadBookmarked: function() {
+    loadBookmarked() {
       var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
       var listData = cTreeData.lists.bookmarked;
       if (!listData.hasMore || listData.loading) return;
 
       listData.loading = true;
       this._setLoading('bookmarked', true);
-      this.async(function() {
+      setTimeout(() => {
         if (!listData.offset) {
           listData.offset = 0;
         }
@@ -329,16 +330,17 @@ this license.
           this._setLoading('bookmarked', false);
         }
       }, Test.LOAD_DELAY);
-    },
+    }
 
-    loadHistory: function() {
+    loadHistory() {
       var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
       var listData = cTreeData.lists.history;
       if (!listData.hasMore || listData.loading) return;
 
       listData.loading = true;
       this._setLoading('history', true);
-      this.async(function() {
+      setTimeout(() => {
         if (!listData.offset) {
           listData.offset = 0;
         }
@@ -372,9 +374,9 @@ this license.
           this._setLoading('history', false);
         }
       }, Test.LOAD_DELAY);
-    },
+    }
 
-    _setLoading: function(name, loading) {
+    _setLoading(name, loading) {
       if (name == 'suggested') {
         this._setSuggestedLoading(loading);
       } else if (name == 'bookmarked') {
@@ -385,9 +387,9 @@ this license.
       if (name == this.currentName) {
         this._setCurrentLoading(loading);
       }
-    },
+    }
 
-    _setHasMore: function(name, hasMore) {
+    _setHasMore(name, hasMore) {
       if (name == 'suggested') {
         this._setSuggestedHasMore(hasMore);
       } else if (name == 'bookmarked') {
@@ -398,9 +400,9 @@ this license.
       if (name == this.currentName) {
         this._setCurrentHasMore(hasMore);
       }
-    },
+    }
 
-    _cTreeDataChanged: function(cTreeData) {
+    _cTreeDataChanged(cTreeData) {
       var listData = cTreeData.lists.suggested;
       this._setSuggestedItems(listData.items);
       this._setSuggestedLoading(listData.loading);
@@ -414,9 +416,9 @@ this license.
       this._setHistoryLoading(listData.loading);
       this._setHistoryHasMore(listData.hasMore);
       this._currentChanged(this.currentName, this.currentName);
-    },
+    }
 
-    _currentChanged: function(currentName, previousName) {
+    _currentChanged(currentName, previousName) {
       if (currentName == "suggested") {
         this._setCurrentItems(this.suggestedItems);
         this._setCurrentLoading(this.suggestedLoading);
@@ -438,8 +440,12 @@ this license.
         this._setCurrentHasMore(false);
         this.loadCurrent = null;
       }
-    },
-  });
+    }
+  }
+  Polymer.CTreeListLoader = CTreeListLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeListLoader.is, CTreeListLoader);
 
 })();
 

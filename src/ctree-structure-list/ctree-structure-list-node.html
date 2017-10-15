@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -86,20 +86,25 @@ this license.
   </template>
 
   <script>
-    Polymer({
-      is: 'ctree-structure-list-node',
-      properties: {
-        elementId: {
-          type: Number,
-          observer: '_elementIdChanged'
-        },
-        expanded: {
-          type: Boolean,
-          value: false,
-          observer: '_expandedChanged'
-   	    }
-      },
-      openElement: function() {
+    class CTreeStructureListNode extends Polymer.Element {
+
+      static get is() { return 'ctree-structure-list-node'; }
+
+      static get properties() {
+        return {
+          elementId: {
+            type: Number,
+            observer: '_elementIdChanged'
+          },
+          expanded: {
+            type: Boolean,
+            value: false,
+            observer: '_expandedChanged'
+     	    }
+        };
+      }
+
+      openElement() {
         var elementDialog = document.querySelector('ctree-dialogs');
         if (elementDialog) {
           elementDialog.elementId = this.elementId;
@@ -107,11 +112,13 @@ this license.
         } else {
           console.error("Error: must include ctree-dialogs tag in body of index.html before app tag");
         }
-      },
-      toggleExpanded: function() {
+      }
+
+      toggleExpanded() {
         this.expanded = !this.expanded;
-      },
-      _elementIdChanged: function(elementId) {
+      }
+
+      _elementIdChanged(elementId) {
         if (ctreeElements) {
           this.expanded = false;
           var element = ctreeElements[elementId];
@@ -127,8 +134,9 @@ this license.
             this.$.itemRow.style.display = "none";
           }
         }
-      },
-      _expandedChanged: function(expanded) {
+      }
+
+      _expandedChanged(expanded) {
         if (expanded) {
           this.$.expand.style.display = "none";
           var element = ctreeElements[this.elementId];
@@ -151,6 +159,9 @@ this license.
           this.$.childrenRow.style.display = "none";
         }
       }
-    });
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeStructureListNode.is, CTreeStructureListNode);
   </script>
 </dom-module>

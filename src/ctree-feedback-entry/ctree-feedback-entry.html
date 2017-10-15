@@ -108,46 +108,50 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-feedback-entry',
+    class CTreeFeedbackEntry extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
 
-    /**
-     * Fired when a the feedback button is tapped.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
-     */
+      static get is() { return 'ctree-feedback-entry'; }
 
-    properties: {
-      _savedHeight: Number,
-    },
+      /**
+       * Fired when a the feedback button is tapped.
+       *
+       * @event feedback-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+       */
 
-    listeners: {
-      "iron-resize": "_onSizeChange",
-    },
-
-    behaviors: [
-      Polymer.IronResizableBehavior,
-    ],
-
-    attached: function() {
-      this.async(this.notifyResize, 1);
-    },
-
-    _fireFeedbackTapped: function() {
-      // TODO: figure out segment data & pass as detail segmentData
-      this.fire('feedback-tapped', {segmentData: {}});
-    },
-
-    _onSizeChange: function() {
-      this.savedHeight = this.offsetHeight;
-    },
-
-    _onCommentChanged: function() {
-      if (this.offsetHeight !== this.previousHeight) {
-        this.async(this.notifyResize, 1);
+      static get properties() {
+        return {
+          _savedHeight: Number,
+        };
       }
-    },
-  });
+
+      ready() {
+        super.ready();
+
+        this.addEventListener('iron-resize', e => this._onSizeChange(e));
+      }
+
+      attached() {
+        setTimeout(() => this.notifyResize(), 1);
+      }
+
+      _fireFeedbackTapped() {
+        // TODO: figure out segment data & pass as detail segmentData
+        this.dispatchEvent(new CustomEvent('feedback-tapped', {detail: {segmentData: {}}, bubbles: true, composed: true}));
+      }
+
+      _onSizeChange() {
+        this.savedHeight = this.offsetHeight;
+      }
+
+      _onCommentChanged() {
+        if (this.offsetHeight !== this.previousHeight) {
+          setTimeout(() => this.notifyResize(), 1);
+        }
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeFeedbackEntry.is, CTreeFeedbackEntry);
   </script>
 </dom-module>

@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
 <!-- internal -->
@@ -71,43 +71,49 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-feedback-page',
+    class CTreeFeedbackPage extends Polymer.Element {
 
-    properties: {
-      feedback: {
-        type: Array,
-        value: [
-          {depth: 0, sentiment: 1, comment: "Test comment 1"},
-          {depth: 1, sentiment: 0, comment: "Test response"},
-          {depth: 2, sentiment: -1, comment: "Test sub-response"},
-          {depth: 3, sentiment: 0, comment: "Test deep-response"},
-          {depth: 0, sentiment: 0, comment: "Test comment 2"}
-        ],
-      },
+      static get is() { return 'ctree-feedback-page'; }
 
-      segment: Number,
+      static get properties() {
+        return {
+          feedback: {
+            type: Array,
+            value: [
+              {depth: 0, sentiment: 1, comment: "Test comment 1"},
+              {depth: 1, sentiment: 0, comment: "Test response"},
+              {depth: 2, sentiment: -1, comment: "Test sub-response"},
+              {depth: 3, sentiment: 0, comment: "Test deep-response"},
+              {depth: 0, sentiment: 0, comment: "Test comment 2"}
+            ],
+          },
 
-      descriptionConfigId: {
-        type: Number,
-        observer: '_onDescriptionConfigChanged',
-      },
-    },
+          segment: Number,
 
-    _onDescriptionConfigChanged: function(descriptionConfigId) {
-      // TODO: refresh feedback list
-    },
-
-    _onFeedbackResized: function() {
-      this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
-    },
-
-    _onItemResized: function(e) {
-      item = e.target.item;
-      if (item) {
-        this.$.feedback.updateSizeForItem(item);
+          descriptionConfigId: {
+            type: Number,
+            observer: '_onDescriptionConfigChanged',
+          },
+        };
       }
-    },
-  });
+
+      _onDescriptionConfigChanged(descriptionConfigId) {
+        // TODO: refresh feedback list
+      }
+
+      _onFeedbackResized() {
+        this.$.feedback.style.top = this.$.topFeedbackEntry.offsetHeight + this.$.feedbackSort.offsetHeight + 'px';
+      }
+
+      _onItemResized(e) {
+        item = e.target.item;
+        if (item) {
+          this.$.feedback.updateSizeForItem(item);
+        }
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeFeedbackPage.is, CTreeFeedbackPage);
   </script>
 </dom-module>

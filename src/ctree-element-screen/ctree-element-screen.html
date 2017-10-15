@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
@@ -106,147 +106,153 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-element-screen',
+    class CTreeElementScreen extends Polymer.Element {
 
-    /**
-     * Fired when the close button is tapped.
-     *
-     * @event close-tapped
-     */
-
-    properties: {
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: String,
+      static get is() { return 'ctree-element-screen'; }
 
       /**
-       * If true, don't show close button.
+       * Fired when the close button is tapped.
+       *
+       * @event close-tapped
        */
-      noclose: Boolean,
 
-      element: {
-        type: Object,
-        observer: '_elementChanged',
-      },
+      static get properties() {
+        return {
+          /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: String,
 
-      elementId: {
-        type: Number,
-        notify: true,
-      },
+          /**
+           * If true, don't show close button.
+           */
+          noclose: Boolean,
 
-      descriptionConfig: {
-        type: Number,
-        observer: '_descriptionConfigChanged',
-        notify: true,
-      },
+          element: {
+            type: Object,
+            observer: '_elementChanged',
+          },
 
-      descriptionSegments: {
-        type: Array,
-        observer: '_descriptionSegmentsChanged',
-        notify: true,
-      },
+          elementId: {
+            type: Number,
+            notify: true,
+          },
 
-      page: {
-        type: String,
-        observer: '_pageChanged',
-        notify: true,
-      },
+          descriptionConfig: {
+            type: Number,
+            observer: '_descriptionConfigChanged',
+            notify: true,
+          },
 
-      feedbackSegment: Number,
+          descriptionSegments: {
+            type: Array,
+            observer: '_descriptionSegmentsChanged',
+            notify: true,
+          },
 
-      historyContributor: Number,
+          page: {
+            type: String,
+            observer: '_pageChanged',
+            notify: true,
+          },
 
-      _descriptionVersionBarVisible: {
-        type: Boolean,
-        observer: '_descriptionVersionBarVisibleChanged',
-        value: true,
-      },
-    },
+          feedbackSegment: Number,
 
-    _closeClicked() {
-      this.fire('close-tapped');
-    },
+          historyContributor: Number,
 
-    _pageChanged: function(page) {
-      if (!page) {
-        this.page = 'details';
+          _descriptionVersionBarVisible: {
+            type: Boolean,
+            observer: '_descriptionVersionBarVisibleChanged',
+            value: true,
+          },
+        };
       }
 
-      if (page == 'details' || page == 'feedback') {
-        // applies to specific description segment so set default description config
-        this._ensureDescriptionConfigSet();
-      } else if (page == 'related') {
-        // applies to entire element so enter general state instead of specific description config state
-        this.descriptionConfig = null;
+      _closeClicked() {
+        this.dispatchEvent(new CustomEvent('close-tapped', {bubbles: true, composed: true}));
       }
-      this.$.importPage.load();
-    },
 
-    _elementChanged: function(element) {
-      if (element) {
-        this.elementId = element.id;
+      _pageChanged(page) {
+        if (!page) {
+          this.page = 'details';
+        }
+
+        if (page == 'details' || page == 'feedback') {
+          // applies to specific description segment so set default description config
+          this._ensureDescriptionConfigSet();
+        } else if (page == 'related') {
+          // applies to entire element so enter general state instead of specific description config state
+          this.descriptionConfig = null;
+        }
+        this.$.importPage.load();
       }
-      if (!this.descriptionConfig && element) {
-        this._pageChanged(this.page);
+
+      _elementChanged(element) {
+        if (element) {
+          this.elementId = element.id;
+        }
+        if (!this.descriptionConfig && element) {
+          this._pageChanged(this.page);
+        }
+        // TODO:
       }
-      // TODO:
-    },
 
-    _descriptionConfigChanged: function(descriptionConfig) {
-      this._descriptionVersionBarVisible = (descriptionConfig ? true : false);
-      if (!descriptionConfig && this.element) {
-        this._pageChanged(this.page);
+      _descriptionConfigChanged(descriptionConfig) {
+        this._descriptionVersionBarVisible = (descriptionConfig ? true : false);
+        if (!descriptionConfig && this.element) {
+          this._pageChanged(this.page);
+        }
+        // TODO:
       }
-      // TODO:
-    },
 
-    _descriptionSegmentsChanged: function(descriptionSegments) {
-      // TODO:
-    },
-
-    _descriptionVersionBarVisibleChanged: function(visible) {
-      // HACK: for some reson this.$ is undefined when open link with dialog parameters
-      if (!this.$) return;
-
-      if (visible) {
-        this.$.pages.style.bottom = '40px';
-      } else {
-        this.$.pages.style.bottom = '0';
+      _descriptionSegmentsChanged(descriptionSegments) {
+        // TODO:
       }
-    },
 
-    _ensureDescriptionConfigSet: function() {
-      if (!this.descriptionConfig) {
-        // TODO: get first config ID from element data
-        this.descriptionConfig = 1;
+      _descriptionVersionBarVisibleChanged(visible) {
+        // HACK: for some reson this.$ is undefined when open link with dialog parameters
+        if (!this.$) return;
+
+        if (visible) {
+          this.$.pages.style.bottom = '40px';
+        } else {
+          this.$.pages.style.bottom = '0';
+        }
       }
-    },
 
-    _onFeedbackTapped: function(e, detail) {
-      // TODO: figure out segment data from e or detail & pass as segmentData
-      this.feedbackSegment = null;
-      this.page = 'feedback';
-    },
-
-    _onContributorsTapped: function() {
-      this.page = 'contributors';
-    },
-
-    _onRelatedTapped: function() {
-      this.page = 'related';
-    },
-
-    _onHistoryTapped: function(e, detail) {
-      this.historyContributor = detail.contributor;
-      if (detail.generalHistory) {
-        // history shown should be for the entire element, not a specific description config
-        this.descriptionConfig = null;
+      _ensureDescriptionConfigSet() {
+        if (!this.descriptionConfig) {
+          // TODO: get first config ID from element data
+          this.descriptionConfig = 1;
+        }
       }
-      this.page = 'history';
-    },
-  });
+
+      _onFeedbackTapped(e, detail) {
+        // TODO: figure out segment data from e or detail & pass as segmentData
+        this.feedbackSegment = null;
+        this.page = 'feedback';
+      }
+
+      _onContributorsTapped() {
+        this.page = 'contributors';
+      }
+
+      _onRelatedTapped() {
+        this.page = 'related';
+      }
+
+      _onHistoryTapped(e, detail) {
+        this.historyContributor = detail.contributor;
+        if (detail.generalHistory) {
+          // history shown should be for the entire element, not a specific description config
+          this.descriptionConfig = null;
+        }
+        this.page = 'history';
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeElementScreen.is, CTreeElementScreen);
   </script>
 </dom-module>

@@ -92,89 +92,93 @@ this license.
   </template>
 
   <script>
-  Polymer({
-    is: 'ctree-feedback-item',
+    class CTreeFeedbackItem extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
 
-    /**
-     * Fired when a the feedback button is tapped.
-     *
-     * @event feedback-tapped
-     * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
-     */
+      static get is() { return 'ctree-feedback-item'; }
 
-    properties: {
-      item: {
-        type: Object,
-        observer: '_itemChanged',
-      },
+      /**
+       * Fired when a the feedback button is tapped.
+       *
+       * @event feedback-tapped
+       * @param {{segment: segmentData}} detail Contains data for segment whos feedback button was tapped.
+       */
 
-      depth: {
-        type: Number,
-        observer: '_depthChanged',
-      },
+      static get properties() {
+        return {
+          item: {
+            type: Object,
+            observer: '_itemChanged',
+          },
 
-      sentiment: Number,
+          depth: {
+            type: Number,
+            observer: '_depthChanged',
+          },
 
-      comment: String,
+          sentiment: Number,
 
-      // TODO: we probalby need to reset this whenever the item is changed (listen for ID or other handle change)
-      // TODO: store entered (but not submitted) comment by ID and clear it so list recycling works correctly
-      _commenting: {
-        type: Boolean,
-        value: false,
-      },
+          comment: String,
 
-      _offset: Number,
-    },
+          // TODO: we probalby need to reset this whenever the item is changed (listen for ID or other handle change)
+          // TODO: store entered (but not submitted) comment by ID and clear it so list recycling works correctly
+          _commenting: {
+            type: Boolean,
+            value: false,
+          },
 
-    behaviors: [
-      Polymer.IronResizableBehavior
-    ],
-
-    listeners: {
-      "iron-resize": "_onSizeChanged"
-    },
-
-    _equals: function(v1, v2) {
-      return v1 === v2;
-    },
-
-    _userClicked: function(e) {
-      // TODO: populate with user data
-      this.$.userDialog.open();
-    },
-
-    _commentTapped: function() {
-      this._commenting = !this._commenting;
-      this.async(this.notifyResize, 1);
-    },
-
-    _itemChanged: function(newItem, oldItem) {
-      // TODO: get user comment store/restore working
-      if (oldItem) {
-        // store comment in progress
-        oldItem.commenting = this._commenting;
-        //oldItem.comment = this.$.userComment.comment;
+          _offset: Number,
+        };
       }
-      this._commenting = newItem.commenting;
-      //this.$.userComment.comment = newItem.comment;
-      // TODO: if item has content populate it, otherwise hide content div
-    },
 
-    _onSizeChanged: function() {
-      this._depthChanged(this.depth);
-    },
+      ready() {
+        super.ready();
 
-    _depthChanged: function(depth) {
-      sentiment = this.$.sentiment;
-      sentimentWidth = sentiment.offsetWidth;
-      offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
-      if (offset != this._offset) {
-        this._offset = offset;
-        sentiment.style.marginLeft = offset + 'px';
-        this.$.feedback.style.width = 'calc(100% - ' + (sentimentWidth + 8 + offset) + 'px)';
+        this.addEventListener('iron-resize', e => this._onSizeChanged(e));
       }
-    },
-  });
+
+      _equals(v1, v2) {
+        return v1 === v2;
+      }
+
+      _userClicked(e) {
+        // TODO: populate with user data
+        this.$.userDialog.open();
+      }
+
+      _commentTapped() {
+        this._commenting = !this._commenting;
+        setTimeout(() => this.notifyResize(), 1);
+      }
+
+      _itemChanged(newItem, oldItem) {
+        // TODO: get user comment store/restore working
+        if (oldItem) {
+          // store comment in progress
+          oldItem.commenting = this._commenting;
+          //oldItem.comment = this.$.userComment.comment;
+        }
+        this._commenting = newItem.commenting;
+        //this.$.userComment.comment = newItem.comment;
+        // TODO: if item has content populate it, otherwise hide content div
+      }
+
+      _onSizeChanged() {
+        this._depthChanged(this.depth);
+      }
+
+      _depthChanged(depth) {
+        sentiment = this.$.sentiment;
+        sentimentWidth = sentiment.offsetWidth;
+        offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
+        if (offset != this._offset) {
+          this._offset = offset;
+          sentiment.style.marginLeft = offset + 'px';
+          this.$.feedback.style.width = 'calc(100% - ' + (sentimentWidth + 8 + offset) + 'px)';
+        }
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeFeedbackItem.is, CTreeFeedbackItem);
   </script>
 </dom-module>

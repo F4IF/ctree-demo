@@ -27,7 +27,7 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
 <link rel="import" href="ctree-structure-list-node-list.html">
 
@@ -44,8 +44,11 @@ this license.
   </template>
 
   <script>
-    Polymer({
-      is: 'ctree-structure-list'
-    });
+    class CTreeStructureList extends Polymer.Element {
+      static get is() { return 'ctree-structure-list'; }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeStructureList.is, CTreeStructureList);
   </script>
 </dom-module>

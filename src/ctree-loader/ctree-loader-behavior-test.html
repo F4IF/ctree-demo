@@ -286,148 +286,155 @@ this license.
     cTreeData.testHistory = getTestElementSubset(testElements.length / 5);
   };
 
-  Polymer.CTreeLoaderBehavior = {
-    properties: {
-      /**
-       * Alternate url where cTree is hosted.  The default is the root domain
-       * where the page holding this element is being hosted.
-       */
-      url: {
-        type: String,
-        notify: true,
-        observer: '_urlChanged',
-      },
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
 
-      /**
-       * The unique key identifying a cTree.  If the site only has one cTree
-       * this doesn't need to be set.
-       */
-      ctreeKey: {
-        type: String,
-        observer: '_keyChanged',
-      },
+  CTree.LoaderBehavior = class extends Polymer.Element {
+    static get properties() {
+      return {
+        /**
+         * Alternate url where cTree is hosted.  The default is the root domain
+         * where the page holding this element is being hosted.
+         */
+        url: {
+          type: String,
+          notify: true,
+          observer: '_urlChanged',
+        },
 
-      /**
-       * All types for current cTree, indexed by ID.
-       *
-       * Structure:
-       *   [{
-       *     id: Number,
-       *     name: String,
-       *     description: String,
-       *     iconUrl: String,
-       *     color: String,
-       *     parentsRequired: Boolean,
-       *     parentsMax: Number,
-       *     parentTypes: [Numbers],
-       *     elements: [Elements],
-       *   }, ...]
-       */
-      types: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * The unique key identifying a cTree.  If the site only has one cTree
+         * this doesn't need to be set.
+         */
+        ctreeKey: {
+          type: String,
+          observer: '_keyChanged',
+        },
 
-      /**
-       * All segment types supported by current cTree, indexed by ID.
-       *
-       * Structure:
-       *   [{
-       *     id: Number,
-       *     componentName: String,
-       *     canBeThumbnail: Boolean,
-       *   }, ...]
-       */
-      segmentTypes: {
-        type: Array,
-        readOnly: true,
-        notify: true,
-      },
+        /**
+         * All types for current cTree, indexed by ID.
+         *
+         * Structure:
+         *   [{
+         *     id: Number,
+         *     name: String,
+         *     description: String,
+         *     iconUrl: String,
+         *     color: String,
+         *     parentsRequired: Boolean,
+         *     parentsMax: Number,
+         *     parentTypes: [Numbers],
+         *     elements: [Elements],
+         *   }, ...]
+         */
+        types: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-      /**
-       * Object holding all values for current cTrees.  All item lists will be
-       * cleared for all cTrees when the user value changes.
-       *
-       * Structure:
-       *   url: String,
-       *   types: [Types],
-       *   segmentTypes: [SegmentTypes],
-       *   elements: [Elements],
-       *   users: [Users],
-       *   lists: {
-       *     suggested: {
-       *       items: [SuggestedItems],
-       *       loading: Boolean,
-       *       hasMore: Boolean,
-       *       offset: String,			// test: Number
-       *     },
-       *     bookmarked: {
-       *       items: [BookmarkedItems],
-       *       loading: Boolean,
-       *       hasMore: Boolean,
-       *       offset: String,			// test: Number
-       *     },
-       *     history: {
-       *       items: [HistoryItems],
-       *       loading: Boolean,
-       *       hasMore: Boolean,
-       *       offset: String,			// test: Number
-       *     },
-       *   },
-       *   testElements: [Elements],
-       *   testElementsWithoutParents: [Elements],
-       *   testSuggested: [Numbers],
-       *   testBookmarks: [Numbers],
-       *   testHistory: [Numbers],
-       *
-       * Elements Structure:
-       *   [{
-       *     id: Number,
-       *     type: ElementType,
-       *     title: String,
-       *     parents: [Numbers],
-       *     children: [Numbers],
-       *     childrenSearchComplete: Boolean,
-       *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-       *     description: [{
-       *       id: Number,
-       *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-       *       segments: [{
-       *         id: Number,
-       *         type: SegmentType,
-       *         variations: [{
-       *           id: Number,
-       *           data: dynamic,	// data type depends on segment type
-       *         }, ...],
-       *       }, ...],
-       *     }, ...],
-       *     feedback: [{
-       *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-       *       text: String,
-       *     }, ...],
-       *     bookmarked: Boolean,
-       *   }, ...]
-       *
-       * Users Structure:
-       *   [{
-       *     id: Number,
-       *     name: String,
-       *     avatar: String,
-       *     // TODO: add more public data
-       *   }, ...]
-       */
-      _cTreeData: {
-        type: Object,
-        observer: '_cTreeDataChanged',
-      },
-    },
+        /**
+         * All segment types supported by current cTree, indexed by ID.
+         *
+         * Structure:
+         *   [{
+         *     id: Number,
+         *     componentName: String,
+         *     canBeThumbnail: Boolean,
+         *   }, ...]
+         */
+        segmentTypes: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-    _urlChanged: function(url) {
+        /**
+         * Object holding all values for current cTrees.  All item lists will be
+         * cleared for all cTrees when the user value changes.
+         *
+         * Structure:
+         *   url: String,
+         *   types: [Types],
+         *   segmentTypes: [SegmentTypes],
+         *   elements: [Elements],
+         *   users: [Users],
+         *   lists: {
+         *     suggested: {
+         *       items: [SuggestedItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *     bookmarked: {
+         *       items: [BookmarkedItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *     history: {
+         *       items: [HistoryItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *   },
+         *   testElements: [Elements],
+         *   testElementsWithoutParents: [Elements],
+         *   testSuggested: [Numbers],
+         *   testBookmarks: [Numbers],
+         *   testHistory: [Numbers],
+         *
+         * Elements Structure:
+         *   [{
+         *     id: Number,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Numbers],
+         *     children: [Numbers],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: Number,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: Number,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: Number,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }, ...]
+         *
+         * Users Structure:
+         *   [{
+         *     id: Number,
+         *     name: String,
+         *     avatar: String,
+         *     // TODO: add more public data
+         *   }, ...]
+         */
+        _cTreeData: {
+          type: Object,
+          observer: '_cTreeDataChanged',
+        },
+      };
+    }
+
+    _urlChanged(url) {
       // do nothing for test loader
-    },
+    }
 
-    _keyChanged: function(cTreeKey, previousKey) {
+    _keyChanged(cTreeKey, previousKey) {
       var cTreeData = cTreesData[cTreeKey];
       var createCTree = !cTreeData;
       if (createCTree) {
@@ -451,7 +458,7 @@ this license.
       this._setSegmentTypes(cTreeData.segmentTypes);
 
       if (createCTree) {
-        this.async(function() {
+        setTimeout(() => {
           // TODO: enable async (wait to load items until done loading types)
           // types (can replace/alter to test other type configurations)
           var rootPath = document.createElement('iron-meta').byKey('rootPath');
@@ -485,19 +492,19 @@ this license.
           }
         }, Test.LOAD_DELAY);
       }
-    },
+    }
 
-    _cTreeDataChanged: function(cTreeData, previousCTreeData) {
+    _cTreeDataChanged(cTreeData, previousCTreeData) {
       // Implement when include behavior to initialize additional fields when cTreeData changes
-    },
+    }
   };
 
   // Initialize object to hold shared static constants and functions
-  Polymer.CTreeLoader = {};
+  CTree.Loader = {};
 
   // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
   // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
-  Polymer.CTreeLoader.COMMENT_CATEGORY = {
+  CTree.Loader.COMMENT_CATEGORY = {
     // Never look up values
     NEW: 100,
     UPDATED: 200,
@@ -512,7 +519,7 @@ this license.
     OPPOSING: 900,
   };
 
-  Polymer.CTreeLoader.COMMENT_SUBJECT = {
+  CTree.Loader.COMMENT_SUBJECT = {
     // popular: no from/with
     ELEMENT: 0,
     TYPE: 1,
@@ -545,7 +552,7 @@ this license.
    * @param {number} id
    * @param {boolean} [defaultToFirst=true]
    */
-  Polymer.CTreeLoader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
+  CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
     if (!array) return undefined;
 
     if (id) {
