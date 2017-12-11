@@ -191,8 +191,8 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         margin: 4px;
       }
       paper-toggle-button.green {
-        --paper-toggle-button-checked-bar-color:  var(--paper-green-500);
-        --paper-toggle-button-checked-button-color:  var(--paper-green-500);
+        --paper-toggle-button-checked-bar-color: var(--paper-green-500);
+        --paper-toggle-button-checked-button-color: var(--paper-green-500);
         --paper-toggle-button-checked-ink-color: var(--paper-green-500);
       }
       @media (max-width: 340px) {
@@ -224,11 +224,11 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         <div class="nav-content">
           <paper-input label="Search" value="{{searchText}}" no-label-float>
             <iron-icon icon="search" slot="prefix"></iron-icon>
-            <paper-icon-button slot="suffix" on-tap="clearSearch" icon="clear" alt="clear" title="clear"></paper-icon-button>
+            <paper-icon-button slot="suffix" hidden$="[[!searchText]]" on-tap="_clearSearch" icon="clear" alt="clear" title="clear"></paper-icon-button>
           </paper-input>
 
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="all" role="navigation">
-            <template is="dom-repeat" items="[[getCTreeList(navList.splices,rootPath,searchText)]]" as="item">
+            <template is="dom-repeat" items="[[_getCTreeList(navList.splices,rootPath,searchText)]]" as="item">
               <div>
                 <a name="[[item.name]]" class="ctree-item" href="[[rootPath]]/[[item.name]]">
                   <paper-button>
@@ -237,7 +237,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
                   </paper-button>
                 </a>
                 <template is="dom-if" if="[[searchText]]">
-                  <paper-toggle-button class="green" checked="{{item.data.saved}}" title="save"></paper-toggle-button>
+                  <paper-toggle-button class="green" hidden$="[[!searchText]]" checked="{{item.data.saved}}" title="save"></paper-toggle-button>
                 </template>
               </div>
             </template>
@@ -335,7 +335,10 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 
           searchText: {
             type: String,
-            observer: '_searchTextChanged'
+            observer: '_searchTextChanged',
+            value: function() {
+              return '';
+            }
           },
 
           navList: {
@@ -394,7 +397,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         dialog.open();
       }
 
-      clearSearch(){
+      _clearSearch(){
         this.searchText = '';
       }
 
@@ -418,7 +421,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         this.$.scrollThreshold.clearTriggers();
       }
 
-      getCTreeList() {
+      _getCTreeList() {
         // TODO: make conditional on if search is active and what search text is
         /*if (this.navList) {
           this.navList.length = 0;
@@ -426,6 +429,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
           this.navList = [];
         }*/
         var newNavList = [];
+        var searchTextLower = this.searchText ? this.searchText.toLowerCase() : '';
         for (var i = 0; i < ctreeSavedPages.length; i++) {
           var name = ctreeSavedPages[i];
           var pageData = ctreePages[name];
@@ -433,12 +437,12 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
             pageData.icon = this.rootPath + pageData.icon;
           }
 
-          if(this.searchText){
-            if(pageData.label.toLowerCase().indexOf(this.searchText.toLowerCase()) !== -1){
+          if (this.searchText) {
+            if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
                 newNavList.push({name: name, data: pageData});
             }
-          }else{
-            if(pageData.saved){
+          } else {
+            if (pageData.saved) {
               newNavList.push({name: name, data: pageData});
             }
           }
