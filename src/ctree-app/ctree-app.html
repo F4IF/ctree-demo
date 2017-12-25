@@ -62,7 +62,7 @@ this license.
 var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
     	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
     	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
-    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: true},
+    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: false},
     	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true}};
 var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 </script>
@@ -190,10 +190,8 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         float: right;
         margin: 4px;
       }
-      paper-toggle-button.green {
-        --paper-toggle-button-checked-bar-color: var(--paper-green-500);
-        --paper-toggle-button-checked-button-color: var(--paper-green-500);
-        --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+      paper-icon-button[hidden] {
+        display: none !important;
       }
       @media (max-width: 340px) {
         .tabLabel {
@@ -237,7 +235,9 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
                   </paper-button>
                 </a>
                 <template is="dom-if" if="[[searchText]]">
-                  <paper-toggle-button class="green" hidden$="[[!searchText]]" checked="{{item.data.saved}}" title="save"></paper-toggle-button>
+                  <paper-icon-button id="saveCTree" hidden$="[[!searchText]]" icon="[[_getCTreeSaveIcon(item.data.saved)]]" on-tap="_toggleCTreeSaved"></paper-toggle-button>
+                  <!-- TODO: fix tooltip -->
+                  <paper-tooltip for="saveCTree" offset="-8">Bookmark</paper-tooltip>
                 </template>
               </div>
             </template>
@@ -397,16 +397,24 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         dialog.open();
       }
 
-      _clearSearch(){
-        this.searchText = '';
-      }
-
       loadMoreListItems() {
         if (this.$.importLoader.loaded) {
           this.$.loader.loadCurrent();
         } else {
           this.$.importLoader.load();
         }
+      }
+
+      _clearSearch() {
+        this.searchText = '';
+      }
+
+      _getCTreeSaveIcon(saved) {
+        return saved ? 'bookmark' : 'bookmark-border';
+      }
+
+      _toggleCTreeSaved() {
+        // TODO: determine which ctree this was clicked for and toggle its data.saved value
       }
 
       _importLoaderLoadingChanged(e) {
