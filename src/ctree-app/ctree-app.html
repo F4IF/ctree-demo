@@ -53,16 +53,17 @@ this license.
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
 <link rel="import" href="../ctree-import/ctree-import.html">
+<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
 
 <link rel="import" href="icons.html">
 
 <script>
 // TODO: create a loder for tree types or add to ctree-loader
-var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png"},
-    	          future: {label: "Future City",	icon: "/images/app-icon-32.png"},
-    	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png"},
-    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png"},
-    	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png"}};
+var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
+    	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
+    	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
+    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: false},
+    	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true}};
 var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 </script>
 
@@ -134,6 +135,10 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         text-decoration: none;
         color: var(--app-secondary-color);
       }
+      .drawer-list div {
+        display: flex;
+        justify-content: space-between;
+      }
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
@@ -185,6 +190,9 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         float: right;
         margin: 4px;
       }
+      paper-icon-button[hidden] {
+        display: none !important;
+      }
       @media (max-width: 340px) {
         .tabLabel {
           display: none;
@@ -212,21 +220,23 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       <app-drawer slot="drawer" id="navDrawer" class="nav-drawer" swipe-open>
         <app-toolbar>cTrees</app-toolbar>
         <div class="nav-content">
-          <paper-input label="Search" no-label-float>
+          <paper-input label="Search" value="{{searchText}}" no-label-float>
             <iron-icon icon="search" slot="prefix"></iron-icon>
+            <paper-icon-button slot="suffix" hidden$="[[!searchText]]" on-tap="_clearSearch" icon="clear" alt="clear" title="clear"></paper-icon-button>
           </paper-input>
 
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="all" role="navigation">
-            <iron-list items="[[navList]]" as="item">
-              <template>
-                <a name="[[item.name]]" href="[[rootPath]]/[[item.name]]">
+            <template is="dom-repeat" items="[[_getCTreeList(navList.splices,rootPath,searchText)]]" as="item">
+              <div>
+                <a name="[[item.name]]" class="ctree-item" href="[[rootPath]]/[[item.name]]">
                   <paper-button>
                     <iron-icon src="[[item.data.icon]]"></iron-icon>
                     [[item.data.label]]
                   </paper-button>
                 </a>
-              </template>
-            </iron-list>
+                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Boockmarked" title-checked="Bookmarked"></ctree-toggle-button>
+              </div>
+            </template>
           </iron-selector>
         </div>
       </app-drawer>
@@ -311,8 +321,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         return {
           rootPath: {
             type: String,
-            value: '',
-            observer: '_rootChanged',
+            value: ''
           },
 
           page: {
@@ -320,7 +329,20 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
             observer: '_pageChanged',
           },
 
-          navList: Array,
+          searchText: {
+            type: String,
+            observer: '_searchTextChanged',
+            value: function() {
+              return '';
+            }
+          },
+
+          navList: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
 
           notifications: Array,
         };
@@ -337,8 +359,6 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 
       ready() {
         super.ready();
-
-        this._updateNavList();
         // TODO:
       }
 
@@ -373,16 +393,24 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         dialog.open();
       }
 
-      _rootChanged(path) {
-        this._updateNavList();
-      }
-
       loadMoreListItems() {
         if (this.$.importLoader.loaded) {
           this.$.loader.loadCurrent();
         } else {
           this.$.importLoader.load();
         }
+      }
+
+      _clearSearch() {
+        this.searchText = '';
+      }
+
+      _getCTreeSaveIcon(saved) {
+        return saved ? 'bookmark' : 'bookmark-border';
+      }
+
+      _toggleCTreeSaved() {
+        // TODO: determine which ctree this was clicked for and toggle its data.saved value
       }
 
       _importLoaderLoadingChanged(e) {
@@ -397,7 +425,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
         this.$.scrollThreshold.clearTriggers();
       }
 
-      _updateNavList() {
+      _getCTreeList() {
         // TODO: make conditional on if search is active and what search text is
         /*if (this.navList) {
           this.navList.length = 0;
@@ -405,15 +433,26 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
           this.navList = [];
         }*/
         var newNavList = [];
+        var searchTextLower = this.searchText ? this.searchText.toLowerCase() : '';
         for (var i = 0; i < ctreeSavedPages.length; i++) {
           var name = ctreeSavedPages[i];
           var pageData = ctreePages[name];
           if (!pageData.icon.startsWith(this.rootPath)) {
             pageData.icon = this.rootPath + pageData.icon;
           }
-          newNavList.push({name: name, data: pageData});
+
+          if (this.searchText) {
+            if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
+                newNavList.push({name: name, data: pageData});
+            }
+          } else {
+            if (pageData.saved) {
+              newNavList.push({name: name, data: pageData});
+            }
+          }
         }
-        this.navList = newNavList;
+
+        return newNavList;
       }
 
       _dialogParamChanged(dialogParam) {
