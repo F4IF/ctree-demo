@@ -49,11 +49,11 @@ this license.
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
 <link rel="import" href="../ctree-import/ctree-import.html">
+<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
 
 <link rel="import" href="icons.html">
 
@@ -234,11 +234,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
                     [[item.data.label]]
                   </paper-button>
                 </a>
-                <template is="dom-if" if="[[searchText]]">
-                  <paper-icon-button id="saveCTree" hidden$="[[!searchText]]" icon="[[_getCTreeSaveIcon(item.data.saved)]]" on-tap="_toggleCTreeSaved"></paper-toggle-button>
-                  <!-- TODO: fix tooltip -->
-                  <paper-tooltip for="saveCTree" offset="-8">Bookmark</paper-tooltip>
-                </template>
+                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Boockmarked" title-checked="Bookmarked"></ctree-toggle-button>
               </div>
             </template>
           </iron-selector>
