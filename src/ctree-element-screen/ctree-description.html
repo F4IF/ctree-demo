@@ -35,7 +35,7 @@ this license.
 
 /**
  * TODO: use template instead of manually adding items, so we can automatically
- * use data binding.  An example of using multiple templates ca be found at
+ * use data binding.  An example of using multiple templates can be found at
  * https://github.com/Polymer/polymer/issues/3755:
  *   this.templatize(tplA);
  *   this.templatize(tplB);
@@ -132,9 +132,7 @@ this license.
       __updateListeners(element, func) {
         var eventListeners = CTreeDescription.__LISTENER_MAPS[element.tagName];
         for (var key in eventListeners) {
-          if (eventListeners.hasOwnProperty(key)) {
-            func.call(element, key, eventListeners[key]);
-          }
+          func.call(element, key, this[eventListeners[key]].bind(this));
         }
       }
 
@@ -159,8 +157,9 @@ this license.
         // TODO: show dialog to let user select which segment type to add
       }
 
-      _editingChanged(e, detail) {
+      _editingChanged(e) {
         // ignore update if segment not really changing editing state
+        var detail = e.detail
         if (detail.value === (this.editingSegmentId === detail.segment.id)) return;
 
         var segments = this.segments;
@@ -203,7 +202,8 @@ this license.
         return null;
       }
 
-      _deleteTapped(e, detail) {
+      _deleteTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
         if (index !== null) {
           this.splice('segments', index, 1);
@@ -215,14 +215,16 @@ this license.
         }
       }
 
-      _moveUpTapped(e, detail) {
+      _moveUpTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
         if (index !== null && index > 0) {
           this.__swapSegments(index, index - 1);
         }
       }
 
-      _moveDownTapped(e, detail) {
+      _moveDownTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
         if (index !== null && index < this.segments.length - 1) {
           this.__swapSegments(index, index + 1);

@@ -81,8 +81,8 @@ this license.
       <iron-image preload fade id="image" sizing="cover" loading="{{loading}}" error="{{error}}"></iron-image>
       <paper-spinner id="loadingIndicator" active$="[[loadingChangeMade]]" hidden$="[[!loadingChangeMade]]"></paper-spinner>
       <paper-input label="Image URL" id="url" on-value-changed="_inputChanged" on-keydown="_checkForEnter" hidden$="[[!editing]]">
-        <paper-icon-button suffix on-tap="_editSaveClicked" icon="segment-save" alt="Save" title="Save" hidden$="[[!validChangeMade]]"></paper-icon-button>
-        <paper-icon-button suffix on-tap="_editCancelClicked" icon="segment-cancel" alt="Cancel" title="Cancel"></paper-icon-button>
+        <paper-icon-button slot="suffix" on-tap="_editSaveClicked" icon="segment-save" alt="Save" title="Save" hidden$="[[!validChangeMade]]"></paper-icon-button>
+        <paper-icon-button slot="suffix" on-tap="_editCancelClicked" icon="segment-cancel" alt="Cancel" title="Cancel"></paper-icon-button>
       </paper-input>
     </div>
   </template>
@@ -114,10 +114,13 @@ this license.
       _editingChanged(editing) {
         if (editing) {
           this.$.url.focus();
+        } else {
+          this._dataChanged(this.data);
         }
       }
 
       _dataChanged(data) {
+        this._inputChanged(data);
         this.validChangeMade = false;
         this.loadingChangeMade = false;
         this._changed = false;
@@ -137,7 +140,7 @@ this license.
       }
 
       _inputChanged(value) {
-        if (this.$.url.value === this.$.image.src) {
+        if (value === this.$.image.src) {
           super._cancelEditUpdate();
           this._waiting = false;
         } else {

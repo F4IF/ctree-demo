@@ -512,10 +512,10 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       }
 
       // TODO: respond to element changes via the ctree element loader
-      _bookmarkChanged(event) {
-        var element = event.detail.element;
+      _bookmarkChanged(e) {
+        var element = e.detail.element;
         // TODO: remove event from bookmarked list (may not be found)
-        if (event.detail.bookmarked) {
+        if (e.detail.bookmarked) {
           // TODO: add event to top of bookmarked list
         }
         // TODO: start checking for duplicates as loading bookmarked items (may have added manually)

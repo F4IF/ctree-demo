@@ -227,8 +227,8 @@ this license.
         this.editing = true;
       }
 
-      _addSegmentVariation(e, detail) {
-        var segmentData = detail.data;
+      _addSegmentVariation(e) {
+        var segmentData = e.detail.data;
         var id = Math.floor(Math.random() * 2000000000) + 1;  // TODO: this would come from loading when uploading it
         this.segment.variations.splice(this._variationIndex + 1, 0, {id: id, data: segmentData});
         this._variationIndex = this._variationIndex + 1;
