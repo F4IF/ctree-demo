@@ -121,6 +121,7 @@ this license.
             'tap': '_addClicked',
           },
           'CTREE-SEGMENT-CONTAINER': {
+            'add-segment-variation': '_addSegmentVariation'
             'editing-segment-changed': '_editingChanged',
             'delete-tapped': '_deleteTapped',
             'move-up-tapped': '_moveUpTapped',
@@ -155,6 +156,17 @@ this license.
       _addClicked(e) {
         //console.log('click: ' + e.currentTarget.index);
         // TODO: show dialog to let user select which segment type to add
+        // TODO: after add segment enter an element edit state and give user option to save/cancel, and prompt for save if closing element (cache unsaved changes to user's account)
+      }
+
+      _addSegmentVariation(e) {
+        var detail = e.detail
+        var index = this._getIndex(detail.segment);
+        if (index === null) return;
+
+        var data = detail.data
+        // TODO: prompt user for reason to add variation
+        // TODO: if prompt successful (not cancelled) insert variation to current variation index, update segment's data, and exit edit mode
       }
 
       _editingChanged(e) {
@@ -205,30 +217,30 @@ this license.
       _deleteTapped(e) {
         var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null) {
-          this.splice('segments', index, 1);
-          if (this.segmentIds && index < this.segmentIds.length) {
-            this.splice('segmentIds', index, 1);
-          } else {
-            this._segmentIdsChanged(this.segmentIds);
-          }
+        if (index === null) return;
+
+        this.splice('segments', index, 1);
+        if (this.segmentIds && index < this.segmentIds.length) {
+          this.splice('segmentIds', index, 1);
+        } else {
+          this._segmentIdsChanged(this.segmentIds);
         }
       }
 
       _moveUpTapped(e) {
         var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null && index > 0) {
-          this.__swapSegments(index, index - 1);
-        }
+        if (index === null || index <= 0) return;
+
+        this.__swapSegments(index, index - 1);
       }
 
       _moveDownTapped(e) {
         var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null && index < this.segments.length - 1) {
-          this.__swapSegments(index, index + 1);
-        }
+        if (index !== null || index >= this.segments.length - 1) return;
+
+        this.__swapSegments(index, index + 1);
       }
 
       __swapSegments(i1, i2) {
@@ -260,6 +272,7 @@ this license.
         }
         this.editingSegmentId = undefined;
         this._segmentIdsChanged(this.segmentIds);
+        // TODO: enter an element edit state and give user option to save/cancel, and prompt for save if closing element (cache unsaved changes to user's account)
       }
 
       _addElement(parent, name, properties, beforeChild) {
