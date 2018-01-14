@@ -228,8 +228,8 @@ this license.
         }
       }
 
-      _onFeedbackTapped(e, detail) {
-        // TODO: figure out segment data from e or detail & pass as segmentData
+      _onFeedbackTapped(e) {
+        // TODO: figure out segment data from e or e.detail & pass as segmentData
         this.feedbackSegment = null;
         this.page = 'feedback';
       }
@@ -242,7 +242,8 @@ this license.
         this.page = 'related';
       }
 
-      _onHistoryTapped(e, detail) {
+      _onHistoryTapped(e) {
+        var detail = e.detail
         this.historyContributor = detail.contributor;
         if (detail.generalHistory) {
           // history shown should be for the entire element, not a specific description config

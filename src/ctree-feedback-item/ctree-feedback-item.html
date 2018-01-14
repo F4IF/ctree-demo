@@ -167,9 +167,9 @@ this license.
       }
 
       _depthChanged(depth) {
-        sentiment = this.$.sentiment;
-        sentimentWidth = sentiment.offsetWidth;
-        offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
+        var sentiment = this.$.sentiment;
+        var sentimentWidth = sentiment.offsetWidth;
+        var offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
         if (offset != this._offset) {
           this._offset = offset;
           sentiment.style.marginLeft = offset + 'px';

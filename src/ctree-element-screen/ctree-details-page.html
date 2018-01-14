@@ -125,7 +125,7 @@ this license.
         super.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
       }
 
-      __segmentsChanged(e, detail) {
+      __segmentsChanged(e) {
         if (this.segments) {
           this.__tempSegments = this.segments.slice();
         } else {

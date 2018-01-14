@@ -1,0 +1,165 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-behavior.html">
+<link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-shared-styles.html">
+
+<dom-module id="ctree-new-element-screen">
+  <template>
+    <style include="ctree-toolbar-shared-styles"></style>
+    <style>
+      :host {
+        display: block;
+      }
+      #container {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .toolbar {
+        --paper-toolbar-height: 48px;
+        --paper-toolbar-sm-height: 48px;
+
+        @apply --shadow-elevation-2dp;
+      }
+      #typeIcon {
+        width: 48px
+      }
+      .title {
+        font-size: 16px !important;
+      }
+      .type-description {
+        width: 180px;
+      }
+      .content {
+        background: #fdf0bd;
+        height: calc(100% - 48px);
+        width: 100%;
+        overflow: hidden;
+      }
+    </style>
+
+    <!--<ctree-import id="importPage" href="/src/ctree-new-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>-->
+
+    <div id="container">
+      <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
+        <!-- TODO: use custom control so it shows an icon instead of text -->
+        <paper-dropdown-menu id="typeIcon" slot="top" horizontal-align="left">
+          <iron-icon slot="prefix" src="/images/app-icon-32.png"></iron-icon>
+          <paper-listbox slot="dropdown-content" class="dropdown-content" selected="0">
+            <!-- TODO: populate programmatically with element types -->
+            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
+            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
+            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
+            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <span slot="top" class="title">[[element.title]]</span>
+        <paper-icon-button slot="top" id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
+        <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
+        <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+      </paper-toolbar>
+      <iron-pages id="pages" class="content" selected="[[page]]" attr-for-selected="name">
+        <!--<ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
+        <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
+        <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
+        <ctree-related-page name="related"></ctree-related-page>
+        <ctree-feedback-page name="feedback" description-config="[[descriptionConfig]]" segment="[[feedbackSegment]]"></ctree-feedback-page>-->
+      </iron-pages>
+    </div>
+  </template>
+
+  <script>
+    class CTreeNewElementScreen extends CTree.ToolbarBehavior {
+
+      static get is() { return 'ctree-new-element-screen'; }
+
+      static get properties() {
+        return {
+          element: {
+            type: Object,
+            observer: '_elementChanged',
+          },
+
+          headerColor: {
+            type: String,
+            value: "#cfcfcf",
+            computed: '_calculateHeaderColor(element)'
+          },
+
+          /**
+           * Toggle icon names.
+           */
+          _toggleButtonIconNames: {
+            type: Array,
+            value: ['bookmark-border', 'bookmark'],
+          },
+        };
+      }
+
+      _onToggleButton() {
+        this.element.bookmarked = !this.element.bookmarked;
+      }
+
+      _getToggleButtonValue() {
+        return this.element ? (this.element.bookmarked ? true : false) : undefined;
+      }
+
+      _calculateHeaderColor(element) {
+        var headerColor = "#cfcfcf";//this.headerColor;
+        if (element) {
+          if (element.color) {
+            headerColor = element.color;
+          } else if (element.type && element.type.color) {
+            headerColor = element.type.color;
+          }
+        }
+        return headerColor;
+      }
+
+      _elementChanged(element) {
+        super._updateToggleButtonIcon();
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeNewElementScreen.is, CTreeNewElementScreen);
+  </script>
+</dom-module>

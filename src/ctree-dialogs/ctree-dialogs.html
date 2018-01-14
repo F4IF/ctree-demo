@@ -32,10 +32,10 @@ this license.
 <link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
 
 <!-- TODO: try using Polymer.importHref to load these (had issues when loading link with dialog url) -->
 <link rel="import" href="../ctree-element-screen/ctree-element-screen.html">
+<link rel="import" href="../ctree-new-element-screen/ctree-new-element-screen.html">
 <link rel="import" href="../ctree-user-screen/ctree-user-screen.html">
 
 <dom-module id="ctree-dialogs">
@@ -83,6 +83,10 @@ this license.
     <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
       <ctree-user-screen ctree-key="[[ctreeKey]]" page="{{_userPage}}" on-close-tapped="_userDialogClosed"></ctree-user-screen>
     </paper-dialog>
+
+    <paper-dialog id="newElementDialog" on-iron-overlay-closed="_newElementDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <ctree-new-element-screen ctree-key="[[ctreeKey]]" on-close-tapped="_newElementDialogClosed"></ctree-new-element-screen>
+    </paper-dialog>
   </template>
 
   <script>
@@ -102,6 +106,12 @@ this license.
             type: String,
             readOnly: true,
             observer: '_dialogChanged',
+          },
+
+          newElement: {
+            type: Boolean,
+            readOnly: true,
+            observer: '_newElementChanged',
           },
 
           page: {
@@ -159,6 +169,10 @@ this license.
         this._setDialog('element');
       }
 
+      openNewElementDialog() {
+        this._setNewElement(true);
+      }
+
       openUserDialog() {
         this._setDialog('user');
       }
@@ -166,14 +180,18 @@ this license.
       _elementDialogClosed() {
         if (this.dialog === 'element') {
           this._setDialog(undefined);
-          this._dialogChanged(undefined);
+        }
+      }
+
+      _newElementDialogClosed() {
+        if (this.newElement) {
+          this._setNewElement(false);
         }
       }
 
       _userDialogClosed() {
         if (this.dialog === 'user') {
           this._setDialog(undefined);
-          this._dialogChanged(undefined);
         }
       }
 
@@ -245,6 +263,20 @@ this license.
             this.$.userDialog.open();
           } else {
             this.$.userDialog.close();
+          }
+        }
+      }
+
+      _newElementChanged(newElement, previousNewElement) {
+        if (newElement === previousNewElement) return;
+
+        if (newElement !== this.$.newElementDialog.opened) {
+          if (newElement) {
+            // TODO: this causes issues, so for now just import normally
+            //Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-new-element-screen/ctree-new-element-screen.html'), () => {this.$.elementDialog.open();}, null);
+            this.$.newElementDialog.open();
+          } else {
+            this.$.newElementDialog.close();
           }
         }
       }

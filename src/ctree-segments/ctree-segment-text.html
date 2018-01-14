@@ -113,10 +113,13 @@ this license.
       _editingChanged(editing) {
         if (editing) {
           this.$.input.focus();
+        } else {
+          this._dataChanged(this.data);
         }
       }
 
       _dataChanged(data) {
+        this._inputChanged(data);
         this.validChangeMade = false;
         this.$.text.textContent = data;
         this._updatedText = data;
@@ -128,9 +131,9 @@ this license.
         this.$.edit.style.fontSize = scale;
       }
 
-      _inputChanged() {
+      _inputChanged(value) {
         this.validChangeMade = false;
-        if (this.$.input.value === this._updatedText) {
+        if (value === this._updatedText) {
           super._cancelEditUpdate();
         } else {
           super._delayEditUpdate();

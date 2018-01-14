@@ -35,7 +35,7 @@ this license.
 
 /**
  * TODO: use template instead of manually adding items, so we can automatically
- * use data binding.  An example of using multiple templates ca be found at
+ * use data binding.  An example of using multiple templates can be found at
  * https://github.com/Polymer/polymer/issues/3755:
  *   this.templatize(tplA);
  *   this.templatize(tplB);
@@ -121,6 +121,7 @@ this license.
             'tap': '_addClicked',
           },
           'CTREE-SEGMENT-CONTAINER': {
+            'add-segment-variation': '_addSegmentVariation',
             'editing-segment-changed': '_editingChanged',
             'delete-tapped': '_deleteTapped',
             'move-up-tapped': '_moveUpTapped',
@@ -132,9 +133,7 @@ this license.
       __updateListeners(element, func) {
         var eventListeners = CTreeDescription.__LISTENER_MAPS[element.tagName];
         for (var key in eventListeners) {
-          if (eventListeners.hasOwnProperty(key)) {
-            func.call(element, key, eventListeners[key]);
-          }
+          func.call(element, key, this[eventListeners[key]].bind(this));
         }
       }
 
@@ -157,10 +156,22 @@ this license.
       _addClicked(e) {
         //console.log('click: ' + e.currentTarget.index);
         // TODO: show dialog to let user select which segment type to add
+        // TODO: after add segment enter an element edit state and give user option to save/cancel, and prompt for save if closing element (cache unsaved changes to user's account)
       }
 
-      _editingChanged(e, detail) {
+      _addSegmentVariation(e) {
+        var detail = e.detail
+        var index = this._getIndex(detail.segment);
+        if (index === null) return;
+
+        var data = detail.data
+        // TODO: prompt user for reason to add variation
+        // TODO: if prompt successful (not cancelled) insert variation to current variation index, update segment's data, and exit edit mode
+      }
+
+      _editingChanged(e) {
         // ignore update if segment not really changing editing state
+        var detail = e.detail
         if (detail.value === (this.editingSegmentId === detail.segment.id)) return;
 
         var segments = this.segments;
@@ -203,30 +214,33 @@ this license.
         return null;
       }
 
-      _deleteTapped(e, detail) {
+      _deleteTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null) {
-          this.splice('segments', index, 1);
-          if (this.segmentIds && index < this.segmentIds.length) {
-            this.splice('segmentIds', index, 1);
-          } else {
-            this._segmentIdsChanged(this.segmentIds);
-          }
+        if (index === null) return;
+
+        this.splice('segments', index, 1);
+        if (this.segmentIds && index < this.segmentIds.length) {
+          this.splice('segmentIds', index, 1);
+        } else {
+          this._segmentIdsChanged(this.segmentIds);
         }
       }
 
-      _moveUpTapped(e, detail) {
+      _moveUpTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null && index > 0) {
-          this.__swapSegments(index, index - 1);
-        }
+        if (index === null || index <= 0) return;
+
+        this.__swapSegments(index, index - 1);
       }
 
-      _moveDownTapped(e, detail) {
+      _moveDownTapped(e) {
+        var detail = e.detail
         var index = this._getIndex(detail.segment);
-        if (index !== null && index < this.segments.length - 1) {
-          this.__swapSegments(index, index + 1);
-        }
+        if (index !== null || index >= this.segments.length - 1) return;
+
+        this.__swapSegments(index, index + 1);
       }
 
       __swapSegments(i1, i2) {
@@ -258,6 +272,7 @@ this license.
         }
         this.editingSegmentId = undefined;
         this._segmentIdsChanged(this.segmentIds);
+        // TODO: enter an element edit state and give user option to save/cancel, and prompt for save if closing element (cache unsaved changes to user's account)
       }
 
       _addElement(parent, name, properties, beforeChild) {
