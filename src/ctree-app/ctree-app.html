@@ -40,7 +40,6 @@ this license.
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
 <link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
@@ -51,6 +50,7 @@ this license.
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
 <link rel="import" href="../ctree-import/ctree-import.html">
 <link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
@@ -210,6 +210,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
     <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
     <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
     <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
+    <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
     <ctree-list-loader-test id="loader" ctree-key="[[ctreeKey]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader-test>
@@ -278,7 +279,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 
         <iron-list id="elementPreviewList" items="[[pageListItems]]" as="item" grid>
           <template>
-            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]"></ctree-element>
+            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]"></ctree-element-preview>
           </template>
 
           <div id="loadingIndicator" hidden$="[[!hasMoreListItems]]">
@@ -527,9 +528,8 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       }
 
       _addElement() {
-        var dialog = this.$.elementDialog;
-        // TODO: initialize dialog for adding new element (edit title, edit type, get suggested elements)
-        dialog.element = undefined;
+        var dialog = this.$.newElementDialog;
+        // TODO: add parameters if needed
         dialog.open();
       }
     }
