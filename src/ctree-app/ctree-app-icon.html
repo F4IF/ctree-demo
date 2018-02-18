@@ -28,60 +28,45 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../../bower_components/iron-location/iron-location.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon/paper-icon.html">
 
-<link rel="import" href="../ctree-import/ctree-import.html">
-
-<link rel="import" href="icons.html">
-<link rel="import" href="ctree-landing.html">
-<link rel="import" href="ctree-catalog.html">
-
-<dom-module id="ctree-app">
+<dom-module id="ctree-app-icon">
   <template>
     <style>
       :host {
-        display: block;
+        display: inline-block;
+        padding: 8px 8px 0 8px;
       }
-      ctree-landing[hidden], ctree-catalog[hidden] {
-        display: none !important;
+      paper-button {
+        min-width: 0;
+        padding: 0px;
+        margin: 0;
+      }
+      iron-icon {
+        width: 48px;
+        height: 48px;
+        padding: 0;
       }
     </style>
 
-    <!-- TODO: <ctree-import href="/src/ctree-app/ctree-landing.html"></ctree-import> -->
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
-    <!-- TODO: <ctree-import href="/src/ctree-app/ctree-catalog.html"></ctree-import> -->
-    <iron-location path="{{path}}" dwell-time="800"></iron-location>
 
-    <ctree-landing hidden$="[[!isRootPath(path, rootPath)]]"></ctree-landing>
-    <ctree-catalog hidden$="[[isRootPath(path, rootPath)]]"></ctree-catalog>
+    <a name="Collaboraton Trees" class="ctree-item" href="[[rootPath]]">
+      <paper-button>
+        <iron-icon src="[[rootPath]]/images/app-icon-144.png"></iron-icon>
+      </paper-button>
+    </a>
   </template>
 
   <script>
-    class CTreeApp extends Polymer.Element {
+    class CTreeAppIcon extends Polymer.Element {
 
-      static get is() { return 'ctree-app'; }
-
-      static get properties() {
-        return {
-          rootPath: {
-            type: String,
-            value: ''
-          },
-        };
-      }
-
-      ready() {
-        super.ready();
-        // TODO:
-      }
-
-      isRootPath(path, rootPath) {
-        return path === rootPath + "/";
-      }
+      static get is() { return 'ctree-app-icon'; }
     }
 
     // Register custom element definition using standard platform API
-    customElements.define(CTreeApp.is, CTreeApp);
+    customElements.define(CTreeAppIcon.is, CTreeAppIcon);
   </script>
 </dom-module>

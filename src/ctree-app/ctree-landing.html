@@ -1,0 +1,378 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-location/iron-location.html">
+<link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
+<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-import/ctree-import.html">
+<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
+
+<link rel="import" href="ctree-app-icon.html">
+<link rel="import" href="icons.html">
+
+<dom-module id="ctree-landing">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --app-primary-color: #5F9F00;
+        --app-secondary-color: black;
+      }
+      #mainLayout app-toolbar {
+        padding: 0 8px 0 0;
+      }
+      #content {
+        @apply --layout-fit;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      #headerTitle, #menuButton {
+        display: none;
+      }
+      app-drawer ul {
+        text-align: left !important;
+      }
+      app-header-layout {
+        height: 100vh;
+      }
+      app-header {
+        background-color: #4F7F00;
+        color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+      paper-tab {
+        width: 0;
+      }
+      paper-tab[link] a {
+        @apply --layout-horizontal;
+        @apply --layout-center-center;
+        color: #fff;
+        text-decoration: none;
+      }
+      paper-tab iron-icon {
+        padding-right: 2px;
+      }
+      .tabTooltip {
+        visibility: hidden;
+      }
+      paper-button {
+        text-transform: none;
+      }
+      paper-button iron-icon {
+        padding-right: 8px;
+      }
+      paper-icon-button[hidden] {
+        display: none !important;
+      }
+      @media (max-width: 500px) {
+        paper-tabs {
+          display: none;
+        }
+        #headerTitle, #menuButton {
+          display: inline-block;
+        }
+      }
+    </style>
+
+    <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
+    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
+    <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
+
+    <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
+    <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
+    <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
+    <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
+    <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
+
+    <app-header-layout id="mainLayout" has-scrolling-region>
+      <app-header slot="header" reveals effects="waterfall">
+        <app-toolbar>
+          <ctree-app-icon></ctree-app-icon>
+          <div id="headerTitle" main-title>Collaboration Trees</div>
+          <paper-icon-button id="menuButton" icon="menu" on-tap="_toggleDrawer"></paper-icon-button>
+          <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px">
+            <paper-tab id="overviewTab" name="overview" link>
+              <a href="[[rootPath]]?section=overview" tabindex="-1">
+                Overview
+              </a>
+            </paper-tab>
+            <paper-tab id="feedbackTab" name="feedback" link>
+              <a href="[[rootPath]]?section=feedback" tabindex="-1">
+                Feedback
+              </a>
+            </paper-tab>
+            <paper-tab id="featuresTab" name="features" link>
+              <a href="[[rootPath]]?section=features" tabindex="-1">
+                Features
+              </a>
+            </paper-tab>
+            <paper-tab id="ctreeTab" name="ctree" link>
+              <a href="[[rootPath]]?section=ctree" tabindex="-1">
+                cTree
+              </a>
+            </paper-tab>
+            <paper-tab id="participateTab" name="participate" link>
+              <a href="[[rootPath]]?section=participate" tabindex="-1">
+                Participate
+              </a>
+            </paper-tab>
+          </paper-tabs>
+        </app-toolbar>
+      </app-header>
+
+      <div id="content">
+        <div id="overview" style="height: 100vh; background-color: #FF0000">
+        </div><div id="feedback" style="display: inline-block; width: 100vw; background-color: #00FF00">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div><div id="ctree" style="display: inline-block; width: 100vw; background-color: #FF00FF">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div><div id="participate" style="display: inline-block; width: 100vw; background-color: #FFFF00">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+      </div>
+    </app-header-layout>
+
+    <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
+      <ul>
+        <li>
+          <a href="[[rootPath]]?section=overview" on-click="_toggleDrawer">
+            Overview
+          </a>
+        </li><li>
+          <a href="[[rootPath]]?section=feedback" on-click="_toggleDrawer">
+            Feedback
+          </a>
+        </li><li>
+          <a href="[[rootPath]]?section=features" on-click="_toggleDrawer">
+            Features
+          </a>
+        </li><li>
+          <a href="[[rootPath]]?section=ctree" on-click="_toggleDrawer">
+            cTree Examples
+          </a>
+        </li><li>
+          <a href="[[rootPath]]?section=participate" on-click="_toggleDrawer">
+            Participate
+          </a>
+        </li>
+      </ul>
+    </app-drawer>
+  </template>
+
+  <script>
+    class CTreeLanding extends Polymer.mixinBehaviors([Polymer.IronScrollTargetBehavior], Polymer.Element) {
+
+      static get is() { return 'ctree-landing'; }
+
+      static get properties() {
+        return {
+          rootPath: {
+            type: String,
+            value: '',
+          },
+
+          section: String,
+
+          _suppressInferSection: {
+            type: Boolean,
+            value: false,
+          },
+        };
+      }
+
+      static get observers() {
+        return [
+          '_dialogParamChanged(queryParams.section)',
+        ];
+      }
+
+      ready() {
+        super.ready();
+        // TODO:
+        this.scrollTarget = this.$.content;
+      }
+
+      _toggleDrawer() {
+        this.$.navDrawer.toggle();
+        console.log("toggle drawer");
+      }
+
+      _scrollHandler() {
+        // throttle the work on the scroll event
+        var THROTTLE_THRESHOLD = 200;
+        if (!this.isDebouncerActive('_updateSection') && !this._suppressInferSection) {
+          this.debounce('_updateSection', function() {
+            this._updateSection();
+          }, THROTTLE_THRESHOLD);
+        }
+      }
+
+      _updateSection() {
+        var children = this.scrollTarget.childNodes;
+        var currentChild = null;
+        var contentMiddle = this.scrollTarget.offsetHeight / 2;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].id) {
+            if (currentChild != null && this.scrollTarget.scrollTop < children[i].offsetTop) {
+              if (this.scrollTarget.scrollTop + this.scrollTarget.offsetHeight - children[i].offsetTop - children[i].offsetHeight >= 0) {
+                currentChild = children[i];
+              }
+              break;
+            }
+            currentChild = children[i];
+          }
+        }
+        this.section = currentChild.id;
+      }
+
+      _dialogParamChanged(section) {
+        if (section && section.length > 0) {
+          this._scrollTo(this.$.content, this.$[section].offsetTop, 500);
+          this.section = section
+        }
+      }
+
+      _scrollTo(container, position, duration) {
+        var MILLIS_PER_FRAME = 16
+        var t = this
+        t._suppressInferSection = true;
+        var scrollStep = (position - container.scrollTop) / (duration / MILLIS_PER_FRAME);
+        var scrollInterval = setInterval(function() {
+          if (Math.abs(position - container.scrollTop) > Math.abs(scrollStep)) {
+            var newPosition = Math.floor(container.scrollTop + scrollStep)
+            container.scrollTop = newPosition;
+            if (container.scrollTop != newPosition) {
+              t._suppressInferSection = false;
+              clearInterval(scrollInterval)
+            }
+          } else {
+            container.scrollTop = position;
+            t._suppressInferSection = false;
+            clearInterval(scrollInterval);
+          }
+        }, MILLIS_PER_FRAME);
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeLanding.is, CTreeLanding);
+  </script>
+</dom-module>
