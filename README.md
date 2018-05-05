@@ -80,10 +80,6 @@ this license.
 
 	npm install -g bower
 
-_**Note:** if you're having trouble installing on Mac, try this:_
-
-> sudo bower install --allow-root
-
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
 	npm install -g polymer-cli
@@ -105,6 +101,10 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 ##### Insall 3rd party dependencies
 
 	bower install
+
+_**Note:** if you're having trouble installing on Mac, try this:_
+
+> sudo bower install --allow-root
 
 #### Recommended development environment
 
