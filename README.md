@@ -82,7 +82,7 @@ this license.
 
 _**Note:** if you're having trouble installing on Mac, try this:_
 
-> ssudo bower install --allow-root
+> sudo bower install --allow-root
 
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
