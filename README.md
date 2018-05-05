@@ -84,6 +84,10 @@ this license.
 
 	npm install -g polymer-cli
 
+_**Note:** if you're having trouble installing on Mac, try this:_
+
+> sudo npm i -g polymer-cli --force --unsafe-perm = true --allow-root
+
 #### Checkout project
 
 ##### Open workspace folder in command prompt where you want the project
@@ -101,6 +105,10 @@ this license.
 ##### Insall 3rd party dependencies
 
 	bower install
+
+_**Note:** if you're having trouble installing on Mac, try this:_
+
+> sudo bower install --allow-root
 
 #### Recommended development environment
 
