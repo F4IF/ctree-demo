@@ -231,7 +231,7 @@ for alpha testing, but may build on it to implement the dialog.
 
 _**Note:** if you're having trouble installing on Mac, try this:_
 
-> sudo npm i -g polymer-cli --force --unsafe-perm = true --allow-root
+> sudo npm i -g polymer-cli --force --unsafe-perm=true --allow-root
 
 #### Checkout project
 
@@ -279,7 +279,7 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 ### Start the development server
 
-This command serves the app at `http://localhost:8080` and provides basic URL
+This command serves the app at `http://localhost:8081` and provides basic URL
 routing for the app:
 
     polymer serve
