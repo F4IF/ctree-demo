@@ -115,13 +115,13 @@ Chrome
 ## Community
 
 The preferred method of communication for the community is our
-[Slack group](slack.ctree.org).  There are also regular events held in
-[Los Angeles, CA](meetup.ctree.org) and [online](eventbrite.com/e/37789071129)
+[Slack group](http://slack.ctree.org).  There are also regular events held in
+[Los Angeles, CA](http://meetup.ctree.org) and [online](http://eventbrite.com/e/37789071129)
 to encourage contributors to set aside time to work on the project.  If you're
 interested in starting events in your area please email
 [contact@innovativeFuture.org](mailto:contact@innovativeFuture.org).  There are
-also [Facebbok](facebook.ctree.org) and [Twitter](twitter.ctree.org) sites where
-you can keep up with the project, as well as a [LinkedIn](linkedin.ctree.org)
+also [Facebbok](http://facebook.ctree.org) and [Twitter](http://twitter.ctree.org) sites where
+you can keep up with the project, as well as a [LinkedIn](http://linkedin.ctree.org)
 organization you can list on your profile if you're a regular contributor.
 
 ## Teams
@@ -134,7 +134,7 @@ issues for a single team.  The current teams are:
 
 ### Landing Page
 
-This team is responsible for implementing a new landing page will be shown to
+This team is responsible for implementing the new landing page shown to
 users when first opening the site.  It's a way to introduce the technology to
 people who aren't familiar with it and help them get started with the site.
 This is a high priority part of the project, required before we can start alpha
