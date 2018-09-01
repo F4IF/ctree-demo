@@ -1,3 +1,9 @@
+# Events
+
+Our first full week hackathon starts Saturday 9/1, building an MVP version for testing by nonprofits and neighborhood organizations.  There will be events in Los Angeles on [Saturday 9/1 @ 10AM](https://www.eventbrite.com/e/43962497012) and [Tuesday 9/4 @ 6PM](https://www.eventbrite.com/e/43962385679).  Join us anytime online at [slack.ctree.org](http://slack.ctree.org) to participate.
+
+We have regular events in Los Angeles every [Tuesday night](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events.
+
 # Collaboration Tree
 
 The Collaboration Tree (cTree) is a new web technology aimed at facilitating
@@ -225,6 +231,8 @@ for alpha testing, but may build on it to implement the dialog.
 
 	npm install -g bower
 
+_**Note:** if you're having trouble installing on Windows, you may need to run the console as an administrator_
+
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
 	npm install -g polymer-cli
@@ -263,18 +271,19 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 ##### Install packages (File > Settings > Install)
 
+* polymer-ide
 * atom-ternjs
 * minimap
 * auto-detect-indentation
 * autoclose-html
 * lint checking
-** linter
-** linter-eslint
-** linter-csslint
-** linter-flow
+  * linter
+  * linter-eslint
+  * linter-csslint
+  * linter-flow
 * other favorite packages
-** https://www.sitepoint.com/10-essential-atom-add-ons/
-** https://medium.com/@satya164/supercharged-javascript-development-in-atom-ea034e22eabc
+  * https://www.sitepoint.com/10-essential-atom-add-ons/
+  * https://medium.com/@satya164/supercharged-javascript-development-in-atom-ea034e22eabc
 
 
 ### Start the development server
