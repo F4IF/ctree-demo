@@ -231,6 +231,8 @@ for alpha testing, but may build on it to implement the dialog.
 
 	npm install -g bower
 
+_**Note:** if you're having trouble installing on Windows, you may need to run the console as an administrator_
+
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
 	npm install -g polymer-cli
@@ -269,18 +271,19 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 ##### Install packages (File > Settings > Install)
 
+* polymer-ide
 * atom-ternjs
 * minimap
 * auto-detect-indentation
 * autoclose-html
 * lint checking
-** linter
-** linter-eslint
-** linter-csslint
-** linter-flow
+  * linter
+  * linter-eslint
+  * linter-csslint
+  * linter-flow
 * other favorite packages
-** https://www.sitepoint.com/10-essential-atom-add-ons/
-** https://medium.com/@satya164/supercharged-javascript-development-in-atom-ea034e22eabc
+  * https://www.sitepoint.com/10-essential-atom-add-ons/
+  * https://medium.com/@satya164/supercharged-javascript-development-in-atom-ea034e22eabc
 
 
 ### Start the development server
