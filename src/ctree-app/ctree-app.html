@@ -255,17 +255,17 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
           </app-toolbar><app-toolbar style="height: 36px;">
             <paper-tabs selected="{{subpage}}" attr-for-selected="name" fallback-selection="suggested" bottom-item>
               <paper-tab id="suggestedTab" name="suggested" link>
-                <a href="[[rootPath]][[ctreeKey]]/suggested" tabindex="-1">
+                <a href="[[rootPath]]/[[ctreeKey]]/suggested" tabindex="-1">
                   <iron-icon icon="suggested"></iron-icon><div class="tabLabel">SUGGESTED</div>
                 </a>
               </paper-tab>
               <paper-tab id="bookmarksTab" name="bookmarked" link>
-                <a href="[[rootPath]][[ctreeKey]]/bookmarked" tabindex="-1">
+                <a href="[[rootPath]]/[[ctreeKey]]/bookmarked" tabindex="-1">
                   <iron-icon icon="bookmark"></iron-icon><div class="tabLabel">BOOKMARKS</div>
                 </a>
               </paper-tab>
               <paper-tab id="historyTab" name="history" link>
-                <a href="[[rootPath]][[ctreeKey]]/history" tabindex="-1">
+                <a href="[[rootPath]]/[[ctreeKey]]/history" tabindex="-1">
                   <iron-icon icon="history"></iron-icon><div class="tabLabel">HISTORY</div>
                 </a>
               </paper-tab>
@@ -498,7 +498,11 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       }
 
       _pageChanged(page) {
-        this.ctreeKey = this.rootPath + (page && page.length > 0 ? '/' + page : '');
+        if (this.rootPath && this.rootPath.length > 0) {
+          this.ctreeKey = this.rootPath + (page && page.length > 0 ? '/' + page : '');
+        } else {
+          this.ctreeKey = page;
+        }
       }
 
       _subpageChanged(subpage) {

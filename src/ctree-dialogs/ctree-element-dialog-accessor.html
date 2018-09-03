@@ -30,21 +30,17 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
+<link rel="import" href="../ctree-dialogs/ctree-dialog-accessor-behavior.html">
+
 <script>
   'use strict';
 
-  class CTreeElementDialogAccessor extends Polymer.Element {
+  class CTreeElementDialogAccessor extends CTree.DialogAccessorBehavior {
 
     static get is() { return 'ctree-element-dialog-accessor'; }
 
     static get properties() {
       return {
-        /**
-         * The unique key identifying a cTree.  If the site only has one cTree
-         * this doesn't need to be set.
-         */
-        ctreeKey: String,
-
         /**
          * Element data
          *
@@ -85,34 +81,17 @@ this license.
         feedbackSegment: Number,
 
         historyContributor: Number,
-
-        _dialog: Object,
       };
     }
 
-    open() {
-      if (!this._dialog) {
-        Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'), () => {
-          var dialogs = document.getElementsByTagName('ctree-dialogs');
-          if (dialogs.length < 1) {
-            this._dialog = document.createElement('ctree-dialogs');
-            document.getElementsByTagName('body')[0].appendChild(this._dialog);
-          } else {
-            if (dialogs.length > 1) {
-              console.warn('Multiple ctree-dialogs tags found. Using first occurrence.');
-            }
-            this._dialog = dialogs[0];
-          }
-          this.open();
-        }, null, true);
-      } else {
-        // TODO: initialize values & listeners
-        if (this._dialog.dialog !== 'element') {// TODO: check open dialog
-          this._dialog.element = this.element;
-          this._dialog.descriptionConfigId = this.descriptionConfigId;
-          this._dialog.descriptionSegmentIds = this.descriptionSegmentIds;
-          this._dialog.openElementDialog();
-        }
+    _openInternal() {
+      // TODO: initialize values & listeners
+      if (this._dialog.dialog !== 'element') {// TODO: check open dialog
+        this._dialog.ctreeKey = this.ctreeKey;
+        this._dialog.element = this.element;
+        this._dialog.descriptionConfigId = this.descriptionConfigId;
+        this._dialog.descriptionSegmentIds = this.descriptionSegmentIds;
+        this._dialog.openElementDialog();
       }
     }
   }
