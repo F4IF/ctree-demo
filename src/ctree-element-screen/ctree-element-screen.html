@@ -91,7 +91,7 @@ this license.
 
     <ctree-element id="element" element="[[element]]" noclose="[[noclose]]" on-close-tapped="_closeClicked">
       <iron-pages id="pages" selected="[[page]]" attr-for-selected="name">
-        <ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" child-types="[[_childTypes]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
+        <ctree-details-page name="details" ctree-key="[[ctreeKey]]" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" child-types="[[_childTypes]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
         <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
         <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
         <ctree-related-page name="related"></ctree-related-page>

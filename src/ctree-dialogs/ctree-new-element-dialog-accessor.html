@@ -41,7 +41,9 @@ this license.
 
     static get properties() {
       return {
-        ctreeElement: Object,
+        parentElementId: Number,
+
+        typeId: Number,
       };
     }
 
@@ -49,7 +51,8 @@ this license.
       // TODO: initialize values & listeners
       if (!this._dialog.newElement) {
         this._dialog.ctreeKey = this.ctreeKey;
-        this._dialog.element = this.element;
+        this._dialog.parentElementId = this.parentElementId;
+        this._dialog.typeId = this.typeId;
         this._dialog.openNewElementDialog();
       }
     }

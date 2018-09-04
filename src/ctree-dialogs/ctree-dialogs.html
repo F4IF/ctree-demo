@@ -85,7 +85,7 @@ this license.
     </paper-dialog>
 
     <paper-dialog id="newElementDialog" on-iron-overlay-closed="_newElementDialogClosed" with-backdrop>
-      <ctree-new-element-screen ctree-key="[[ctreeKey]]" on-close-tapped="_newElementDialogClosed"></ctree-new-element-screen>
+      <ctree-new-element-screen ctree-key="[[ctreeKey]]" parent-id="{{queryParams.e}}" type-id="[[typeId]]" on-close-tapped="_newElementDialogClosed"></ctree-new-element-screen>
     </paper-dialog>
   </template>
 
@@ -117,6 +117,11 @@ this license.
           page: {
             type: String,
             observer: '_pageChanged',
+          },
+
+          typeId: {
+            type: Number,
+            observer: '_typeIdChanged',
           },
 
           element: {
