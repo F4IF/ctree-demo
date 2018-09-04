@@ -49,20 +49,35 @@ this license.
         left: 0;
         right: 16px;
       }
-      ctree-description {
+      .scrollRegion {
         position: absolute;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0;
-        padding-top: 64px;
+        /*padding-top: 64px;*/
         overflow-x: hidden;
         overflow-y: auto;
       }
+      #childButtonPrompts {
+        text-align: center;
+      }
+      #childButtonPrompts paper-button {
+        color: white;
+        font-weight: bold;
+        margin: 4px;
+      }
     </style>
 
-    <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
-    <ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>
+    <div class="scrollRegion">
+      <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
+      <div id="childButtonPrompts">
+        <template is="dom-repeat" items="[[childTypes]]" as="type">
+          <paper-button raised style="background: [[type.color]]">[[type.prompt]]</paper-button>
+        </template>
+      </div>
+    </div>
+    <!--<ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>-->
   </template>
 
   <script>
@@ -108,6 +123,8 @@ this license.
             type: Array,
             observer: '__segmentsChanged',
           },
+
+          childTypes: Array,
 
           __tempSegments: Array,
         };
