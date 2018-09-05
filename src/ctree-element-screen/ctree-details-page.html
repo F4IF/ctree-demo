@@ -28,10 +28,8 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-list/iron-list.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
-<link rel="import" href="../ctree-element/ctree-element-description-behavior.html">
+<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-element/ctree-element-header.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 <link rel="import" href="ctree-description.html">
@@ -49,20 +47,37 @@ this license.
         left: 0;
         right: 16px;
       }
-      ctree-description {
+      .scrollRegion {
         position: absolute;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0;
-        padding-top: 64px;
+        /*padding-top: 64px;*/
         overflow-x: hidden;
         overflow-y: auto;
       }
+      #childButtonPrompts {
+        text-align: center;
+      }
+      #childButtonPrompts paper-button {
+        color: white;
+        font-weight: bold;
+        margin: 4px;
+      }
     </style>
 
-    <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
-    <ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>
+    <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
+
+    <div class="scrollRegion">
+      <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
+      <div id="childButtonPrompts">
+        <template is="dom-repeat" items="[[childTypes]]" as="type">
+          <paper-button raised style="background: [[type.color]]" on-tap="_addChildClicked" type="[[type]]">[[type.prompt]]</paper-button>
+        </template>
+      </div>
+    </div>
+    <!--<ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>-->
   </template>
 
   <script>
@@ -92,6 +107,12 @@ this license.
       static get properties() {
         return {
           /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: String,
+
+          /**
            * Segments data
            *
            * Structure:
@@ -109,12 +130,21 @@ this license.
             observer: '__segmentsChanged',
           },
 
+          childTypes: Array,
+
           __tempSegments: Array,
         };
       }
 
       _descriptionChanged(description, descriptionSegments) {
         this.segments = description.segments; // TODO: copy array using .slice() so we can mutate it separately?
+      }
+
+      _addChildClicked(e) {
+          var dialog = this.$.newElementDialog;
+          dialog.elementId = this.element.id
+          dialog.typeId = e.target.type.id
+          dialog.open();
       }
 
       _fireContributorsTapped() {

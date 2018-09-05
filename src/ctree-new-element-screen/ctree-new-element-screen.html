@@ -113,9 +113,19 @@ this license.
 
       static get properties() {
         return {
+          parentId: {
+            type: Number,
+            notify: true,
+          },
+
           element: {
             type: Object,
             observer: '_elementChanged',
+          },
+
+          typeId: {
+            type: Number,
+            notify: true,
           },
 
           headerColor: {
