@@ -87,11 +87,11 @@ this license.
     </style>
 
     <ctree-import id="importPage" href="/src/ctree-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>
-    <ctree-element-loader-test ctree-key="[[ctreeKey]]" element="{{element}}" element-id="[[elementId]]" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
+    <ctree-element-loader-test ctree-key="[[ctreeKey]]" types="{{_types}}" element="{{element}}" element-id="[[elementId]]" item-comment="{{comment}}" item-comment-icon="{{commentIcon}}"></ctree-element-loader-test>
 
     <ctree-element id="element" element="[[element]]" noclose="[[noclose]]" on-close-tapped="_closeClicked">
       <iron-pages id="pages" selected="[[page]]" attr-for-selected="name">
-        <ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
+        <ctree-details-page name="details" ctree-key="[[ctreeKey]]" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" child-types="[[_childTypes]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
         <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
         <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
         <ctree-related-page name="related"></ctree-related-page>
@@ -161,12 +161,22 @@ this license.
 
           historyContributor: Number,
 
+          _types: Array,
+
+          _childTypes: Array,
+
           _descriptionVersionBarVisible: {
             type: Boolean,
             observer: '_descriptionVersionBarVisibleChanged',
             value: true,
           },
         };
+      }
+
+      static get observers() {
+        return [
+          '_updateChildTypes(element.type, _types)',
+        ];
       }
 
       _closeClicked() {
@@ -219,6 +229,18 @@ this license.
         } else {
           this.$.pages.style.bottom = '0';
         }
+      }
+
+      _updateChildTypes(elementType, types) {
+        var childTypes = []
+        if (elementType && types) {
+          types.forEach(function(type) {
+            if (type.parentTypes.includes(elementType.id)) {
+              childTypes.push(type)
+            }
+          }, this);
+        }
+        this._childTypes = childTypes;
       }
 
       _ensureDescriptionConfigSet() {
