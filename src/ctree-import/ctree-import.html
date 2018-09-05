@@ -35,6 +35,11 @@ this license.
 
   'use strict';
 
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
   class CTreeImport extends Polymer.Element {
 
     static get is() { return 'ctree-import'; }
@@ -44,6 +49,15 @@ this license.
         href: {
           type: String,
           observer: '_hrefChanged',
+        },
+
+        requiredParent: Object,
+
+        required: String,
+
+        requiredRetryDelay: {
+          type: Number,
+          value: 100,
         },
 
         loading: {
@@ -63,29 +77,51 @@ this license.
     load() {
       if (!this.loading && !this.loaded) {
         this.loading = true;
+        this.__loadInternal();
       }
     }
 
     _hrefChanged() {
       this.loading = false;
+      this.__loadStarted = false;
       this._setLoaded(false);
     }
 
     _loadingChanged(loading, previousLoading) {
       if (!loading || previousLoading) return;
 
+      this.__loadInternal();
+    }
+
+    __loadInternal() {
+      if (this.__loadStarted) return;
+      this.__loadStarted = true;
+
       if (!this.href || this.href.length === 0) {
         this.loading = false;
+        this.__loadStarted = false;
       } else {
         var href = this.href;
         Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + href), () => {
-          if (this.href === href) {
-            this._setLoaded(true);
-            this.loading = false;
-          }
+          this.__loadingSuccess(href);
         }, () => {
-          this.loading = false;
+          if (this.href === href) {
+            this.loading = false;
+            this.__loadStarted = false;
+          }
         }, true);
+      }
+    }
+
+    __loadingSuccess(href) {
+      if (this.href !== href) return;
+
+      if (!this.required || CTree[this.required]) {
+        this._setLoaded(true);
+        this.loading = false;
+        this.__loadStarted = false;
+      } else {
+        window.setTimeout(this.__loadingSuccess.bind(this, href), this.requiredRetryDelay);
       }
     }
   }

@@ -94,7 +94,7 @@ this license.
 
   class CTreeListLoader extends CTree.LoaderBehavior {
 
-    static get is() { return 'ctree-list-loader-test'; }
+    static get is() { return 'ctree-list-loader'; }
 
     static get properties() {
       return {
@@ -251,40 +251,7 @@ this license.
       listData.loading = true;
       this._setLoading('suggested', true);
       setTimeout(() => {
-        if (!this.ctreeKey) return;
-
-        if (!listData.offset) {
-          listData.offset = 0;
-        }
-        var items = getTestItems(cTreeData, cTreeData.testSuggested, listData.offset, this.pageSize, Test.SUGGESTED_COMMENTS);
-        if (!items || items.length == 0) {
-          listData.hasMore = false;
-          if (this._cTreeData == cTreeData) {
-            this._setSuggestedHasMore(false);
-          }
-        } else {
-          items.forEach(function(item) {
-            if (this._cTreeData == cTreeData) {
-              this.push('suggestedItems', item);
-              if (this.currentName == 'suggested') {
-                this.notifySplices('currentItems', [{
-                  index: this.currentItems.length - 1,
-                  removed: [],
-                  addedCount: 1,
-                  object: this.currentItems,
-                  type: 'splice',
-                }]);
-              }
-            } else {
-              listData.items.push(item);
-            }
-            listData.offset++;
-          }, this);
-        }
-        listData.loading = false;
-        if (this._cTreeData == cTreeData) {
-          this._setLoading('suggested', false);
-        }
+        this._loadListItems(cTreeData, listData, 'suggested', 'suggestedItems', cTreeData.testSuggested, Test.SUGGESTED_COMMENTS, this._setSuggestedHasMore);
       }, Test.LOAD_DELAY);
     }
 
@@ -297,38 +264,7 @@ this license.
       listData.loading = true;
       this._setLoading('bookmarked', true);
       setTimeout(() => {
-        if (!listData.offset) {
-          listData.offset = 0;
-        }
-        var items = getTestItems(cTreeData, cTreeData.testBookmarked, listData.offset, this.pageSize)
-        if (!items || items.length == 0) {
-          listData.hasMore = false;
-          if (this._cTreeData == cTreeData) {
-            this._setBookmarkedHasMore(false);
-          }
-        } else {
-          items.forEach(function(item) {
-            if (this._cTreeData == cTreeData) {
-              this.push('bookmarkedItems', item);
-              if (this.currentName == 'bookmarked') {
-                this.notifySplices('currentItems', [{
-                  index: this.currentItems.length - 1,
-                  removed: [],
-                  addedCount: 1,
-                  object: this.currentItems,
-                  type: 'splice',
-                }]);
-              }
-            } else {
-              listData.items.push(item);
-            }
-            listData.offset++;
-          }, this);
-        }
-        listData.loading = false;
-        if (this._cTreeData == cTreeData) {
-          this._setLoading('bookmarked', false);
-        }
+        this._loadListItems(cTreeData, listData, 'bookmarked', 'bookmarkedItems', cTreeData.testBookmarked, null, this._setBookmarkedHasMore);
       }, Test.LOAD_DELAY);
     }
 
@@ -341,39 +277,43 @@ this license.
       listData.loading = true;
       this._setLoading('history', true);
       setTimeout(() => {
-        if (!listData.offset) {
-          listData.offset = 0;
-        }
-        var items = getTestItems(cTreeData, cTreeData.testHistory, listData.offset, this.pageSize, Test.HISTORY_COMMENTS);
-        if (!items || items.length == 0) {
-          listData.hasMore = false;
-          if (this._cTreeData == cTreeData) {
-            this._setHistoryHasMore(false);
-          }
-        } else {
-          items.forEach(function(item) {
-            if (this._cTreeData == cTreeData) {
-              this.push('historyItems', item);
-              if (this.currentName == 'history') {
-                this.notifySplices('currentItems', [{
-                  index: this.currentItems.length - 1,
-                  removed: [],
-                  addedCount: 1,
-                  object: this.currentItems,
-                  type: 'splice',
-                }]);
-              }
-            } else {
-              listData.items.push(item);
-            }
-            listData.offset++;
-          }, this);
-        }
-        listData.loading = false;
-        if (this._cTreeData == cTreeData) {
-          this._setLoading('history', false);
-        }
+        this._loadListItems(cTreeData, listData, 'history', 'historyItems', cTreeData.testHistory, Test.HISTORY_COMMENTS, this._setHistoryHasMore);
       }, Test.LOAD_DELAY);
+    }
+
+    _loadListItems(cTreeData, listData, name, itemsName, list, commentCodes, hasMore) {
+      if (!listData.offset) {
+        listData.offset = 0;
+      }
+      var items = getTestItems(cTreeData, list, listData.offset, this.pageSize, commentCodes);
+      if (!items || items.length == 0) {
+        listData.hasMore = false;
+        if (this._cTreeData == cTreeData) {
+          hasMore.bind(this)(false);
+        }
+      } else {
+        items.forEach(function(item) {
+          if (this._cTreeData == cTreeData) {
+            this.push(itemsName, item);
+            if (this.currentName == name) {
+              this.notifySplices('currentItems', [{
+                index: this.currentItems.length - 1,
+                removed: [],
+                addedCount: 1,
+                object: this.currentItems,
+                type: 'splice',
+              }]);
+            }
+          } else {
+            listData.items.push(item);
+          }
+          listData.offset++;
+        }, this);
+      }
+      listData.loading = false;
+      if (this._cTreeData == cTreeData) {
+        this._setLoading(name, false);
+      }
     }
 
     _setLoading(name, loading) {
@@ -420,29 +360,24 @@ this license.
 
     _currentChanged(currentName, previousName) {
       if (currentName == "suggested") {
-        this._setCurrentItems(this.suggestedItems);
-        this._setCurrentLoading(this.suggestedLoading);
-        this._setCurrentHasMore(this.suggestedHasMore);
-        this.loadCurrent = this.loadSuggested;
+        this.__setCurrent(this.loadSuggested, this.suggestedItems, this.suggestedLoading, this.suggestedHasMore);
       } else if (currentName == "bookmarked") {
-        this._setCurrentItems(this.bookmarkedItems);
-        this._setCurrentLoading(this.bookmarkedLoading);
-        this._setCurrentHasMore(this.bookmarkedHasMore);
-        this.loadCurrent = this.loadBookmarked;
+        this.__setCurrent(this.loadBookmarked, this.bookmarkedItems, this.bookmarkedLoading, this.bookmarkedHasMore);
       } else if (currentName == "history") {
-        this._setCurrentItems(this.historyItems);
-        this._setCurrentLoading(this.historyLoading);
-        this._setCurrentHasMore(this.historyHasMore);
-        this.loadCurrent = this.loadHistory;
+        this.__setCurrent(this.loadHistory, this.historyItems, this.historyLoading, this.historyHasMore);
       } else {
-        this._setCurrentItems([]);
-        this._setCurrentLoading(false);
-        this._setCurrentHasMore(false);
-        this.loadCurrent = null;
+        this.__setCurrent(null, [], false, false);
       }
     }
+
+    __setCurrent(load, items, loading, hasMore) {
+      this._setCurrentItems(items);
+      this._setCurrentLoading(loading);
+      this._setCurrentHasMore(hasMore);
+      this.loadCurrent = load;
+    }
   }
-  Polymer.CTreeListLoader = CTreeListLoader;
+  CTree.ListLoader = CTreeListLoader;
 
   // Register custom element definition using standard platform API
   customElements.define(CTreeListLoader.is, CTreeListLoader);
