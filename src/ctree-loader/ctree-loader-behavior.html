@@ -1,0 +1,316 @@
+<!--
+@license
+Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  // monostate data
+  // TODO: remove identifying Firebase data before committing
+  var config = {
+    apiKey: "AIzaSyBier7ftAiHBdiYke1nnUIgr6OBsDsJSBo",
+    authDomain: "ctree-mvp.firebaseapp.com",
+    databaseURL: "https://ctree-mvp.firebaseio.com",
+    projectId: "ctree-mvp",
+    storageBucket: "ctree-mvp.appspot.com",
+    messagingSenderId: "404345601751"
+  };
+
+  /*var ElementTypes = [
+    [
+      {id: 1, name: "Subject",	description: "What this cTree is about",	prompt: "Create cTree",
+      	iconUrl: "/images/app-icon-32.png",	color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
+      {id: 2, name: "Goals",	description: "Areas which need to be addresed",	prompt: "Add goal",
+        iconUrl: "/images/app-icon-32.png",	color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1, 2], elements: []},
+      {id: 3, name: "Implementation",	description: "How to structure or accomplish suggestion", prompt: "",
+        iconUrl: "/images/app-icon-32.png",	color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [3, 5, 7], elements: []},
+      {id: 4, name: "Question",	description: "Something which needs to be answered", prompt: "Ask question",
+        iconUrl: "/images/app-icon-32.png",	color: "#d1d100", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
+      {id: 5, name: "Answer",	description: "Possible answer to question", prompt: "Answer question",
+        iconUrl: "/images/app-icon-32.png",	color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
+      {id: 6, name: "Problem",	description: "Issue which needs to be solved", prompt: "Identify problem",
+        iconUrl: "/images/app-icon-32.png",	color: "#e12323", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
+      {id: 7, name: "Solution",	description: "Potential way to address problem", prompt: "Suggest solution",
+        iconUrl: "/images/app-icon-32.png",	color: "#00aeae", parentsRequired: true,	parentsMax: -1,	parentTypes: [6], elements: []},
+    ],
+  ];
+  var SegmentTypes = [
+    {id: 1, componentName: 'ctree-segment-text', canBeThumbnail: false},
+    {id: 2, componentName: 'ctree-segment-image', canBeThumbnail: true},
+  ];*/
+
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
+  if (CTree.firebaseConfig) {
+    CTree.LoaderBehavior = class extends Polymer.Element {
+      static get properties() {
+        return {
+          /**
+           * Alternate url where cTree is hosted.  The default is the root domain
+           * where the page holding this element is being hosted.
+           */
+          // TODO: support changing Firebase targets (will require new config details in addition to URL)
+          url: {
+            type: String,
+            notify: true,
+            observer: '_urlChanged',
+          },
+
+          /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: {
+            type: String,
+            observer: '_keyChanged',
+          },
+
+          /**
+           * All types for current cTree, indexed by ID.
+           *
+           * Structure:
+           *   [{
+           *     id: Number,
+           *     name: String,
+           *     description: String,
+           *     iconUrl: String,
+           *     color: String,
+           *     parentsRequired: Boolean,
+           *     parentsMax: Number,
+           *     parentTypes: [Numbers],
+           *     elements: [Elements],
+           *   }, ...]
+           */
+          types: {
+            type: Array,
+            readOnly: true,
+            notify: true,
+          },
+
+          /**
+           * All segment types supported by current cTree, indexed by ID.
+           *
+           * Structure:
+           *   [{
+           *     id: Number,
+           *     componentName: String,
+           *     canBeThumbnail: Boolean,
+           *   }, ...]
+           */
+          segmentTypes: {
+            type: Array,
+            readOnly: true,
+            notify: true,
+          },
+
+          /**
+           * Object holding all values for current cTrees.  All item lists will be
+           * cleared for all cTrees when the user value changes.
+           *
+           * Structure:
+           *   url: String,
+           *   types: [Types],
+           *   segmentTypes: [SegmentTypes],
+           *   elements: [Elements],
+           *   users: [Users],
+           *   lists: {
+           *     suggested: {
+           *       items: [SuggestedItems],
+           *       loading: Boolean,
+           *       hasMore: Boolean,
+           *       offset: String,			// test: Number
+           *     },
+           *     bookmarked: {
+           *       items: [BookmarkedItems],
+           *       loading: Boolean,
+           *       hasMore: Boolean,
+           *       offset: String,			// test: Number
+           *     },
+           *     history: {
+           *       items: [HistoryItems],
+           *       loading: Boolean,
+           *       hasMore: Boolean,
+           *       offset: String,			// test: Number
+           *     },
+           *   },
+           *   testElements: [Elements],
+           *   testElementsWithoutParents: [Elements],
+           *   testSuggested: [Numbers],
+           *   testBookmarks: [Numbers],
+           *   testHistory: [Numbers],
+           *
+           * Elements Structure:
+           *   [{
+           *     id: Number,
+           *     type: ElementType,
+           *     title: String,
+           *     parents: [Numbers],
+           *     children: [Numbers],
+           *     childrenSearchComplete: Boolean,
+           *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+           *     description: [{
+           *       id: Number,
+           *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+           *       segments: [{
+           *         id: Number,
+           *         type: SegmentType,
+           *         variations: [{
+           *           id: Number,
+           *           data: dynamic,	// data type depends on segment type
+           *         }, ...],
+           *       }, ...],
+           *     }, ...],
+           *     feedback: [{
+           *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+           *       text: String,
+           *     }, ...],
+           *     bookmarked: Boolean,
+           *   }, ...]
+           *
+           * Users Structure:
+           *   [{
+           *     id: Number,
+           *     name: String,
+           *     avatar: String,
+           *     // TODO: add more public data
+           *   }, ...]
+           */
+          _cTreeData: {
+            type: Object,
+            observer: '_cTreeDataChanged',
+          },
+        };
+      }
+
+      _urlChanged(url) {
+        // TODO: implement once supported
+      }
+
+      _keyChanged(cTreeKey, previousKey) {
+        // TODO: load initial data from Firebase ()
+        this._cTreeData = {
+          url: this.url,
+          types: [],
+          segmentTypes: [],
+          elements: [],
+          users: [],
+          lists: {
+            suggested:  {items: [], loading: false, hasMore: true},
+            bookmarked: {items: [], loading: false, hasMore: true},
+            history:    {items: [], loading: false, hasMore: true},
+          },
+        };
+        this._setTypes(this._cTreeData.types);
+        this._setSegmentTypes(this._cTreeData.segmentTypes);
+      }
+
+      _cTreeDataChanged(cTreeData, previousCTreeData) {
+        // Implement when include behavior to initialize additional fields when cTreeData changes
+      }
+    };
+
+    // Initialize object to hold shared static constants and functions
+    CTree.Loader = {};
+
+    // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
+    // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
+    CTree.Loader.COMMENT_CATEGORY = {
+      // Never look up values
+      NEW: 100,
+      UPDATED: 200,
+      TRANSLATED: 300,
+      NEEDS: 400,
+      NEEDS_FEEDBACK_FOR: 500,
+
+      // Look up some values
+      POPULAR_FROM: 600,
+      POPULAR_WITH: 700,
+      SIMILAR_TO: 800,
+      OPPOSING: 900,
+    };
+
+    CTree.Loader.COMMENT_SUBJECT = {
+      // popular: no from/with
+      ELEMENT: 0,
+      TYPE: 1,
+
+      // popular: don't look up, no from/with
+      TITLE: 10,
+      DESCRIPTION: 11,
+      TRANSLATION: 12,
+      FEEDBACK: 13,
+
+      CATEGORY: 20,
+      GROUP: 21,
+      USER: 22,
+
+      // popular: child of
+      PARENT: 30,
+      // popular: parent of
+      CHILD: 31,
+      // popular: sibling of
+      SIBLING: 32,
+    };
+
+    /**
+     * Gets the first object from the array with the id property equal to the id
+     * parameter passed to this function.  If defaultToFirst is true this will
+     * return the first item from the array if no matching item is found, else
+     * will return undefined.
+     *
+     * @param {Array} array
+     * @param {number} id
+     * @param {boolean} [defaultToFirst=true]
+     */
+    CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
+      if (!array) return undefined;
+
+      if (id) {
+        for (var i = 0; i < array.length; i++) {
+          if (array[i].id == id) {
+            return array[i];
+          }
+        }
+      }
+      return defaultToFirst ? array[0] : undefined;
+    };
+  }
+
+})();
+
+</script>

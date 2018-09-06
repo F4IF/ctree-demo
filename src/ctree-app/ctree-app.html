@@ -48,6 +48,8 @@ this license.
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
@@ -58,13 +60,27 @@ this license.
 <link rel="import" href="icons.html">
 
 <script>
-// TODO: create a loder for tree types or add to ctree-loader
-var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
-    	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
-    	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
-    	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: false},
-    	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true}};
-var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
+  // TODO: replace with config from Firebase to use Firebase loaders instead of test loaders
+  CTree.firebaseConfig = null;/*{
+    apiKey: "1a2B3c4D5e6F7g8H9i0J1k2L3m4N5o6P7q8R9S0",
+    authDomain: "yourproject.firebaseapp.com",
+    databaseURL: "https://yourproject.firebaseio.com",
+    projectId: "yourproject",
+    storageBucket: "yourproject.appspot.com",
+    messagingSenderId: "123456789012"
+  };*/
+
+  // TODO: create a loder for tree types or add to ctree-loader
+  var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
+      	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
+      	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
+      	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: false},
+      	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true}};
+  var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 </script>
 
 <dom-module id="ctree-app">
@@ -203,8 +219,11 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       }
     </style>
 
+    <firebase-app id="firebase"></firebase-app>
+    <firebase-auth id="auth"></firebase-auth>
+
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
-    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
+    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader.html" required="ListLoader" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
     <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
 
     <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
@@ -213,7 +232,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
-    <ctree-list-loader-test id="loader" ctree-key="[[ctreeKey]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader-test>
+    <ctree-list-loader id="loader" ctree-key="[[ctreeKey]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader>
 
     <app-drawer-layout fullbleed>
 
@@ -360,6 +379,18 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
 
       ready() {
         super.ready();
+
+        if (CTree.firebaseConfig) {
+          // initialize Firebase
+          var firebase = this.$.firebase
+          firebase.apiKey = CTree.firebaseConfig.apiKey;
+          firebase.authDomain = CTree.firebaseConfig.authDomain;
+          firebase.storageBucket = CTree.firebaseConfig.storageBucket;
+          firebase.messagingSenderId = CTree.firebaseConfig.messagingSenderId;
+          firebase.databaseUrl = CTree.firebaseConfig.databaseURL;
+          this.$.auth.signInAnonymously();
+        }
+
         // TODO:
       }
 

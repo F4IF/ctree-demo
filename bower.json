@@ -34,6 +34,7 @@
     "paper-toolbar": "PolymerElements/paper-toolbar#^2.1.0",
     "paper-tooltip": "PolymerElements/paper-tooltip#^2.1.1",
     "polymer": "polymer/polymer#^2.6.1",
+    "polymerfire": "FirebaseExtended/polymerfire#^2.2.1",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.2.6"
   },
   "devDependencies": {
