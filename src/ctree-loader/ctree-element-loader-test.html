@@ -31,7 +31,7 @@ this license.
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
 <link rel="import" href="ctree-loader-behavior-test.html">
-<link rel="import" href="../ctree-loader/lorem.html">
+<link rel="import" href="lorem.html">
 
 <script>
 (function() {
@@ -45,7 +45,7 @@ this license.
 
   class CTreeElementLoader extends CTree.LoaderBehavior {
 
-    static get is() { return 'ctree-element-loader-test'; }
+    static get is() { return 'ctree-element-loader'; }
 
     static get properties() {
       return {
@@ -266,7 +266,7 @@ this license.
               if (popular) {
                 subjectData = 'description';
               } else {
-                var description = Polymer.CTreeLoader.getFromArrayWithId(this.element.description, item.commentData, false);
+                var description = CTree.Loader.getFromArrayWithId(this.element.description, item.commentData, false);
                 if (description && description.segments.length > 0) {
                   var segments = description.segments;
                   subjectData = '';
@@ -308,7 +308,7 @@ this license.
               if (popular) {
                 subjectData = 'feedback';
               } else {
-                var feedback = Polymer.CTreeLoader.getFromArrayWithId(this.element.feedback, item.commentData, false);
+                var feedback = CTree.Loader.getFromArrayWithId(this.element.feedback, item.commentData, false);
                 if (feedback) {
                   var feedback = allFeedback[item.commentData];
                   // TODO: if no text we should try to get text from content (using segment type's getText)
@@ -378,7 +378,7 @@ this license.
       // do nothing for test loader
     }
   }
-  Polymer.CTreeElementLoader = CTreeElementLoader;
+  CTree.ElementLoader = CTreeElementLoader;
 
   // Register custom element definition using standard platform API
   customElements.define(CTreeElementLoader.is, CTreeElementLoader);
