@@ -229,7 +229,6 @@ this license.
       }
 
       _keyChanged(cTreeKey, previousKey) {
-        console.log('ctree: ' + cTreeKey);
         var cTreeData = cTreesData[cTreeKey];
         var createCTree = !cTreeData;
         if (createCTree) {
@@ -310,7 +309,6 @@ this license.
             data = Object.keys(data).map(key => {key: data[key]});
           }
           handleData(data);
-          console.log(path + ' data: ' + loader.data);
           loader.removeEventListener('data-changed', listener);
         };
         loader.addEventListener('data-changed', listener);
