@@ -1,0 +1,191 @@
+{
+  "ctrees" : {
+    "<default>" : {
+      "types" : [ null, {
+        "color" : "#8a5b15",
+        "description" : "What this cTree is about",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Subject",
+        "parentsMax" : 0,
+        "parentsRequired" : false,
+        "prompt" : "Create cTree"
+      }, {
+        "color" : "#d58c20",
+        "description" : "Areas which need to be addresed",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Goals",
+        "parentTypes" : [ null, 1, 2 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Add goal"
+      }, {
+        "color" : "#16ad16",
+        "description" : "How to structure or accomplish suggestion",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Implementation",
+        "parentTypes" : [ null, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Suggest implementation"
+      }, {
+        "color" : "#d1d100",
+        "description" : "Something which needs to be answered",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Question",
+        "parentTypes" : [ null, 2, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Ask question"
+      }, {
+        "color" : "#2c2ce2",
+        "description" : "Possible answer to question",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Answer",
+        "parentTypes" : [ null, 4 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Answer question"
+      }, {
+        "color" : "#e12323",
+        "description" : "Issue which needs to be solved",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Problem",
+        "parentTypes" : [ null, 2, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Identify problem"
+      }, {
+        "color" : "#00aeae",
+        "description" : "Potential way to address problem",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Solution",
+        "parentTypes" : [ null, 6 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Suggest solution"
+      } ],
+      "segmentTypes" : [ null, {
+        "canBeThumbnail" : false,
+        "componentName" : "ctree-segment-text"
+      }, {
+        "canBeThumbnail" : true,
+        "componentName" : "ctree-segment-image"
+      } ]
+    },
+    "test" : {
+      "descriptions" : {
+        "forElements" : [ null, [ null, {
+          "rating" : 0,
+          "segments" : [ 1 ]
+        } ], {
+          "2" : {
+            "rating" : 0,
+            "segments" : [ 2 ]
+          }
+        } ]
+      },
+      "elements" : [ null, {
+        "rating" : 0,
+        "title" : "test1",
+        "type" : 1
+      }, {
+        "parents" : [ null, {
+          "rating" : 1
+        } ],
+        "rating" : 0,
+        "title" : "test2",
+        "type" : 2
+      } ],
+      "feedback" : {
+        "forDescriptions" : [ null, [ null, {
+          "rating" : 0,
+          "text" : "test comment"
+        } ] ]
+      },
+      "name" : "Test",
+      "segmentTypes" : [ null, {
+        "canBeThumbnail" : false,
+        "componentName" : "ctree-segment-text"
+      }, {
+        "canBeThumbnail" : true,
+        "componentName" : "ctree-segment-image"
+      } ],
+      "segmentVariations" : {
+        "forSegment" : [ null, [ null, {
+          "data" : "test description 1",
+          "rating" : 0,
+          "type" : 1
+        } ], {
+          "2" : {
+            "data" : "test description 2",
+            "rating" : 0,
+            "type" : 1
+          }
+        } ]
+      },
+      "types" : [ null, {
+        "color" : "#8a5b15",
+        "description" : "What this cTree is about",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Subject",
+        "parentsMax" : 0,
+        "parentsRequired" : false,
+        "prompt" : "Create cTree"
+      }, {
+        "color" : "#d58c20",
+        "description" : "Areas which need to be addresed",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Goals",
+        "parentTypes" : [ null, 1, 2 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Add goal"
+      }, {
+        "color" : "#16ad16",
+        "description" : "How to structure or accomplish suggestion",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Implementation",
+        "parentTypes" : [ null, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Suggest implementation"
+      }, {
+        "color" : "#d1d100",
+        "description" : "Something which needs to be answered",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Question",
+        "parentTypes" : [ null, 2, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Ask question"
+      }, {
+        "color" : "#2c2ce2",
+        "description" : "Possible answer to question",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Answer",
+        "parentTypes" : [ null, 4 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Answer question"
+      }, {
+        "color" : "#e12323",
+        "description" : "Issue which needs to be solved",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Problem",
+        "parentTypes" : [ null, 2, 3, 5, 7 ],
+        "parentsMax" : 1,
+        "parentsRequired" : true,
+        "prompt" : "Identify problem"
+      }, {
+        "color" : "#00aeae",
+        "description" : "Potential way to address problem",
+        "iconUrl" : "/images/app-icon-32.png",
+        "name" : "Solution",
+        "parentTypes" : [ null, 6 ],
+        "parentsMax" : -1,
+        "parentsRequired" : true,
+        "prompt" : "Suggest solution"
+      } ]
+    }
+  }
+}

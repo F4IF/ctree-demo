@@ -29,6 +29,7 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
@@ -101,6 +102,11 @@ this license.
           },
 
           /**
+           * The name of the cTree to display to users.
+           */
+          name: String,
+
+          /**
            * All types for current cTree, indexed by ID.
            *
            * Structure:
@@ -144,6 +150,7 @@ this license.
            *
            * Structure:
            *   url: String,
+           *   name: String,
            *   types: [Types],
            *   segmentTypes: [SegmentTypes],
            *   elements: [Elements],
@@ -168,11 +175,11 @@ this license.
            *       offset: String,			// test: Number
            *     },
            *   },
-           *   testElements: [Elements],
-           *   testElementsWithoutParents: [Elements],
-           *   testSuggested: [Numbers],
-           *   testBookmarks: [Numbers],
-           *   testHistory: [Numbers],
+           *   cachedElements: [Elements],
+           *   cachedElementsWithoutParents: [Elements],
+           *   cachedSuggested: [Numbers],
+           *   cachedBookmarks: [Numbers],
+           *   cachedHistory: [Numbers],
            *
            * Elements Structure:
            *   [{
@@ -222,21 +229,92 @@ this license.
       }
 
       _keyChanged(cTreeKey, previousKey) {
-        // TODO: load initial data from Firebase ()
-        this._cTreeData = {
-          url: this.url,
-          types: [],
-          segmentTypes: [],
-          elements: [],
-          users: [],
-          lists: {
-            suggested:  {items: [], loading: false, hasMore: true},
-            bookmarked: {items: [], loading: false, hasMore: true},
-            history:    {items: [], loading: false, hasMore: true},
-          },
-        };
+        console.log('ctree: ' + cTreeKey);
+        var cTreeData = cTreesData[cTreeKey];
+        var createCTree = !cTreeData;
+        if (createCTree) {
+          cTreeData = {
+            key: cTreeKey,
+            name: "",
+            url: this.url,
+            types: [],
+            segmentTypes: [],
+            elements: [],
+            users: [],
+            lists: {
+              suggested:  {items: [], loading: false, hasMore: true},
+              bookmarked: {items: [], loading: false, hasMore: true},
+              history:    {items: [], loading: false, hasMore: true},
+            },
+          };
+          cTreesData[cTreeKey] = cTreeData;
+        }
+
+        this._cTreeData = cTreeData;
         this._setTypes(this._cTreeData.types);
         this._setSegmentTypes(this._cTreeData.segmentTypes);
+        this.name = cTreeData.name;
+
+        if (cTreeData.name.length == 0) {
+          this._getData('name', function(data) {
+            cTreeData.name = data;
+            if (this.ctreeKey === cTreeData.key) {
+              this.name = data;
+            }
+          });
+        }
+        if (cTreeData.types.length == 0) {
+          this._getData('types', function(data) {
+            cTreeData.types = data;
+          });
+        }
+        if (cTreeData.segmentTypes.length == 0) {
+          this._getData('segmentTypes', function(data) {
+            cTreeData.segmentTypes = data;
+          });
+        }
+      }
+
+      _getData(path, handleData, orderBy, ascending = true, value) {
+        var loader = document.createElement('firebase-query');
+        loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
+        if (value != null) {
+          loader.orderBy = orderBy;
+          loader.startAt = value;
+          loader.endAt = value;
+        }
+        var listener = function() {
+          var data = loader.data;
+          if (data == null || !data.length) return;
+          if (orderBy != null || !ascending) {
+            data = Object.keys(data).map(key => {key: data[key]});
+            data.sort(function(a, b) {
+              var keyA = Object.keys(a)[0];
+              var keyB = Object.keys(b)[0];
+              var valueA;
+              var valueB;
+              if (orderBy != null) {
+                valueA = a[keyA][orderBy];
+                valueB = b[keyB][orderBy];
+              } else {
+                valueA = keyA;
+                valueB = keyB;
+              }
+              if (ascending) {
+                return valueA - valueB;
+              } else {
+                return valueB - valueA;
+              }
+            });
+          } else if (Array.isArray(data)) {
+            data = Object.keys(data).map(key => {key: data[key]});
+          }
+          handleData(data);
+          console.log(path + ' data: ' + loader.data);
+          loader.removeEventListener('data-changed', listener);
+        };
+        loader.addEventListener('data-changed', listener);
+        document.body.appendChild(loader);
       }
 
       _cTreeDataChanged(cTreeData, previousCTreeData) {
