@@ -91,17 +91,17 @@ this license.
 
     <ctree-element id="element" element="[[element]]" noclose="[[noclose]]" on-close-tapped="_closeClicked">
       <iron-pages id="pages" selected="[[page]]" attr-for-selected="name">
-        <ctree-details-page name="details" ctree-key="[[ctreeKey]]" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" child-types="[[_childTypes]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
+        <ctree-details-page name="details" ctree-key="[[ctreeKey]]" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" child-types="[[_childTypes]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped" on-comment-submitted="_onCommentSubmitted"></ctree-details-page>
         <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
         <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
         <ctree-related-page name="related"></ctree-related-page>
         <ctree-feedback-page name="feedback" description-config="[[descriptionConfig]]" segment="[[feedbackSegment]]"></ctree-feedback-page>
       </iron-pages>
-      <table id="nav" hidden$="[[!_descriptionVersionBarVisible]]"><tr>
+      <!--<table id="nav" hidden$="[[!_descriptionVersionBarVisible]]"><tr>
         <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$=""></paper-icon-button></td>
         <td id="feedback" colspan="2"><ctree-feedback-bar on-feedback-tapped="_onFeedbackTapped"></ctree-feedback-bar></td>
         <td><paper-icon-button id="next" icon="navigate-next" title="next element variation" hidden$=""></paper-icon-button></td>
-      </tr></table>
+      </tr></table>-->
     </ctree-element>
   </template>
 
@@ -224,11 +224,11 @@ this license.
         // HACK: for some reson this.$ is undefined when open link with dialog parameters
         if (!this.$) return;
 
-        if (visible) {
-          this.$.pages.style.bottom = '40px';
-        } else {
+        //if (visible) {
+        //  this.$.pages.style.bottom = '40px';
+        //} else {
           this.$.pages.style.bottom = '0';
-        }
+        //}
       }
 
       _updateChildTypes(elementType, types) {
@@ -272,6 +272,13 @@ this license.
           this.descriptionConfig = null;
         }
         this.page = 'history';
+      }
+
+      _onCommentSubmitted(e) {
+        var comment = e.detail.comment
+        // TODO: when adding comment support, ensure this adds to both the visible list and backend, may need to use notifySplice if this isn't working
+        // TODO: check if we need to escape some text to protect the backend from hacking or errors
+        this.splice('element.feedback', 0, 0, {text: comment, rating: 0});
       }
     }
 

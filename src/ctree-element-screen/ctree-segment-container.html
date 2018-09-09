@@ -32,6 +32,7 @@ this license.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
 
+<link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 
 <dom-module id="ctree-segment-container">
@@ -72,7 +73,7 @@ this license.
     <!-- TODO: hide second row unless in edit mode for row -->
     <table id="nav"><tr>
       <td><paper-icon-button id="previous" icon="navigate-before" title="previous element variation" hidden$="[[_firstVariation(_variationIndex)]]" on-tap="previous"></paper-icon-button></td>
-      <td id="content" on-tap="_contentClicked"><div id="container"></div><paper-ripple hidden$=[[editing]]></paper-ripple></td>
+      <td id="content" on-tap="_contentClicked"><div id="container"></div><!--<paper-ripple hidden$=[[editing]]></paper-ripple></td>-->
       <td><paper-icon-button id="next" icon="navigate-next" title="next element variation" hidden$="[[_lastVariation(_variationIndex)]]" on-tap="next"></paper-icon-button></td>
     </tr></table>
     <table><tr hidden$="[[!editing]]">
@@ -224,7 +225,7 @@ this license.
       _contentClicked() {
         if (this.editing) return;
 
-        this.editing = true;
+        //this.editing = true;
       }
 
       _addSegmentVariation(e) {

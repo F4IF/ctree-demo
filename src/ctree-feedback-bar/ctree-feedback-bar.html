@@ -45,14 +45,17 @@ this license.
         padding-right: 4px;
       }
       .count {
-        display: inline-block;
+        display: none;/*inline-block;*/
         vertical-align: text-bottom;
+      }
+      .rating paper-icon-button[selected] {
+        color: orange;
       }
     </style>
 
-    <div class="rating"><div class="count">30</div><paper-icon-button id="thumbs-up" icon="thumbs-up" title="like"></paper-icon-button></div>
-    <div class="rating"><div class="count">40</div><paper-icon-button id="thumbs-down" icon="thumbs-down" title="dislike"></paper-icon-button></div>
-    <paper-icon-button id="comment" icon="comment" title="comment" on-tap="_fireFeedbackTapped"></paper-icon-button>
+    <div class="rating"><div class="count">30</div><paper-icon-button id="thumbs-up" icon="thumbs-up" title="like" selected$="[[_isPositive(userRating)]]" on-tap="_positiveClicked"></paper-icon-button></div>
+    <div class="rating"><div class="count">40</div><paper-icon-button id="thumbs-down" icon="thumbs-down" title="dislike" selected$="[[_isNegative(userRating)]]" on-tap="_negativeClicked"></paper-icon-button></div>
+    <!--<paper-icon-button id="comment" icon="comment" title="comment" on-tap="_fireFeedbackTapped"></paper-icon-button>-->
   </template>
 
   <script>
@@ -82,14 +85,77 @@ this license.
            *     }, ...],
            *   }
            */
-          segment: {
-            type: Object,
+          segment: Object,
+
+          rating: {
+            type: Number,
+            notify: true,
+          },
+
+          userRating: {
+            type: Number,
+            notify: true,
+          },
+
+          elementId: {
+            type: Number,
+            observer: '_elementIdChanged',
+          },
+
+          commentId: {
+            type: String, // TODO: once we have unique IDs for comments change this to Number
+            observer: '_commentIdChanged',
           },
         };
       }
 
+      _elementIdChanged(elementId) {
+        this.userRating = 0;
+      }
+
+      _commentIdChanged(commentId) {
+        this.userRating = 0;
+      }
+
+      _positiveClicked() {
+        var oldRating = this.userRating;
+        if (this.userRating > 0) {
+          this.userRating = 0;
+        } else {
+          this.userRating = 1;
+        }
+        this.__updateRating(oldRating);
+      }
+
+      _negativeClicked() {
+        var oldRating = this.userRating;
+        if (this.userRating < 0) {
+          this.userRating = 0;
+        } else {
+          this.userRating = -1;
+        }
+        this.__updateRating(oldRating);
+      }
+
+      _isPositive(userRating) {
+        return userRating > 0;
+      }
+
+      _isNegative(userRating) {
+        return userRating < 0;
+      }
+
       _fireFeedbackTapped() {
         this.dispatchEvent(new CustomEvent('feedback-tapped', {detail: {segment: this.segment}, bubbles: true, composed: true}));
+      }
+
+      __updateRating(oldRating) {
+        var oldTotalRating = this.rating;
+        if (this.rating != null) {
+          this.rating = this.rating + this.userRating - oldRating;
+        } else {
+          this.rating = this.userRating;
+        }
       }
     }
 
