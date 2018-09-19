@@ -1,0 +1,34 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    "ctrees": {
+    	".write": "auth != null",
+    	"$ctree": {
+        "description": {
+          "$forType": {
+            "$typeId": {
+              ".indexOn": "rating"
+            }
+          }
+        },
+        "elements": {
+          ".indexOn": "rating"
+        },
+        "feedback": {
+          "$forType": {
+            "$typeId": {
+            	".indexOn": "rating"
+            }
+          }
+        },
+        "segmentVariations": {
+          "$forType": {
+            "$typeId": {
+              ".indexOn": "rating"
+            }
+          }
+        }
+      }
+    }
+  }
+}

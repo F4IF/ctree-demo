@@ -79,8 +79,9 @@ this license.
       	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
       	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
       	          newCTrees: {label: "New cTrees",	icon: "/images/app-icon-32.png", saved: false},
-      	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true}};
-  var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
+      	          lyrics: {label: "Song Lyrics",	icon: "/images/app-icon-32.png", saved: true},
+      	          test: {label: "Test",	icon: "/images/app-icon-32.png", saved: true}};
+  var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics", "test"];
 </script>
 
 <dom-module id="ctree-app">
@@ -245,7 +246,7 @@ this license.
             <paper-icon-button slot="suffix" hidden$="[[!searchText]]" on-tap="_clearSearch" icon="clear" alt="clear" title="clear"></paper-icon-button>
           </paper-input>
 
-          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="all" role="navigation">
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="test" role="navigation">
             <template is="dom-repeat" items="[[_getCTreeList(navList.splices,rootPath,searchText)]]" as="item">
               <div>
                 <a name="[[item.name]]" class="ctree-item" href="[[rootPath]]/[[item.name]]">
