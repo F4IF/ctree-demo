@@ -110,6 +110,7 @@ this license.
         <template is="dom-repeat" items="[[childTypes]]" as="type">
           <paper-button raised style="background: [[type.color]]" on-tap="_addChildClicked" type="[[type]]">[[type.prompt]]</paper-button>
         </template>
+       <ctree-feedback-bar rating="{{rating}}" element-id="[[element.id]]"></ctree-feedback-bar>
       </div>
       <div class="commentContainer" hidden$="[[_commentSubmitted]]">
         <div class="divider"></div>
@@ -228,6 +229,43 @@ this license.
       _submitComment(e) {
         this.dispatchEvent(new CustomEvent('comment-submitted', {detail: {comment: this.$.comment.value}, bubbles: true, composed: true}));
         this._commentSubmitted = true;
+      }
+
+      _positiveClicked() {
+        var oldRating = this.userRating;
+          if (this.userRating > 0) {
+            this.userRating = 0;
+          } else {
+            this.userRating = 1;
+          }
+        this.__updateRating(oldRating);
+      }
+
+      _negativeClicked() {
+        var oldRating = this.userRating;
+          if (this.userRating < 0) {
+            this.userRating = 0;
+          } else {
+            this.userRating = -1;
+          }
+        this.__updateRating(oldRating);
+      }
+
+      _isPositive(userRating) {
+        return userRating > 0;
+      }
+
+      _isNegative(userRating) {
+        return userRating < 0;
+      }
+
+      __updateRating(oldRating) {
+        var oldTotalRating = this.rating;
+          if (this.rating != null) {
+            this.rating = this.rating + this.userRating - oldRating;
+          } else {
+            this.rating = this.userRating;
+          }
       }
 
       // TODO: before close element or switch description check if tempSegments changed, and if ask user if they want to save their changes
