@@ -24,7 +24,7 @@
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.1.0",
     "paper-fab": "PolymerElements/paper-fab#^2.1.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#^2.2.0",
-    "paper-input": "PolymerElements/paper-input#^2.2.3",
+    "paper-input": "PolymerElements/paper-input#2.0-preview",
     "paper-item": "PolymerElements/paper-item#^2.1.1",
     "paper-listbox": "polymerelements/paper-listbox#^2.1.1",
     "paper-ripple": "PolymerElements/paper-ripple#^2.1.1",

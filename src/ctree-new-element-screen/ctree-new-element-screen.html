@@ -33,6 +33,7 @@ this license.
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../ctree-icons/ctree-icons.html">
@@ -74,27 +75,40 @@ this license.
         width: 100%;
         overflow: hidden;
       }
+      .input {
+        width: 100%;
+      }
     </style>
 
     <!--<ctree-import id="importPage" href="/src/ctree-new-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>-->
 
     <div id="container">
-      <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
+      <paper-toolbar style="background-color: [[headerColor]];">
         <!-- TODO: use custom control so it shows an icon instead of text -->
         <paper-dropdown-menu id="typeIcon" slot="top" horizontal-align="left">
           <iron-icon slot="prefix" src="/images/app-icon-32.png"></iron-icon>
           <paper-listbox slot="dropdown-content" class="dropdown-content" selected="0">
             <!-- TODO: populate programmatically with element types -->
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
+            <paper-item>
+              <iron-icon src="/images/app-icon-32.png"></iron-icon> Seed
+            </paper-item>
+            <paper-item>
+              <iron-icon src="/images/app-icon-32.png"></iron-icon> Seed
+            </paper-item>
+            <paper-item>
+              <iron-icon src="/images/app-icon-32.png"></iron-icon> Seed
+            </paper-item>
+            <paper-item>
+              <iron-icon src="/images/app-icon-32.png"></iron-icon> Seed
+            </paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
         <span slot="top" class="title">[[element.title]]</span>
+        <paper-input slot="top" class="input"></paper-input>
         <paper-icon-button slot="top" id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
         <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
-        <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+        <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]:
+          [[element.type.description]]</paper-tooltip>
       </paper-toolbar>
       <iron-pages id="pages" class="content" selected="[[page]]" attr-for-selected="name">
         <!--<ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
