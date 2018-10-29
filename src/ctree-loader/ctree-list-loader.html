@@ -196,7 +196,69 @@ this license.
         var listData = cTreeData.lists.suggested;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+        listData.loading = true;
+        this._setLoading('suggested', true);
+
+        this._loadAllDataListItems(cTreeData.suggestionTypes, (dataContainerArray) => {
+          var items = [];
+          // TODO: start timer to break out of loading items
+          for (var i = 0; i < 20; i++) {
+            // check to see which dataContainers can be options (have items)
+            var options = [];
+            // TODO: if run out of options wait until timer runs out to see if more items are loaded
+            for (var key in dataContainerArray) {
+              var dataContainer = dataContainerArray[key];
+              if (this._hasNextItem(dataContainer)) {
+                options.push(dataContainer);
+              }
+            }
+            // get random item from available options
+            var item = null;
+            while (options.length > 0 && !item) {
+              // get index of option
+              var optionIndex;
+              if (options.length == 1) {
+                optionIndex = 0;
+              } else {
+                optionIndex = Math.floor(Math.random() * options.length);
+              }
+              // get next non-null item from option
+              var dataContainer = options[optionIndex];
+              do {
+                var itemObj = this._getNextItem(dataContainer, true);
+                if (itemObj) {
+                  // if item doesn't already exist add it
+                  var key = Object.keys(itemObj)[0];
+                  if (!items.find(existingItem => existingItem.key == key) && !this.suggestedItems.find(existingItem => existingItem.key == key)) {
+                    item = Object.assign({key: key}, Object.values(itemObj)[0]);
+                  }
+                }
+              } while (!item && this._hasNextItem(dataContainer));
+              if (!item) {
+                // item was invalid and option has no more items, so remove option
+                options.splice(optionIndex, 1);
+              }
+              if (options.length == 0) {
+                // no options left, check to see if any new options are available
+                for (dataContainer in dataContainerArray) {
+                  if (this._hasNextItem(dataContainer)) {
+                    options.push(dataContainer);
+                  }
+                }
+              }
+            }
+            if (item) {
+              // TODO: start loading description or segments
+              items.push(item);
+            } else {
+              // no options left, so not worth continuing to look for items
+              break;
+            }
+          }
+
+          // TODO: load descriptions for each item, then segments for each description, then call this when done for each (or timeout and push unloaded items back to cache)
+          this._loadListItems(cTreeData, listData, items, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+        }, 5000);
       }
 
       loadBookmarked() {
@@ -205,7 +267,10 @@ this license.
         var listData = cTreeData.lists.bookmarked;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
+        listData.loading = true;
+        this._setLoading('bookmarked', true);
+
+        this._loadListItems(cTreeData, listData, null, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
       }
 
       loadHistory() {
@@ -214,17 +279,16 @@ this license.
         var listData = cTreeData.lists.history;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'history', 'historyItems', this._setHistoryHasMore);
+        listData.loading = true;
+        this._setLoading('history', true);
+
+        this._loadListItems(cTreeData, listData, null, 'history', 'historyItems', this._setHistoryHasMore);
       }
 
-      _loadListItems(cTreeData, listData, name, itemsName, hasMore) {
-        listData.loading = true;
-        this._setLoading(name, true);
-
+      _loadListItems(cTreeData, listData, items, name, itemsName, hasMore) {
         if (!listData.offset) {
           listData.offset = 0;
         }
-        var items = null; // TODO: get user specific items from Firebase, may want to use cTreeData caching like cTreeData.testSuggested, listData.offset, this.pageSize
         if (!items || items.length == 0) {
           listData.hasMore = false;
           if (this._cTreeData == cTreeData) {

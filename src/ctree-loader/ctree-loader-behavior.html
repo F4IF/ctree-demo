@@ -30,6 +30,7 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
@@ -172,6 +173,14 @@ this license.
            *   cachedSuggested: [Numbers],
            *   cachedBookmarks: [Numbers],
            *   cachedHistory: [Numbers],
+           *   suggestionTypes: [{
+           *     key: String,
+           *     ascending: Boolean,
+           *     startAt: Number,
+           *     loadGroup: Boolean,
+           *     cachedElements: [Elements],
+           *     nextCacheIndex: Number,
+           *   }, ...]
            *
            * Elements Structure:
            *   [{
@@ -237,6 +246,36 @@ this license.
               bookmarked: {items: [], loading: false, hasMore: true},
               history:    {items: [], loading: false, hasMore: true},
             },
+            suggestionTypes: [
+              {
+                key: 'rating',
+                ascending: false,
+              },
+              {
+                key: 'createdDate',
+                ascending: false,
+              },
+              {
+                key: 'childCount',
+                ascending: true,
+              },
+              {
+                key: 'feedbackCount',
+                ascending: true,
+              },
+              {
+                key: 'interactionCount',
+                ascending: false,
+              },
+              {
+                key: 'lastInteractionDate',
+                ascending: true,
+              },
+              {
+                key: 'lastInteractionDate',
+                ascending: false,
+              },
+            ]
           };
           cTreesData[cTreeKey] = cTreeData;
         }
@@ -247,64 +286,285 @@ this license.
         this.name = cTreeData.name;
 
         if (cTreeData.name.length == 0) {
-          this._getData('name', function(data) {
+          this._getData('name', (data) => {
             cTreeData.name = data;
             if (this.ctreeKey === cTreeData.key) {
+              if (!data) {
+                data = "";
+              }
               this.name = data;
             }
           });
         }
         if (cTreeData.types.length == 0) {
-          this._getData('types', function(data) {
+          this._getData('types', (data) => {
+            if (!data) {
+              data = [];
+            }
             cTreeData.types = data;
           });
         }
         if (cTreeData.segmentTypes.length == 0) {
-          this._getData('segmentTypes', function(data) {
+          this._getData('segmentTypes', (data) => {
+            if (!data) {
+              data = [];
+            }
             cTreeData.segmentTypes = data;
           });
         }
       }
 
-      _getData(path, handleData, orderBy, ascending = true, value) {
-        var loader = document.createElement('firebase-query');
+      /**
+       * Gets the data at the given path and calls handleData({key: Object}).
+       *
+       * @param  {String}         path       Path within tree where to get data from
+       * @param  {Function([{key: Object}])} handleData Function to call with loaded data as an array of key-value pairs
+       * @param  {String}         orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
+       * @param  {Boolean}        ascending  Sort the items by ascending order.
+       * @param  {Any}            value      A specific value used to start from in the field specified by orderBy.
+       * @param  {Number}         count      If a value > 0 is specified, specifies the count of items to return.  If not specified and value is given it returns all items matching that value.  If neither case, returns all items.
+       * @return null
+       */
+      _getData(path, handleData, orderBy, ascending = true, value, count) {
+        var loader;
+        if (value == null) {
+          loader = document.createElement('firebase-document');
+        } else {
+          loader = document.createElement('firebase-query');
+        }
         loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
         if (value != null) {
-          loader.orderBy = orderBy;
-          loader.startAt = value;
-          loader.endAt = value;
+          loader.orderByChild = orderBy;
+          if (!count || count < 0) {
+            loader.equalTo = value;
+          } else if (ascending) {
+            loader.startAt = value;
+            loader.limitToFirst = count;
+          } else {
+            loader.endAt = value;
+            loader.limitToLast = count;
+          }
         }
+        var processed = false;
         var listener = function() {
+          // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
+          if (processed) {
+            return;
+          }
+
           var data = loader.data;
-          if (data == null || !data.length) return;
-          if (orderBy != null || !ascending) {
-            data = Object.keys(data).map(key => {key: data[key]});
-            data.sort(function(a, b) {
-              var keyA = Object.keys(a)[0];
-              var keyB = Object.keys(b)[0];
-              var valueA;
-              var valueB;
-              if (orderBy != null) {
-                valueA = a[keyA][orderBy];
-                valueB = b[keyB][orderBy];
-              } else {
-                valueA = keyA;
-                valueB = keyB;
+          if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
+            processed = true;
+            loader.removeEventListener('data-changed', listener);
+            loader.remove();
+            var mapFunction = function(key) {
+              var object = {}
+              var value = data[key]
+              if (value.$key) {
+                key = value.$key
+                delete value.$key
               }
-              if (ascending) {
-                return valueA - valueB;
-              } else {
-                return valueB - valueA;
+              if (data.$value) {
+                value = value.$value
+              }
+              object[key] = value;
+              return object;
+            }
+            if (typeof(data) === 'object' && (orderBy != null || !ascending)) {
+              data = Object.keys(data).map(mapFunction);
+              data.sort(function(a, b) {
+                var keyA = Object.keys(a)[0];
+                var keyB = Object.keys(b)[0];
+                var valueA;
+                var valueB;
+                if (orderBy != null) {
+                  valueA = a[keyA][orderBy];
+                  valueB = b[keyB][orderBy];
+                } else {
+                  valueA = keyA;
+                  valueB = keyB;
+                }
+                if (ascending) {
+                  return valueA - valueB;
+                } else {
+                  return valueB - valueA;
+                }
+              });
+            } else if (Array.isArray(data)) {
+              data = Object.keys(data).map(mapFunction);
+            }
+            handleData.bind(this)(data);
+          }
+        };
+        loader.addEventListener('data-changed', listener.bind(this));
+        document.body.appendChild(loader);
+      }
+
+      /**
+       * Loads list items for each data container in the array.  Once loading
+       * completes for each data container or times out it calls
+       * processItems(dataContainerArray).  Timeout can be provided in
+       * milliseconds.
+       */
+      _loadAllDataListItems(dataContainerArray, processItems, timeout) {
+        var count = dataContainerArray.length;
+        var completed = 0;
+        var processDataStarted = false;
+        for (var i = 0; i < count; i++) {
+          var dataContainer = dataContainerArray[i];
+          this._loadDataListItems(dataContainer, (dataContainer) => {
+            completed++
+            if (completed >= count && !processDataStarted) {
+              var allComplete = true;
+              for (var j = 0; j < dataContainerArray.length; j++) {
+                if (dataContainerArray[j].loading) {
+                  allComplete = false;
+                  break;
+                }
+              }
+              if (allComplete) {
+                processDataStarted = true;
+                processItems.bind(this)(dataContainerArray);
+              }
+            }
+          });
+        }
+        if (!processDataStarted && timeout != null && timeout >= 0) {
+          setTimeout((dataContainer) => {
+            if (!processDataStarted) {
+              processDataStarted = true;
+              processItems.bind(this)(dataContainerArray);
+            }
+          }, timeout);
+        }
+      }
+
+      /**
+       * Load list items for dataContainer, and call onComplete(dataContainer)
+       * once it's done.  It's guaranteed that onComplete will be called, even
+       * if no additional items could be loaded.
+       *
+       * dataContainer Structure:
+       *   {
+       *     key: String,
+       *     ascending: Boolean,
+       *     startAt: Number,
+       *     loadGroup: Boolean,
+       *     cachedItems: [
+       *       {key: Object},
+       *       ...
+       *     ],
+       *     nextCacheIndex: Number,
+       *     loading: Boolean,
+       *     allLoaded: Boolean
+       *   }
+       */
+      _loadDataListItems(dataContainer, onComplete) {
+        if (!dataContainer || dataContainer.allLoaded) {
+          if (onComplete) {
+            onComplete.bind(this)(dataContainer);
+          }
+          return;
+        }
+        if (!dataContainer.startAt) {
+          if (dataContainer.ascending) {
+            dataContainer.startAt = Number.MIN_VALUE;
+          } else {
+            dataContainer.startAt = Number.MAX_VALUE;
+          }
+        }
+        if (!dataContainer.callbacks) {
+          dataContainer.callbacks = [];
+        }
+        if (dataContainer.loading) {
+          console.log('loadDataListItems: loading');
+          if (onComplete) {
+            // add to list of callbacks
+            var called = false;
+            var callbacks = dataContainer.callbacks;
+            var index = callbacks.length;
+            callbacks.push(function() {
+              if (!called) {
+                called = true;
+                onComplete.bind(this)(dataContainer);
               }
             });
-          } else if (Array.isArray(data)) {
-            data = Object.keys(data).map(key => {key: data[key]});
+            if ((!dataContainer.loading || dataContainer.callbacks != callbacks) && !called) {
+              // since we added the callback loading may have completed but the callback wasn't called, so call it to be sure
+              called = true;
+              onComplete.bind(this)(dataContainer);
+            }
           }
-          handleData(data);
-          loader.removeEventListener('data-changed', listener);
-        };
-        loader.addEventListener('data-changed', listener);
-        document.body.appendChild(loader);
+        } else if (dataContainer.loadGroup) {
+          // get all elements matching value (ignore first because we already loaded it)
+          dataContainer.loading = true;
+          if (onComplete) {
+            dataContainer.callbacks.push(onComplete);
+          }
+          this._getData('elements', (data) => {
+            dataContainer.loadGroup = false;
+            if (dataContainer.ascending) {
+              dataContainer.startAt++;
+            } else {
+              dataContainer.startAt--;
+            }
+            dataContainer.nextCacheIndex = 1;
+            dataContainer.cachedItems = data;
+            dataContainer.loading = false;
+            this.__processCallbacks(dataContainer);
+          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
+        } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
+          // get next value
+          dataContainer.loading = true;
+          if (onComplete) {
+            dataContainer.callbacks.push(onComplete);
+          }
+          this._getData('elements', (data) => {
+            dataContainer.nextCacheIndex = 0;
+            dataContainer.cachedItems = data;
+            if (data && data.length > 0) {
+              var value = Object.values(data[0])[0];
+              dataContainer.startAt = value[dataContainer.key];
+              dataContainer.loadGroup = true;
+            } else {
+              dataContainer.allLoaded = true;
+            }
+            dataContainer.loading = false;
+            this.__processCallbacks(dataContainer);
+          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt, 1);
+        } else if (onComplete) {
+          onComplete(dataContainer);
+        }
+      }
+
+      __processCallbacks(dataContainer) {
+        var callbacks = dataContainer.callbacks;
+        for (var i = 0; i < callbacks.length; i++) {
+          var callback = callbacks[i];
+          if (callback) {
+            callback.bind(this)(dataContainer);
+          }
+        }
+        dataContainer.callbacks = [];
+      }
+
+      _hasNextItem(dataContainer) {
+        return dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+      }
+
+      /**
+       * Returns next item as a {key: Object} structured Object, or null if none exist.
+       */
+      _getNextItem(dataContainer, preload) {
+        var item = null;
+        if (this._hasNextItem(dataContainer)) {
+          item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
+          dataContainer.nextCacheIndex++;
+        }
+        if (preload && !dataContainer.loading) {  // TODO: check if there aren't any more items
+          this._loadDataListItems(dataContainer);
+        }
+        return item;
       }
 
       _cTreeDataChanged(cTreeData, previousCTreeData) {
