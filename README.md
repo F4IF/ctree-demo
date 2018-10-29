@@ -1,8 +1,6 @@
 # Events
 
-Our first full week hackathon starts Saturday 9/1, building an MVP version for testing by nonprofits and neighborhood organizations.  There will be events in Los Angeles on [Saturday 9/1 @ 10AM](https://www.eventbrite.com/e/43962497012) and [Tuesday 9/4 @ 6PM](https://www.eventbrite.com/e/43962385679).  Join us anytime online at [slack.ctree.org](http://slack.ctree.org) to participate.
-
-We have regular events in Los Angeles every [Tuesday night](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events.
+We have regular events in Los Angeles every [Tuesday night](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and collaborate online on our [Slack Group](http://slack.ctree.org).
 
 # Collaboration Tree
 
