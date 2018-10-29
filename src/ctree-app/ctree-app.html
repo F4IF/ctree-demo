@@ -235,10 +235,10 @@ this license.
 
     <ctree-list-loader id="loader" ctree-key="[[ctreeKey]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader>
 
-    <app-drawer-layout fullbleed>
+    <!-- <app-drawer-layout fullbleed> -->
 
       <!-- Navigation drawer -->
-      <app-drawer slot="drawer" id="navDrawer" class="nav-drawer" swipe-open>
+      <!--<app-drawer slot="drawer" id="navDrawer" class="nav-drawer" swipe-open>
         <app-toolbar>cTrees</app-toolbar>
         <div class="nav-content">
           <paper-input label="Search" value="{{searchText}}" no-label-float>
@@ -260,19 +260,20 @@ this license.
             </template>
           </iron-selector>
         </div>
-      </app-drawer>
+      </app-drawer>-->
 
       <app-header-layout id="mainLayout" has-scrolling-region>
         <app-header slot="header" fixed effects="waterfall">
           <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>cTree.org</div>
+            <!--<paper-icon-button icon="menu" drawer-toggle></paper-icon-button>-->
+            <div main-title>[[_getPageName(page)]]</div>
             <paper-icon-button icon="search" on-tap="showSearch"></paper-icon-button>
-            <paper-icon-button icon="account-circle" on-tap="showAccountDialog"></paper-icon-button>
+            <!--<paper-icon-button icon="account-circle" on-tap="showAccountDialog"></paper-icon-button>
             <paper-icon-button icon="account-stats" on-tap="showAccountStats"></paper-icon-button>
             <paper-icon-button id="notifications" icon="notifications-none" on-tap="showNotifications"></paper-icon-button>
-            <paper-badge for="notifications"></paper-badge>
-          </app-toolbar><app-toolbar style="height: 36px;">
+            <paper-badge for="notifications"></paper-badge>-->
+          </app-toolbar>
+          <!-- </app-toolbar><app-toolbar style="height: 36px;">
             <paper-tabs selected="{{subpage}}" attr-for-selected="name" fallback-selection="suggested" bottom-item>
               <paper-tab id="suggestedTab" name="suggested" link>
                 <a href="[[rootPath]]/[[ctreeKey]]/suggested" tabindex="-1">
@@ -293,7 +294,7 @@ this license.
             <paper-tooltip class="tabTooltip" for="suggestedTab" offset="-8">Suggested</paper-tooltip>
             <paper-tooltip class="tabTooltip" for="bookmarksTab" offset="-8">Bookmarks</paper-tooltip>
             <paper-tooltip class="tabTooltip" for="historyTab" offset="-8">History</paper-tooltip>
-          </app-toolbar>
+          </app-toolbar> -->
 
         </app-header>
 
@@ -330,7 +331,7 @@ this license.
           </div>
         </app-drawer>
       </app-header-layout>
-    </app-drawer-layout>
+    <!-- </app-drawer-layout> -->
   </template>
 
   <script>
@@ -539,6 +540,10 @@ this license.
 
       _searchTextChanged(searchText) {
         // TODO:
+      }
+
+      _getPageName(page) {
+        return ctreePages[page].label
       }
 
       _subpageChanged(subpage) {
