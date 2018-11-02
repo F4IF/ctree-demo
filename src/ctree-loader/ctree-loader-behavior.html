@@ -287,29 +287,38 @@ this license.
 
         if (cTreeData.name.length == 0) {
           this._getData('name', (data) => {
-            cTreeData.name = data;
+            if (data) {
+              cTreeData.name = data;
+            } else {
+              cTreeData.name = "";
+            }
             if (this.ctreeKey === cTreeData.key) {
-              if (!data) {
-                data = "";
-              }
-              this.name = data;
+              this.name = cTreeData.name;
             }
           });
         }
         if (cTreeData.types.length == 0) {
           this._getData('types', (data) => {
-            if (!data) {
-              data = [];
+            if (data) {
+              cTreeData.types = this._dataArrayToIndexedItems(data);
+            } else {
+              cTreeData.types = [];
             }
-            cTreeData.types = data;
+            if (this.ctreeKey === cTreeData.key) {
+              this._setTypes(cTreeData.types);
+            }
           });
         }
         if (cTreeData.segmentTypes.length == 0) {
           this._getData('segmentTypes', (data) => {
-            if (!data) {
-              data = [];
+            if (data) {
+              cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
+            } else {
+              cTreeData.segmentTypes = [];
             }
-            cTreeData.segmentTypes = data;
+            if (this.ctreeKey === cTreeData.key) {
+              this._setSegmentTypes(cTreeData.segmentTypes);
+            }
           });
         }
       }
@@ -322,7 +331,7 @@ this license.
        * @param  {String}         orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
        * @param  {Boolean}        ascending  Sort the items by ascending order.
        * @param  {Any}            value      A specific value used to start from in the field specified by orderBy.
-       * @param  {Number}         count      If a value > 0 is specified, specifies the count of items to return.  If not specified and value is given it returns all items matching that value.  If neither case, returns all items.
+       * @param  {Number}         count      Specifies the count of items to return.  If not specified and value is given it returns all items matching that value, otherwise returns all items.
        * @return null
        */
       _getData(path, handleData, orderBy, ascending = true, value, count) {
@@ -335,13 +344,17 @@ this license.
         loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
         if (value != null) {
           loader.orderByChild = orderBy;
-          if (!count || count < 0) {
+          if (!count || count <= 0) {
             loader.equalTo = value;
           } else if (ascending) {
-            loader.startAt = value;
+            if (value) {
+              loader.startAt = value;
+            }
             loader.limitToFirst = count;
           } else {
-            loader.endAt = value;
+            if (value) {
+              loader.endAt = value;
+            }
             loader.limitToLast = count;
           }
         }
@@ -398,6 +411,28 @@ this license.
         };
         loader.addEventListener('data-changed', listener.bind(this));
         document.body.appendChild(loader);
+      }
+
+      /**
+       * Converts a data entry from the array returned by _getData, which is in the format
+       * {id: dataEntry}, to an item with ID as a property of the item.
+       */
+      _dataToItem(data) {
+        var id = Object.keys(data)[0];
+        return Object.assign({id: id}, data[id]);
+      }
+
+      /**
+       * Converts the data array returned by _getData to an object containing each item indexed by
+       * its ID.
+       */
+      _dataArrayToIndexedItems(dataArray) {
+        var items = [];
+        for (var key in dataArray) {
+          var item = this._dataToItem(dataArray[key]);
+          items[item.id] = item;
+        }
+        return items;
       }
 
       /**
@@ -477,7 +512,6 @@ this license.
           dataContainer.callbacks = [];
         }
         if (dataContainer.loading) {
-          console.log('loadDataListItems: loading');
           if (onComplete) {
             // add to list of callbacks
             var called = false;
@@ -548,8 +582,24 @@ this license.
         dataContainer.callbacks = [];
       }
 
-      _hasNextItem(dataContainer) {
-        return dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+      /**
+       * Return if has a next item ready in the cache.  If onHasNext(boolean) is passed, this will
+       * trigger caching more items if needed and call onHasNext once that attempt to cache more
+       * items is done, with the parameter set to true if cached items are available.
+       */
+      _hasNextItem(dataContainer, onHasNext) {
+        var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+        if (onHasNext) {
+          if (hasNext) {
+            onHasNext.bind(this)(hasNext);
+          } else {
+            this._loadDataListItems(dataContainer, (dataContainer) => {
+              var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+              onHasNext.bind(this)(hasNext);
+            });
+          }
+        }
+        return hasNext;
       }
 
       /**
@@ -561,10 +611,163 @@ this license.
           item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
           dataContainer.nextCacheIndex++;
         }
-        if (preload && !dataContainer.loading) {  // TODO: check if there aren't any more items
+        if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) && !dataContainer.loading) {
           this._loadDataListItems(dataContainer);
         }
         return item;
+      }
+
+      /**
+       * Load description data for the provided item, including segment variations for the
+       * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
+       * item.
+       *
+       * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
+       * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+       * @param  {Function} onServerResponse  (Optional) Function called whenever the server response.  This function should return a boolean value of true if processing should stop (ex. if loading has timed out).
+       * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
+       * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+       */
+      _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
+        if (onServerResponse) onServerResponse.bind(this);
+
+        var descriptions = item.description;
+        if (!descriptions) {
+          descriptions = [];
+          item.description = descriptions;
+        }
+        var descriptionItem = null;
+        var segments = null;
+
+        // function to check if description with matching ID already exists
+        var checkForDescription = descriptionId => {
+          var descriptionFound = false;
+          for (var key in descriptions) {
+            if (descriptions[key].id == descriptionId) {
+              descriptionItem = descriptions[key];
+              segments = descriptionItem.segments;
+              descriptionFound = true;
+              break;
+            }
+          }
+          return descriptionFound;
+        };
+        // function to load data for each segment
+        var loadSegments = () => {
+          var segmentCount = segments.length;
+          var loadedCount = 0;
+          for (var key in segments) {
+            var segmentVariationId = null;
+            if (segmentVariations) {
+              segmentVariationId = segmentVariations[key];
+            }
+            this._loadSegmentVariation(segments[key], () => {
+              loadedCount++;
+
+              if ((!onServerResponse || !onServerResponse()) && onLoadingComplete && loadedCount >= segmentCount) {
+                onLoadingComplete(item);
+              }
+            }, segmentVariationId);
+          }
+        };
+        // function to process data for description
+        var onDescriptionLoaded = data => {
+          var descriptionData;
+          if (descriptionId) {
+            // ID specified when loading, so use raw data
+            descriptionData = data;
+          } else {
+            // searched for best match, so look up ID and description from data
+            var dataItem = data[0];
+            descriptionId = Object.keys(dataItem)[0];
+            descriptionData = dataItem[descriptionId];
+          }
+          if (!checkForDescription(descriptionId)) {
+            segments = descriptionData.segments.map(segmentId => { return {id: segmentId}; });
+            descriptionItem = {id: descriptionId, segments: segments};
+            descriptions.push(descriptionItem);
+          }
+          if (!onServerResponse || !onServerResponse()) {
+            loadSegments();
+          }
+        };
+
+        if (!descriptionId) {
+          // load top rated description variation
+          this._getData('descriptions/forElement/' + item.id, onDescriptionLoaded, 'rating', false, null, 1);
+        } else if (!checkForDescription(descriptionId)) {
+          // load description variation with provided ID
+          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
+          this._getData('descriptions/forElement/' + item.id + '/' + descriptionId, onDescriptionLoaded);
+        } else {
+          // already loaded description with provided ID, so ensure segments are all loaded
+          loadSegments();
+        }
+      }
+
+      /**
+       * Load segment variation data for the provided segment.  Once complete, onLoadingComplete
+       * will be called with result.
+       *
+       * @param  {Segment} segment            Element data to load the description data for.  The description and segment data will be added to the item.
+       * @param  {Function} onLoadingComplete (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+       * @param  {Number} segmentVariationId  (Optional) ID of the segment variation you want to load.
+       */
+      _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
+        var segmentVariations = segment.variations;
+        if (!segmentVariations) {
+          segmentVariations = [];
+          segment.variations = segmentVariations;
+        }
+        var segmentVariationItem = null;
+        var segments = null;
+
+        // function to check if segment variation with matching ID already exists
+        var checkForSegmentVariation = segmentVariationId => {
+          var segmentVariationFound = false;
+          for (var key in segmentVariations) {
+            if (segmentVariations[key].id == segmentVariationId) {
+              segmentVariationItem = segmentVariations[key];
+              segmentVariationFound = true;
+              break;
+            }
+          }
+          return segmentVariationFound;
+        };
+        // function to process data for segment variation
+        var onSegmentVariationLoaded = data => {
+          var segmentVariation;
+          if (segmentVariationItem) {
+            // ID specified when loading, so use raw data
+            segmentVariation = data;
+          } else {
+            // searched for best match, so look up ID and segment variation from data
+            var dataItem = data[0];
+            var segmentVariationId = Object.keys(dataItem)[0];
+            segmentVariation = dataItem[segmentVariationId];
+          }
+          if (!segment.typeId) {
+            segment.typeId = segmentVariation.type;
+            segment.type = this.segmentTypes[segment.typeId];
+          }
+          if (!checkForSegmentVariation(segmentVariationId) && segmentVariation.type == segment.typeId) {
+            segmentVariationItem = {id: segmentVariationId, data: segmentVariation.data};
+            segmentVariations.push(segmentVariationItem);
+          }
+          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
+        }
+
+        if (!segmentVariationId) {
+          // load top rated segment variation
+          this._getData('segmentVariations/forSegment/' + segment.id, onSegmentVariationLoaded, 'rating', false, null, 1);
+        } else if (!checkForSegmentVariation(segmentVariationId)) {
+          // load segment variation with provided ID
+          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
+          this._getData('segmentVariations/forSegment/' + segment.id + '/' + segmentVariationId, onSegmentVariationLoaded);
+        } else {
+          // already loaded segment variation with provided ID, so just call onLoadingComplete
+          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
+        }
       }
 
       _cTreeDataChanged(cTreeData, previousCTreeData) {

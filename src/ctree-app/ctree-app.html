@@ -303,7 +303,7 @@ this license.
             <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]"></ctree-element-preview>
           </template>
 
-          <div id="loadingIndicator" hidden$="[[!hasMoreListItems]]">
+          <div id="loadingIndicator" hidden$="[[!loadingListItems]]">
             <paper-spinner active$="[[loadingListItems]]"></paper-spinner> Loading more
           </div>
         </iron-list>

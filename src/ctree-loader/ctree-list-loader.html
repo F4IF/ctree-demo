@@ -52,6 +52,24 @@ this license.
           },
 
           /**
+           * Total time before stop trying to load the next page of items and return any items
+           * which have been fully loaded.
+           */
+          timeout: {
+            type: Number,
+            value: 7500,
+          },
+
+          /**
+           * Maximum time between different responses from server before we give up and return any
+           * items which have been fully loaded.
+           */
+          timeoutBetweenResponses: {
+            type: Number,
+            value: 1500,
+          },
+
+          /**
            * The type of list to load in current properties.  Supported values:
            *   - suggested
            *   - bookmarked
@@ -199,66 +217,140 @@ this license.
         listData.loading = true;
         this._setLoading('suggested', true);
 
-        this._loadAllDataListItems(cTreeData.suggestionTypes, (dataContainerArray) => {
-          var items = [];
-          // TODO: start timer to break out of loading items
-          for (var i = 0; i < 20; i++) {
-            // check to see which dataContainers can be options (have items)
-            var options = [];
-            // TODO: if run out of options wait until timer runs out to see if more items are loaded
-            for (var key in dataContainerArray) {
-              var dataContainer = dataContainerArray[key];
-              if (this._hasNextItem(dataContainer)) {
-                options.push(dataContainer);
-              }
-            }
-            // get random item from available options
-            var item = null;
-            while (options.length > 0 && !item) {
-              // get index of option
-              var optionIndex;
-              if (options.length == 1) {
-                optionIndex = 0;
-              } else {
-                optionIndex = Math.floor(Math.random() * options.length);
-              }
-              // get next non-null item from option
-              var dataContainer = options[optionIndex];
-              do {
-                var itemObj = this._getNextItem(dataContainer, true);
-                if (itemObj) {
-                  // if item doesn't already exist add it
-                  var key = Object.keys(itemObj)[0];
-                  if (!items.find(existingItem => existingItem.key == key) && !this.suggestedItems.find(existingItem => existingItem.key == key)) {
-                    item = Object.assign({key: key}, Object.values(itemObj)[0]);
-                  }
-                }
-              } while (!item && this._hasNextItem(dataContainer));
-              if (!item) {
-                // item was invalid and option has no more items, so remove option
-                options.splice(optionIndex, 1);
-              }
-              if (options.length == 0) {
-                // no options left, check to see if any new options are available
-                for (dataContainer in dataContainerArray) {
-                  if (this._hasNextItem(dataContainer)) {
-                    options.push(dataContainer);
-                  }
-                }
-              }
-            }
-            if (item) {
-              // TODO: start loading description or segments
-              items.push(item);
-            } else {
-              // no options left, so not worth continuing to look for items
+        var quit = false;
+        var items = [];
+        var loadedItems = [];
+        var itemCount = 0;
+        var maxItems = 20;
+        var onDoneLoading = function(dataContainerArray) {
+          // TODO: return any items not in loadedItems to their cache
+          this._loadListItems(cTreeData, listData, loadedItems, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+
+          // check if all data sources have been fully loaded
+          var allLoaded = true;
+          for (var key in dataContainerArray) {
+            if (!dataContainerArray[key].allLoaded) {
+              allLoaded = false;
               break;
             }
           }
+          if (allLoaded) {
+            this._setHasMore('suggested', false);
+          }
+        }.bind(this);
+        var operationCount = 0;
+        var startOperationTimeout = () => {
+          if (quit) return true;
 
-          // TODO: load descriptions for each item, then segments for each description, then call this when done for each (or timeout and push unloaded items back to cache)
-          this._loadListItems(cTreeData, listData, items, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
-        }, 5000);
+          operationCount++;
+          var operationIndex = operationCount;
+          setTimeout(() => {
+            if (operationCount == operationIndex) {
+              // no additional operations, so timeout loading
+              quit = true;
+            }
+          }, this.timeoutBetweenResponses);
+          return quit;
+        }
+        var checkHasNextItem = (dataContainer, options) => {
+          if (!dataContainer.allLoaded) {
+            this._hasNextItem(dataContainer, (hasNext) => {
+              startOperationTimeout();
+              if (hasNext) {
+                options.push(dataContainer);
+              }
+            });
+          }
+        }
+        var loadItem = (dataContainerArray) => {
+          if (quit || items.length >= maxItems) {
+            onDoneLoading(dataContainerArray);
+            return;
+          }
+
+          // check to see which dataContainers can be options (have items)
+          var options = [];
+          var tempCount = itemCount;
+          for (var key in dataContainerArray) {
+            checkHasNextItem(dataContainerArray[key], options);
+          }
+
+          // get random item from available options
+          var item = null;
+          var randomOption = () => {
+            if (quit) {
+              onDoneLoading(dataContainerArray);
+              return;
+            }
+            if (options.length <= 0) {
+              // check if any container has more items
+              var anyLoading = false;
+              for (var key in dataContainerArray) {
+                var dataContainer = dataContainerArray[key];
+                if (!dataContainer.allLoaded) {
+                  anyLoading = true;
+                  // TODO: do we need to check if not added as option and not loading to prevent waiting for containers which stopped loading?
+                }
+              }
+
+              if (anyLoading) {
+                // no options, wait and check again
+                setTimeout(randomOption, 100);
+              } else {
+                // no additional items
+                onDoneLoading(dataContainerArray);
+              }
+              return;
+            }
+
+            // get index of option
+            var optionIndex;
+            if (options.length == 1) {
+              optionIndex = 0;
+            } else {
+              optionIndex = Math.floor(Math.random() * options.length);
+            }
+
+            // get next non-null item from option
+            var dataContainer = options[optionIndex];
+            do {
+              var dataItem = this._getNextItem(dataContainer, true);
+              if (dataItem) {
+                // if item doesn't already exist add it
+                var id = Object.keys(dataItem)[0];
+                if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
+                  item = this._dataToItem(dataItem);
+                  item.typeId = item.type;
+                  item.type = this.types[item.typeId];
+                }
+              }
+            } while (!item && this._hasNextItem(dataContainer) && !quit);
+            if (!item) {
+              // item was invalid and option has no more items, so remove option and check again
+              options.splice(optionIndex, 1);
+              checkHasNextItem(dataContainer, options);
+            }
+
+            if (item) {
+              // add item to list after load description
+              itemCount++;
+              items.push(item);
+              this._loadDescription(item, item => {
+                var loadedItem = {element: item};
+                // TODO: add reason for suggestion
+                loadedItems.push(loadedItem);
+              }, startOperationTimeout);
+
+              loadItem(dataContainerArray);
+            } else {
+              // last option didn't result in an item, try a different option
+              randomOption();
+            }
+          }
+          randomOption()
+        }
+        setTimeout(() => { quit = true; }, this.timeout);
+        this._loadAllDataListItems(cTreeData.suggestionTypes, loadItem, this.timeout);
       }
 
       loadBookmarked() {

@@ -1,6 +1,13 @@
 {
   "ctrees" : {
     "<default>" : {
+      "segmentTypes" : [ null, {
+        "canBeThumbnail" : false,
+        "componentName" : "ctree-segment-text"
+      }, {
+        "canBeThumbnail" : true,
+        "componentName" : "ctree-segment-image"
+      } ],
       "types" : [ null, {
         "color" : "#8a5b15",
         "description" : "What this cTree is about",
@@ -63,18 +70,11 @@
         "parentsMax" : -1,
         "parentsRequired" : true,
         "prompt" : "Suggest solution"
-      } ],
-      "segmentTypes" : [ null, {
-        "canBeThumbnail" : false,
-        "componentName" : "ctree-segment-text"
-      }, {
-        "canBeThumbnail" : true,
-        "componentName" : "ctree-segment-image"
       } ]
     },
     "test" : {
       "descriptions" : {
-        "forElements" : [ null, [ null, {
+        "forElement" : [ null, [ null, {
           "rating" : 0,
           "segments" : [ 1 ]
         } ], {
@@ -85,19 +85,29 @@
         } ]
       },
       "elements" : [ null, {
+        "childCount" : 1,
+        "createdDate" : 123456789,
+        "feedbackCount" : 1,
+        "interactionCount" : 0,
+        "lastInteractionDate" : 12345789,
         "rating" : 0,
         "title" : "test1",
         "type" : 1
       }, {
+        "childCount" : 0,
+        "createdDate" : 12345679,
+        "feedbackCount" : 0,
+        "interactionCount" : 0,
+        "lastInteractionDate" : 12345689,
         "parents" : [ null, {
           "rating" : 1
         } ],
-        "rating" : 0,
+        "rating" : 1,
         "title" : "test2",
         "type" : 2
       } ],
       "feedback" : {
-        "forDescriptions" : [ null, [ null, {
+        "forDescription" : [ null, [ null, {
           "rating" : 0,
           "text" : "test comment"
         } ] ]

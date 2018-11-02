@@ -235,7 +235,8 @@ this license.
         var childTypes = []
         if (elementType && types) {
           types.forEach(function(type) {
-            if (type.parentTypes.includes(elementType.id)) {
+            var parentTypes = type.parentTypes;
+            if (parentTypes && parentTypes.includes(elementType.id)) {
               childTypes.push(type)
             }
           }, this);
