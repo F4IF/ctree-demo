@@ -97,7 +97,10 @@ this license.
           /**
            * The name of the cTree to display to users.
            */
-          name: String,
+          name: {
+            type: String,
+            notify: true,
+          },
 
           /**
            * All types for current cTree, indexed by ID.
