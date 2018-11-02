@@ -317,10 +317,10 @@ this license.
               var dataItem = this._getNextItem(dataContainer, true);
               if (dataItem) {
                 // if item doesn't already exist add it
-                var id = Object.keys(dataItem)[0];
+                var id = Number(Object.keys(dataItem)[0]);
                 if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
                   item = this._dataToItem(dataItem);
-                  item.typeId = item.type;
+                  item.typeId = Number(item.type);
                   item.type = this.types[item.typeId];
                 }
               }

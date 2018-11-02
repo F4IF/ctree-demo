@@ -421,7 +421,7 @@ this license.
        * {id: dataEntry}, to an item with ID as a property of the item.
        */
       _dataToItem(data) {
-        var id = Object.keys(data)[0];
+        var id = Number(Object.keys(data)[0]);
         return Object.assign({id: id}, data[id]);
       }
 
@@ -682,7 +682,7 @@ this license.
           } else {
             // searched for best match, so look up ID and description from data
             var dataItem = data[0];
-            descriptionId = Object.keys(dataItem)[0];
+            descriptionId = Number(Object.keys(dataItem)[0]);
             descriptionData = dataItem[descriptionId];
           }
           if (!checkForDescription(descriptionId)) {
@@ -746,11 +746,11 @@ this license.
           } else {
             // searched for best match, so look up ID and segment variation from data
             var dataItem = data[0];
-            var segmentVariationId = Object.keys(dataItem)[0];
+            var segmentVariationId = Number(Object.keys(dataItem)[0]);
             segmentVariation = dataItem[segmentVariationId];
           }
           if (!segment.typeId) {
-            segment.typeId = segmentVariation.type;
+            segment.typeId = Number(segmentVariation.type);
             segment.type = this.segmentTypes[segment.typeId];
           }
           if (!checkForSegmentVariation(segmentVariationId) && segmentVariation.type == segment.typeId) {
