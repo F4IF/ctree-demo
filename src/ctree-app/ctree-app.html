@@ -210,6 +210,9 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
+      ctree-element-preview[hidden] {
+        display: none !important;
+      }
       @media (max-width: 340px) {
         .tabLabel {
           display: none;
@@ -299,8 +302,9 @@ this license.
         </app-header>
 
         <iron-list id="elementPreviewList" items="[[pageListItems]]" as="item" grid>
+          <!-- HACK: added  hidden$="[[!item]]" to prevent phantom items from being added -->
           <template>
-            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]"></ctree-element-preview>
+            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]" hidden$="[[!item]]"></ctree-element-preview>
           </template>
 
           <div id="loadingIndicator" hidden$="[[!loadingListItems]]">

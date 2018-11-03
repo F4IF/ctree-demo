@@ -387,7 +387,8 @@ this license.
             hasMore.bind(this)(false);
           }
         } else {
-          items.forEach(function(item) {
+          for (var key in items) {
+            var item = items[key];
             if (this._cTreeData == cTreeData) {
               this.push(itemsName, item);
               if (this.currentName == name) {
@@ -403,7 +404,7 @@ this license.
               listData.items.push(item);
             }
             listData.offset++;
-          }, this);
+          }
         }
         listData.loading = false;
         if (this._cTreeData == cTreeData) {
