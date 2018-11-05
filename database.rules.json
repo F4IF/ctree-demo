@@ -6,18 +6,18 @@
     	"$ctree": {
         "description": {
           "$forType": {
-            "$typeId": {
+          	"$typeId": {
               ".indexOn": "rating"
-            }
+          	}
           }
         },
         "elements": {
-          ".indexOn": "rating"
+          ".indexOn": ["childCount", "createdDate", "feedbackCount", "interactionCount", "lastInteractionDate", "rating"],
         },
         "feedback": {
           "$forType": {
             "$typeId": {
-            	".indexOn": "rating"
+              ".indexOn": "rating"
             }
           }
         },

@@ -52,6 +52,24 @@ this license.
           },
 
           /**
+           * Total time before stop trying to load the next page of items and return any items
+           * which have been fully loaded.
+           */
+          timeout: {
+            type: Number,
+            value: 7500,
+          },
+
+          /**
+           * Maximum time between different responses from server before we give up and return any
+           * items which have been fully loaded.
+           */
+          timeoutBetweenResponses: {
+            type: Number,
+            value: 1500,
+          },
+
+          /**
            * The type of list to load in current properties.  Supported values:
            *   - suggested
            *   - bookmarked
@@ -196,7 +214,143 @@ this license.
         var listData = cTreeData.lists.suggested;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+        listData.loading = true;
+        this._setLoading('suggested', true);
+
+        var quit = false;
+        var items = [];
+        var loadedItems = [];
+        var itemCount = 0;
+        var maxItems = 20;
+        var onDoneLoading = function(dataContainerArray) {
+          // TODO: return any items not in loadedItems to their cache
+          this._loadListItems(cTreeData, listData, loadedItems, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+
+          // check if all data sources have been fully loaded
+          var allLoaded = true;
+          for (var key in dataContainerArray) {
+            if (!dataContainerArray[key].allLoaded) {
+              allLoaded = false;
+              break;
+            }
+          }
+          if (allLoaded) {
+            this._setHasMore('suggested', false);
+          }
+        }.bind(this);
+        var operationCount = 0;
+        var startOperationTimeout = () => {
+          if (quit) return true;
+
+          operationCount++;
+          var operationIndex = operationCount;
+          setTimeout(() => {
+            if (operationCount == operationIndex) {
+              // no additional operations, so timeout loading
+              quit = true;
+            }
+          }, this.timeoutBetweenResponses);
+          return quit;
+        }
+        var checkHasNextItem = (dataContainer, options) => {
+          if (!dataContainer.allLoaded) {
+            this._hasNextItem(dataContainer, (hasNext) => {
+              startOperationTimeout();
+              if (hasNext) {
+                options.push(dataContainer);
+              }
+            });
+          }
+        }
+        var loadItem = (dataContainerArray) => {
+          if (quit || items.length >= maxItems) {
+            onDoneLoading(dataContainerArray);
+            return;
+          }
+
+          // check to see which dataContainers can be options (have items)
+          var options = [];
+          var tempCount = itemCount;
+          for (var key in dataContainerArray) {
+            checkHasNextItem(dataContainerArray[key], options);
+          }
+
+          // get random item from available options
+          var item = null;
+          var randomOption = () => {
+            if (quit) {
+              onDoneLoading(dataContainerArray);
+              return;
+            }
+            if (options.length <= 0) {
+              // check if any container has more items
+              var anyLoading = false;
+              for (var key in dataContainerArray) {
+                var dataContainer = dataContainerArray[key];
+                if (!dataContainer.allLoaded) {
+                  anyLoading = true;
+                  // TODO: do we need to check if not added as option and not loading to prevent waiting for containers which stopped loading?
+                }
+              }
+
+              if (anyLoading) {
+                // no options, wait and check again
+                setTimeout(randomOption, 100);
+              } else {
+                // no additional items
+                onDoneLoading(dataContainerArray);
+              }
+              return;
+            }
+
+            // get index of option
+            var optionIndex;
+            if (options.length == 1) {
+              optionIndex = 0;
+            } else {
+              optionIndex = Math.floor(Math.random() * options.length);
+            }
+
+            // get next non-null item from option
+            var dataContainer = options[optionIndex];
+            do {
+              var dataItem = this._getNextItem(dataContainer, true);
+              if (dataItem) {
+                // if item doesn't already exist add it
+                var id = Number(Object.keys(dataItem)[0]);
+                if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
+                  item = this._dataToItem(dataItem);
+                  item.typeId = Number(item.type);
+                  item.type = this.types[item.typeId];
+                }
+              }
+            } while (!item && this._hasNextItem(dataContainer) && !quit);
+            if (!item) {
+              // item was invalid and option has no more items, so remove option and check again
+              options.splice(optionIndex, 1);
+              checkHasNextItem(dataContainer, options);
+            }
+
+            if (item) {
+              // add item to list after load description
+              itemCount++;
+              items.push(item);
+              this._loadDescription(item, item => {
+                var loadedItem = {element: item};
+                // TODO: add reason for suggestion
+                loadedItems.push(loadedItem);
+              }, startOperationTimeout);
+
+              loadItem(dataContainerArray);
+            } else {
+              // last option didn't result in an item, try a different option
+              randomOption();
+            }
+          }
+          randomOption()
+        }
+        setTimeout(() => { quit = true; }, this.timeout);
+        this._loadAllDataListItems(cTreeData.suggestionTypes, loadItem, this.timeout);
       }
 
       loadBookmarked() {
@@ -205,7 +359,10 @@ this license.
         var listData = cTreeData.lists.bookmarked;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
+        listData.loading = true;
+        this._setLoading('bookmarked', true);
+
+        this._loadListItems(cTreeData, listData, null, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
       }
 
       loadHistory() {
@@ -214,24 +371,24 @@ this license.
         var listData = cTreeData.lists.history;
         if (!listData.hasMore || listData.loading) return;
 
-        this._loadListItems(cTreeData, listData, 'history', 'historyItems', this._setHistoryHasMore);
+        listData.loading = true;
+        this._setLoading('history', true);
+
+        this._loadListItems(cTreeData, listData, null, 'history', 'historyItems', this._setHistoryHasMore);
       }
 
-      _loadListItems(cTreeData, listData, name, itemsName, hasMore) {
-        listData.loading = true;
-        this._setLoading(name, true);
-
+      _loadListItems(cTreeData, listData, items, name, itemsName, hasMore) {
         if (!listData.offset) {
           listData.offset = 0;
         }
-        var items = null; // TODO: get user specific items from Firebase, may want to use cTreeData caching like cTreeData.testSuggested, listData.offset, this.pageSize
         if (!items || items.length == 0) {
           listData.hasMore = false;
           if (this._cTreeData == cTreeData) {
             hasMore.bind(this)(false);
           }
         } else {
-          items.forEach(function(item) {
+          for (var key in items) {
+            var item = items[key];
             if (this._cTreeData == cTreeData) {
               this.push(itemsName, item);
               if (this.currentName == name) {
@@ -247,7 +404,7 @@ this license.
               listData.items.push(item);
             }
             listData.offset++;
-          }, this);
+          }
         }
         listData.loading = false;
         if (this._cTreeData == cTreeData) {

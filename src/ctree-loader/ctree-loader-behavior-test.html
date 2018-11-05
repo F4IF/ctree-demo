@@ -470,10 +470,10 @@ this license.
               type.iconUrl = rootPath + type.iconUrl;
             }
             cTreeData.types[type.id] = type;
-          });
+          }, this);
           SegmentTypes.forEach(function(type) {
             cTreeData.segmentTypes[type.id] = type;
-          });
+          }, this);
 
           populateCTreeTestData(cTreeData);
 

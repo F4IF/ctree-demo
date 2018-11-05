@@ -30,6 +30,7 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
@@ -96,7 +97,10 @@ this license.
           /**
            * The name of the cTree to display to users.
            */
-          name: String,
+          name: {
+            type: String,
+            notify: true,
+          },
 
           /**
            * All types for current cTree, indexed by ID.
@@ -172,6 +176,14 @@ this license.
            *   cachedSuggested: [Numbers],
            *   cachedBookmarks: [Numbers],
            *   cachedHistory: [Numbers],
+           *   suggestionTypes: [{
+           *     key: String,
+           *     ascending: Boolean,
+           *     startAt: Number,
+           *     loadGroup: Boolean,
+           *     cachedElements: [Elements],
+           *     nextCacheIndex: Number,
+           *   }, ...]
            *
            * Elements Structure:
            *   [{
@@ -237,6 +249,36 @@ this license.
               bookmarked: {items: [], loading: false, hasMore: true},
               history:    {items: [], loading: false, hasMore: true},
             },
+            suggestionTypes: [
+              {
+                key: 'rating',
+                ascending: false,
+              },
+              {
+                key: 'createdDate',
+                ascending: false,
+              },
+              {
+                key: 'childCount',
+                ascending: true,
+              },
+              {
+                key: 'feedbackCount',
+                ascending: true,
+              },
+              {
+                key: 'interactionCount',
+                ascending: false,
+              },
+              {
+                key: 'lastInteractionDate',
+                ascending: true,
+              },
+              {
+                key: 'lastInteractionDate',
+                ascending: false,
+              },
+            ]
           };
           cTreesData[cTreeKey] = cTreeData;
         }
@@ -247,64 +289,488 @@ this license.
         this.name = cTreeData.name;
 
         if (cTreeData.name.length == 0) {
-          this._getData('name', function(data) {
-            cTreeData.name = data;
+          this._getData('name', (data) => {
+            if (data) {
+              cTreeData.name = data;
+            } else {
+              cTreeData.name = "";
+            }
             if (this.ctreeKey === cTreeData.key) {
-              this.name = data;
+              this.name = cTreeData.name;
             }
           });
         }
         if (cTreeData.types.length == 0) {
-          this._getData('types', function(data) {
-            cTreeData.types = data;
+          this._getData('types', (data) => {
+            if (data) {
+              cTreeData.types = this._dataArrayToIndexedItems(data);
+            } else {
+              cTreeData.types = [];
+            }
+            if (this.ctreeKey === cTreeData.key) {
+              this._setTypes(cTreeData.types);
+            }
           });
         }
         if (cTreeData.segmentTypes.length == 0) {
-          this._getData('segmentTypes', function(data) {
-            cTreeData.segmentTypes = data;
+          this._getData('segmentTypes', (data) => {
+            if (data) {
+              cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
+            } else {
+              cTreeData.segmentTypes = [];
+            }
+            if (this.ctreeKey === cTreeData.key) {
+              this._setSegmentTypes(cTreeData.segmentTypes);
+            }
           });
         }
       }
 
-      _getData(path, handleData, orderBy, ascending = true, value) {
-        var loader = document.createElement('firebase-query');
+      /**
+       * Gets the data at the given path and calls handleData({key: Object}).
+       *
+       * @param  {String}         path       Path within tree where to get data from
+       * @param  {Function([{key: Object}])} handleData Function to call with loaded data as an array of key-value pairs
+       * @param  {String}         orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
+       * @param  {Boolean}        ascending  Sort the items by ascending order.
+       * @param  {Any}            value      A specific value used to start from in the field specified by orderBy.
+       * @param  {Number}         count      Specifies the count of items to return.  If not specified and value is given it returns all items matching that value, otherwise returns all items.
+       * @return null
+       */
+      _getData(path, handleData, orderBy, ascending = true, value, count) {
+        var loader;
+        if (value == null) {
+          loader = document.createElement('firebase-document');
+        } else {
+          loader = document.createElement('firebase-query');
+        }
         loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
         if (value != null) {
-          loader.orderBy = orderBy;
-          loader.startAt = value;
-          loader.endAt = value;
+          loader.orderByChild = orderBy;
+          if (!count || count <= 0) {
+            loader.equalTo = value;
+          } else if (ascending) {
+            if (value) {
+              loader.startAt = value;
+            }
+            loader.limitToFirst = count;
+          } else {
+            if (value) {
+              loader.endAt = value;
+            }
+            loader.limitToLast = count;
+          }
         }
+        var processed = false;
         var listener = function() {
+          // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
+          if (processed) {
+            return;
+          }
+
           var data = loader.data;
-          if (data == null || !data.length) return;
-          if (orderBy != null || !ascending) {
-            data = Object.keys(data).map(key => {key: data[key]});
-            data.sort(function(a, b) {
-              var keyA = Object.keys(a)[0];
-              var keyB = Object.keys(b)[0];
-              var valueA;
-              var valueB;
-              if (orderBy != null) {
-                valueA = a[keyA][orderBy];
-                valueB = b[keyB][orderBy];
-              } else {
-                valueA = keyA;
-                valueB = keyB;
+          if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
+            processed = true;
+            loader.removeEventListener('data-changed', listener);
+            loader.remove();
+            var mapFunction = function(key) {
+              var object = {}
+              var value = data[key]
+              if (value.$key) {
+                key = value.$key
+                delete value.$key
               }
-              if (ascending) {
-                return valueA - valueB;
-              } else {
-                return valueB - valueA;
+              if (data.$value) {
+                value = value.$value
+              }
+              object[key] = value;
+              return object;
+            }
+            if (typeof(data) === 'object' && (orderBy != null || !ascending)) {
+              data = Object.keys(data).map(mapFunction);
+              data.sort(function(a, b) {
+                var keyA = Object.keys(a)[0];
+                var keyB = Object.keys(b)[0];
+                var valueA;
+                var valueB;
+                if (orderBy != null) {
+                  valueA = a[keyA][orderBy];
+                  valueB = b[keyB][orderBy];
+                } else {
+                  valueA = keyA;
+                  valueB = keyB;
+                }
+                if (ascending) {
+                  return valueA - valueB;
+                } else {
+                  return valueB - valueA;
+                }
+              });
+            } else if (Array.isArray(data)) {
+              data = Object.keys(data).map(mapFunction);
+            }
+            handleData.bind(this)(data);
+          }
+        };
+        loader.addEventListener('data-changed', listener.bind(this));
+        document.body.appendChild(loader);
+      }
+
+      /**
+       * Converts a data entry from the array returned by _getData, which is in the format
+       * {id: dataEntry}, to an item with ID as a property of the item.
+       */
+      _dataToItem(data) {
+        var id = Number(Object.keys(data)[0]);
+        return Object.assign({id: id}, data[id]);
+      }
+
+      /**
+       * Converts the data array returned by _getData to an object containing each item indexed by
+       * its ID.
+       */
+      _dataArrayToIndexedItems(dataArray) {
+        var items = [];
+        for (var key in dataArray) {
+          var item = this._dataToItem(dataArray[key]);
+          items[item.id] = item;
+        }
+        return items;
+      }
+
+      /**
+       * Loads list items for each data container in the array.  Once loading
+       * completes for each data container or times out it calls
+       * processItems(dataContainerArray).  Timeout can be provided in
+       * milliseconds.
+       */
+      _loadAllDataListItems(dataContainerArray, processItems, timeout) {
+        var count = dataContainerArray.length;
+        var completed = 0;
+        var processDataStarted = false;
+        for (var i = 0; i < count; i++) {
+          var dataContainer = dataContainerArray[i];
+          this._loadDataListItems(dataContainer, (dataContainer) => {
+            completed++
+            if (completed >= count && !processDataStarted) {
+              var allComplete = true;
+              for (var j = 0; j < dataContainerArray.length; j++) {
+                if (dataContainerArray[j].loading) {
+                  allComplete = false;
+                  break;
+                }
+              }
+              if (allComplete) {
+                processDataStarted = true;
+                processItems.bind(this)(dataContainerArray);
+              }
+            }
+          });
+        }
+        if (!processDataStarted && timeout != null && timeout >= 0) {
+          setTimeout((dataContainer) => {
+            if (!processDataStarted) {
+              processDataStarted = true;
+              processItems.bind(this)(dataContainerArray);
+            }
+          }, timeout);
+        }
+      }
+
+      /**
+       * Load list items for dataContainer, and call onComplete(dataContainer)
+       * once it's done.  It's guaranteed that onComplete will be called, even
+       * if no additional items could be loaded.
+       *
+       * dataContainer Structure:
+       *   {
+       *     key: String,
+       *     ascending: Boolean,
+       *     startAt: Number,
+       *     loadGroup: Boolean,
+       *     cachedItems: [
+       *       {key: Object},
+       *       ...
+       *     ],
+       *     nextCacheIndex: Number,
+       *     loading: Boolean,
+       *     allLoaded: Boolean
+       *   }
+       */
+      _loadDataListItems(dataContainer, onComplete) {
+        if (!dataContainer || dataContainer.allLoaded) {
+          if (onComplete) {
+            onComplete.bind(this)(dataContainer);
+          }
+          return;
+        }
+        if (!dataContainer.startAt) {
+          if (dataContainer.ascending) {
+            dataContainer.startAt = Number.MIN_VALUE;
+          } else {
+            dataContainer.startAt = Number.MAX_VALUE;
+          }
+        }
+        if (!dataContainer.callbacks) {
+          dataContainer.callbacks = [];
+        }
+        if (dataContainer.loading) {
+          if (onComplete) {
+            // add to list of callbacks
+            var called = false;
+            var callbacks = dataContainer.callbacks;
+            var index = callbacks.length;
+            callbacks.push(function() {
+              if (!called) {
+                called = true;
+                onComplete.bind(this)(dataContainer);
               }
             });
-          } else if (Array.isArray(data)) {
-            data = Object.keys(data).map(key => {key: data[key]});
+            if ((!dataContainer.loading || dataContainer.callbacks != callbacks) && !called) {
+              // since we added the callback loading may have completed but the callback wasn't called, so call it to be sure
+              called = true;
+              onComplete.bind(this)(dataContainer);
+            }
           }
-          handleData(data);
-          loader.removeEventListener('data-changed', listener);
+        } else if (dataContainer.loadGroup) {
+          // get all elements matching value (ignore first because we already loaded it)
+          dataContainer.loading = true;
+          if (onComplete) {
+            dataContainer.callbacks.push(onComplete);
+          }
+          this._getData('elements', (data) => {
+            dataContainer.loadGroup = false;
+            if (dataContainer.ascending) {
+              dataContainer.startAt++;
+            } else {
+              dataContainer.startAt--;
+            }
+            dataContainer.nextCacheIndex = 1;
+            dataContainer.cachedItems = data;
+            dataContainer.loading = false;
+            this.__processCallbacks(dataContainer);
+          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
+        } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
+          // get next value
+          dataContainer.loading = true;
+          if (onComplete) {
+            dataContainer.callbacks.push(onComplete);
+          }
+          this._getData('elements', (data) => {
+            dataContainer.nextCacheIndex = 0;
+            dataContainer.cachedItems = data;
+            if (data && data.length > 0) {
+              var value = Object.values(data[0])[0];
+              dataContainer.startAt = value[dataContainer.key];
+              dataContainer.loadGroup = true;
+            } else {
+              dataContainer.allLoaded = true;
+            }
+            dataContainer.loading = false;
+            this.__processCallbacks(dataContainer);
+          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt, 1);
+        } else if (onComplete) {
+          onComplete(dataContainer);
+        }
+      }
+
+      __processCallbacks(dataContainer) {
+        var callbacks = dataContainer.callbacks;
+        for (var i = 0; i < callbacks.length; i++) {
+          var callback = callbacks[i];
+          if (callback) {
+            callback.bind(this)(dataContainer);
+          }
+        }
+        dataContainer.callbacks = [];
+      }
+
+      /**
+       * Return if has a next item ready in the cache.  If onHasNext(boolean) is passed, this will
+       * trigger caching more items if needed and call onHasNext once that attempt to cache more
+       * items is done, with the parameter set to true if cached items are available.
+       */
+      _hasNextItem(dataContainer, onHasNext) {
+        var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+        if (onHasNext) {
+          if (hasNext) {
+            onHasNext.bind(this)(hasNext);
+          } else {
+            this._loadDataListItems(dataContainer, (dataContainer) => {
+              var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+              onHasNext.bind(this)(hasNext);
+            });
+          }
+        }
+        return hasNext;
+      }
+
+      /**
+       * Returns next item as a {key: Object} structured Object, or null if none exist.
+       */
+      _getNextItem(dataContainer, preload) {
+        var item = null;
+        if (this._hasNextItem(dataContainer)) {
+          item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
+          dataContainer.nextCacheIndex++;
+        }
+        if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) && !dataContainer.loading) {
+          this._loadDataListItems(dataContainer);
+        }
+        return item;
+      }
+
+      /**
+       * Load description data for the provided item, including segment variations for the
+       * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
+       * item.
+       *
+       * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
+       * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+       * @param  {Function} onServerResponse  (Optional) Function called whenever the server response.  This function should return a boolean value of true if processing should stop (ex. if loading has timed out).
+       * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
+       * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+       */
+      _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
+        if (onServerResponse) onServerResponse.bind(this);
+
+        var descriptions = item.description;
+        if (!descriptions) {
+          descriptions = [];
+          item.description = descriptions;
+        }
+        var descriptionItem = null;
+        var segments = null;
+
+        // function to check if description with matching ID already exists
+        var checkForDescription = descriptionId => {
+          var descriptionFound = false;
+          for (var key in descriptions) {
+            if (descriptions[key].id == descriptionId) {
+              descriptionItem = descriptions[key];
+              segments = descriptionItem.segments;
+              descriptionFound = true;
+              break;
+            }
+          }
+          return descriptionFound;
         };
-        loader.addEventListener('data-changed', listener);
-        document.body.appendChild(loader);
+        // function to load data for each segment
+        var loadSegments = () => {
+          var segmentCount = segments.length;
+          var loadedCount = 0;
+          for (var key in segments) {
+            var segmentVariationId = null;
+            if (segmentVariations) {
+              segmentVariationId = segmentVariations[key];
+            }
+            this._loadSegmentVariation(segments[key], () => {
+              loadedCount++;
+
+              if ((!onServerResponse || !onServerResponse()) && onLoadingComplete && loadedCount >= segmentCount) {
+                onLoadingComplete(item);
+              }
+            }, segmentVariationId);
+          }
+        };
+        // function to process data for description
+        var onDescriptionLoaded = data => {
+          var descriptionData;
+          if (descriptionId) {
+            // ID specified when loading, so use raw data
+            descriptionData = data;
+          } else {
+            // searched for best match, so look up ID and description from data
+            var dataItem = data[0];
+            descriptionId = Number(Object.keys(dataItem)[0]);
+            descriptionData = dataItem[descriptionId];
+          }
+          if (!checkForDescription(descriptionId)) {
+            segments = descriptionData.segments.map(segmentId => { return {id: segmentId}; });
+            descriptionItem = {id: descriptionId, segments: segments};
+            descriptions.push(descriptionItem);
+          }
+          if (!onServerResponse || !onServerResponse()) {
+            loadSegments();
+          }
+        };
+
+        if (!descriptionId) {
+          // load top rated description variation
+          this._getData('descriptions/forElement/' + item.id, onDescriptionLoaded, 'rating', false, null, 1);
+        } else if (!checkForDescription(descriptionId)) {
+          // load description variation with provided ID
+          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
+          this._getData('descriptions/forElement/' + item.id + '/' + descriptionId, onDescriptionLoaded);
+        } else {
+          // already loaded description with provided ID, so ensure segments are all loaded
+          loadSegments();
+        }
+      }
+
+      /**
+       * Load segment variation data for the provided segment.  Once complete, onLoadingComplete
+       * will be called with result.
+       *
+       * @param  {Segment} segment            Element data to load the description data for.  The description and segment data will be added to the item.
+       * @param  {Function} onLoadingComplete (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+       * @param  {Number} segmentVariationId  (Optional) ID of the segment variation you want to load.
+       */
+      _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
+        var segmentVariations = segment.variations;
+        if (!segmentVariations) {
+          segmentVariations = [];
+          segment.variations = segmentVariations;
+        }
+        var segmentVariationItem = null;
+        var segments = null;
+
+        // function to check if segment variation with matching ID already exists
+        var checkForSegmentVariation = segmentVariationId => {
+          var segmentVariationFound = false;
+          for (var key in segmentVariations) {
+            if (segmentVariations[key].id == segmentVariationId) {
+              segmentVariationItem = segmentVariations[key];
+              segmentVariationFound = true;
+              break;
+            }
+          }
+          return segmentVariationFound;
+        };
+        // function to process data for segment variation
+        var onSegmentVariationLoaded = data => {
+          var segmentVariation;
+          if (segmentVariationItem) {
+            // ID specified when loading, so use raw data
+            segmentVariation = data;
+          } else {
+            // searched for best match, so look up ID and segment variation from data
+            var dataItem = data[0];
+            var segmentVariationId = Number(Object.keys(dataItem)[0]);
+            segmentVariation = dataItem[segmentVariationId];
+          }
+          if (!segment.typeId) {
+            segment.typeId = Number(segmentVariation.type);
+            segment.type = this.segmentTypes[segment.typeId];
+          }
+          if (!checkForSegmentVariation(segmentVariationId) && segmentVariation.type == segment.typeId) {
+            segmentVariationItem = {id: segmentVariationId, data: segmentVariation.data};
+            segmentVariations.push(segmentVariationItem);
+          }
+          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
+        }
+
+        if (!segmentVariationId) {
+          // load top rated segment variation
+          this._getData('segmentVariations/forSegment/' + segment.id, onSegmentVariationLoaded, 'rating', false, null, 1);
+        } else if (!checkForSegmentVariation(segmentVariationId)) {
+          // load segment variation with provided ID
+          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
+          this._getData('segmentVariations/forSegment/' + segment.id + '/' + segmentVariationId, onSegmentVariationLoaded);
+        } else {
+          // already loaded segment variation with provided ID, so just call onLoadingComplete
+          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
+        }
       }
 
       _cTreeDataChanged(cTreeData, previousCTreeData) {
