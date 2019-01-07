@@ -1,3 +1,5 @@
+[Click here for steps to set up this project on your local machine](https://github.com/F4IF/ctree-demo/tree/master#setup)
+
 # Events
 
 We have regular events in Los Angeles every [Tuesday night](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and collaborate online on our [Slack Group](http://slack.ctree.org).
@@ -221,6 +223,8 @@ for alpha testing, but may build on it to implement the dialog.
 
 	https://git-scm.com/downloads
 
+_**Note:** if you're unfamiliar with Git it may be useful to install a visual Git client like [Sourcetree](https://www.sourcetreeapp.com/)_
+
 #####  Install the current LTS version (4.x) of Node.js or newer
 
 	https://nodejs.org/en/download/
@@ -230,6 +234,10 @@ for alpha testing, but may build on it to implement the dialog.
 	npm install -g bower
 
 _**Note:** if you're having trouble installing on Windows, you may need to run the console as an administrator_
+
+_**Note:** if you're having trouble installing on Mac, try this:_
+
+> sudo npm i -g bower --force --unsafe-perm=true --allow-root
 
 ##### Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
