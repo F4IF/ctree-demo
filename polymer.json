@@ -10,7 +10,7 @@
     "src/ctree-element-screen/ctree-feedback-page.html",
     "src/ctree-element-screen/ctree-history-page.html",
     "src/ctree-element-screen/ctree-related-page.html",
-    "src/ctree-loader/ctree-list-loader-test.html",
+    "src/ctree-loader/ctree-list-loader.html",
     "src/ctree-user-screen/ctree-user-screen.html"
   ],
   "extraDependencies": [

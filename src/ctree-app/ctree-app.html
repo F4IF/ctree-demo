@@ -51,14 +51,7 @@ this license.
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 
-<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
-<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
-<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
-<link rel="import" href="../ctree-import/ctree-import.html">
-<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
-
-<link rel="import" href="icons.html">
-
+<!-- This MUST be done before importing any cTree elements -->
 <script>
   if (!window.CTree) {
     window.CTree = {};
@@ -73,7 +66,18 @@ this license.
     storageBucket: "yourproject.appspot.com",
     messagingSenderId: "123456789012"
   };*/
+</script>
 
+<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
+<link rel="import" href="../ctree-import/ctree-import.html">
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html"> <!-- needs to be added to fix crash when showing dialog on refresh -->
+<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
+
+<link rel="import" href="icons.html">
+
+<script>
   // TODO: create a loder for tree types or add to ctree-loader
   var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
       	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
