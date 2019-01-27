@@ -128,7 +128,25 @@ this license.
             type: Number,
             observer: '_elementIdChanged',
           },
+
+          descriptionConfigId: {
+            type: Number,
+            observer: '_descriptionConfigIdChanged',
+          },
+
+          descriptionSegmentIds: {
+            type: Array,
+            observer: '_descriptionSegmentIdsChanged',
+          },
         };
+      }
+
+      _keyChanged(cTreeKey, previousKey) {
+        super._keyChanged(cTreeKey, previousKey);
+        if (cTreeKey != previousKey && this._cTreeData && this.elementId && (!this.element || this.elementId != this.element.id)) {
+          // reload element from new tree
+          this._elementIdChanged(this.elementId);
+        }
       }
 
       _listItemChanged(listItem) {
@@ -153,21 +171,23 @@ this license.
         if (!elementId || (this.element && elementId == this.element.id) || !this._cTreeData) return;
 
         var cTreeData = this._cTreeData;
-        this.element = cTreeData.elements[elementId];
+        this._loadElement(elementId, (element) => {
+          if ((this.element && elementId == this.element.id) || !this._cTreeData || this._cTreeData !== cTreeData) return;
 
-        if (!this.element) {
-          setTimeout(() => {
-            if (this.element || this.elementId != elementId) return; // element or elementId updated
+          this.element = element;
+        }, this.descriptionId, this.segmentVariations);
+      }
 
-            // TODO: this should simulate reality better by only returning the pieces of the element needed for suggestedItem (id, type, name, description config, description segments)
-            var element = cTreeData.testElements[elementId];
-            cTreeData.elements[elementId] = element;
+      _descriptionConfigIdChanged(descriptionConfigId) {
+        if (!this.elementId) return;
 
-            if (this._cTreeData == cTreeData) {
-              this.element = element;
-            }
-          }, Test.LOAD_DELAY);
-        }
+        // TODO: load new description config for element, if needed
+      }
+
+      _descriptionSegmentIdsChanged(descriptionSegmentIds) {
+        if (!this.elementId) return;
+
+        // TODO: load new description segments for element, if needed
       }
 
       _updateComment() {
@@ -363,7 +383,7 @@ this license.
       }
 
       _urlChanged(url) {
-        // do nothing for test loader
+        // TODO: support loading elements from a cTree at a different URL
       }
 
       _cTreeDataChanged(cTreeData) {
@@ -372,7 +392,7 @@ this license.
       }
 
       _userChanged(user) {
-        // do nothing for test loader
+        // TODO: update as needed based on user (primarily to impact access rights)
       }
     }
     CTree.ElementLoader = CTreeElementLoader;

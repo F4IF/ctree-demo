@@ -72,27 +72,67 @@ this license.
          *     bookmarked: Boolean,
          *   }
          */
-        element: Object,
+        element: {
+          type: Object,
+          observer: '_elementChanged',
+        },
 
-        descriptionConfigId: Number,
+        descriptionConfigId: {
+          type: Number,
+          observer: '_descriptionConfigIdChanged',
+        },
 
-        descriptionSegmentIds: Array,
+        descriptionSegmentIds: {
+          type: Array,
+          observer: '_descriptionSegmentIdsChanged',
+        },
 
-        feedbackSegment: Number,
+        feedbackSegment: {
+          type: Number,
+          observer: '_feedbackSegmentChanged',
+        },
 
-        historyContributor: Number,
+        historyContributor: {
+          type: Number,
+          observer: '_historyContributorChanged',
+        },
       };
     }
 
     _openInternal() {
       // TODO: initialize values & listeners
-      if (this._dialog.dialog !== 'element') {// TODO: check open dialog
-        this._dialog.ctreeKey = this.ctreeKey;
+      this._dialog.ctreeKey = this.ctreeKey;
+      if (this.element) {
         this._dialog.element = this.element;
         this._dialog.descriptionConfigId = this.descriptionConfigId;
         this._dialog.descriptionSegmentIds = this.descriptionSegmentIds;
+        this._dialog.feedbackSegment = this.feedbackSegment;
+        this._dialog.historyContributor = this.historyContributor;
+        this._dialog.openElementDialog(this);
+      } else if (this._dialog.dialog !== 'element') {
+        // open just using params
         this._dialog.openElementDialog();
       }
+    }
+
+    _elementChanged() {
+      this.updateDialogProperty('element');
+    }
+
+    _descriptionConfigIdChanged() {
+      this.updateDialogProperty('descriptionConfigId');
+    }
+
+    _descriptionSegmentIdsChanged() {
+      this.updateDialogProperty('descriptionSegmentIds');
+    }
+
+    _feedbackSegmentChanged() {
+      this.updateDialogProperty('feedbackSegment');
+    }
+
+    _historyContributorChanged() {
+      this.updateDialogProperty('historyContributor');
     }
   }
 

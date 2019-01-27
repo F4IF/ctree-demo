@@ -41,9 +41,15 @@ this license.
 
     static get properties() {
       return {
-        parentElementId: Number,
+        parentElementId: {
+          type: Number,
+          observer: '_parentElementIdChanged',
+        },
 
-        typeId: Number,
+        typeId: {
+          type: Number,
+          observer: '_typeIdChanged',
+        },
       };
     }
 
@@ -53,8 +59,16 @@ this license.
         this._dialog.ctreeKey = this.ctreeKey;
         this._dialog.parentElementId = this.parentElementId;
         this._dialog.typeId = this.typeId;
-        this._dialog.openNewElementDialog();
+        this._dialog.openNewElementDialog(this);
       }
+    }
+
+    _parentElementIdChanged() {
+      this.updateDialogProperty('parentElementId');
+    }
+
+    _typeIdChanged() {
+      this.updateDialogProperty('typeId');
     }
   }
 
