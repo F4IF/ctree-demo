@@ -48,9 +48,15 @@ this license.
          *   {
          *   }
          */
-        user: Object,
+        user: {
+          type: Object,
+          observer: '_userChanged',
+        },
 
-        page: String,
+        page: {
+          type: String,
+          observer: '_pageChanged',
+        },
       };
     }
 
@@ -60,8 +66,16 @@ this license.
         this._dialog.ctreeKey = this.ctreeKey;
         this._dialog.user = this.user;
         this._dialog.page = this.page;
-        this._dialog.openUserDialog();
+        this._dialog.openUserDialog(this);
       }
+    }
+
+    _userChanged() {
+      this.updateDialogProperty('user');
+    }
+
+    _pageChanged() {
+      this.updateDialogProperty('page');
     }
   }
 

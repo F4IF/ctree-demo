@@ -75,6 +75,24 @@ this license.
       static get properties() {
         return {
           /**
+           * Total time before stop trying to load the requested data and return any data which has
+           * been fully loaded.
+           */
+          timeout: {
+            type: Number,
+            value: 7500,
+          },
+
+          /**
+           * Maximum time between different responses from server before we give up and return any
+           * data which has been fully loaded.
+           */
+          timeoutBetweenResponses: {
+            type: Number,
+            value: 1500,
+          },
+
+          /**
            * Alternate url where cTree is hosted.  The default is the root domain
            * where the page holding this element is being hosted.
            */
@@ -233,6 +251,8 @@ this license.
       }
 
       _keyChanged(cTreeKey, previousKey) {
+        if (cTreeKey == previousKey) return;
+
         var cTreeData = cTreesData[cTreeKey];
         var createCTree = !cTreeData;
         if (createCTree) {
@@ -324,6 +344,49 @@ this license.
             }
           });
         }
+      }
+
+      /**
+       * Start the timeout countdown based on the timeout parameter.  If provided, this will track
+       * the state of if the operation should quit or not in the quitHolder parameter.  This will
+       * also notify the onTimeout function if provided.  This returns a function which can be used
+       * to check if too much time has ellapsed between network calls when frequent network calls
+       * are needed.
+       *
+       * @param  {{value: Boolean}} quitHolder An object who's value field is updated to reflect if the timeout has been triggered or not.
+       * @param  {Function} onTimeout          A function to call when the timeout is reached.
+       * @return {Function}                    A function which can be used to check if too much time has ellapsed between network calls when frequent network calls are needed.
+       */
+      _startTimeoutCountdown(quitHolder, onTimeout) {
+        if (!quitHolder) {
+          quitHolder = {value: false};
+        } else {
+          quitHolder.value = false;
+        }
+        var operationCount = 0;
+        var startOperationTimeout = () => {
+          if (quitHolder.value) return false;
+
+          operationCount++;
+          var operationIndex = operationCount;
+          setTimeout(() => {
+            if (operationCount == operationIndex) {
+              // no additional operations, so timeout loading
+              if (!quitHolder.value) {
+                quitHolder.value = true;
+                if (onTimeout) onTimeout();
+              }
+            }
+          }, this.timeoutBetweenResponses);
+          return !quitHolder.value;
+        }
+        setTimeout(() => {
+          if (!quitHolder.value) {
+            quitHolder.value = true;
+            if (onTimeout) onTimeout();
+          }
+        }, this.timeout);
+        return startOperationTimeout;
       }
 
       /**
@@ -547,6 +610,7 @@ this license.
             }
             dataContainer.nextCacheIndex = 1;
             dataContainer.cachedItems = data;
+            // TODO: add/update elements in cTreeData
             dataContainer.loading = false;
             this.__processCallbacks(dataContainer);
           }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
@@ -559,6 +623,7 @@ this license.
           this._getData('elements', (data) => {
             dataContainer.nextCacheIndex = 0;
             dataContainer.cachedItems = data;
+            // TODO: add/update elements in cTreeData
             if (data && data.length > 0) {
               var value = Object.values(data[0])[0];
               dataContainer.startAt = value[dataContainer.key];
@@ -621,13 +686,68 @@ this license.
       }
 
       /**
+       * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
+       * called with the final, fully loaded item.
+       *
+       * @param  {Number} elementId           ID of the element to load data for.
+       * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+       * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
+       * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+       */
+      _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+        var onServerResponse = this._startTimeoutCountdown();
+        onServerResponse.bind(this);
+
+        var cTreeData = this.cTreeData;
+        var elements = cTreeData.elements;
+        if (!elements) {
+          elements = [];
+          cTreeData.elements = elements;
+        }
+        var element = elements[elementId];
+
+        // function to load data for description
+        var loadDescription = () => {
+          this._loadDescription(element, onLoadingComplete, onServerResponse, descriptionId, segmentVariations);
+        };
+        // function to process data for element
+        var onElementLoaded = data => {
+          element = elements[elementId];
+          if (!element) {
+            var typeId = Number(data.type);
+            element = Object.assign(data, {
+              id: elementId,
+              typeId: typeId,
+              type: cTreeData.types[typeId],
+            });
+            elements[elementId] = element;
+          }
+          if (!onServerResponse || onServerResponse()) {
+            loadDescription();
+          }
+        };
+
+        if (onServerResponse) onServerResponse.bind(this);
+        if (!element) {
+          // load element with provided ID
+          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
+          if (!onServerResponse || onServerResponse()) {
+            this._getData('elements/' + elementId, onElementLoaded);
+          }
+        } else {
+          // already loaded element with provided ID, so ensure description is fully loaded
+          loadDescription();
+        }
+      }
+
+      /**
        * Load description data for the provided item, including segment variations for the
        * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
        * item.
        *
        * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
        * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-       * @param  {Function} onServerResponse  (Optional) Function called whenever the server response.  This function should return a boolean value of true if processing should stop (ex. if loading has timed out).
+       * @param  {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
        * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
        * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
        */
@@ -667,7 +787,7 @@ this license.
             this._loadSegmentVariation(segments[key], () => {
               loadedCount++;
 
-              if ((!onServerResponse || !onServerResponse()) && onLoadingComplete && loadedCount >= segmentCount) {
+              if ((!onServerResponse || onServerResponse()) && onLoadingComplete && loadedCount >= segmentCount) {
                 onLoadingComplete(item);
               }
             }, segmentVariationId);
@@ -685,23 +805,28 @@ this license.
             descriptionId = Number(Object.keys(dataItem)[0]);
             descriptionData = dataItem[descriptionId];
           }
+          // TODO: add/update description for element
           if (!checkForDescription(descriptionId)) {
             segments = descriptionData.segments.map(segmentId => { return {id: segmentId}; });
             descriptionItem = {id: descriptionId, segments: segments};
             descriptions.push(descriptionItem);
           }
-          if (!onServerResponse || !onServerResponse()) {
+          if (!onServerResponse || onServerResponse()) {
             loadSegments();
           }
         };
 
         if (!descriptionId) {
           // load top rated description variation
-          this._getData('descriptions/forElement/' + item.id, onDescriptionLoaded, 'rating', false, null, 1);
+          if (!onServerResponse || onServerResponse()) {
+            this._getData('descriptions/forElement/' + item.id, onDescriptionLoaded, 'rating', false, null, 1);
+          }
         } else if (!checkForDescription(descriptionId)) {
           // load description variation with provided ID
           // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
-          this._getData('descriptions/forElement/' + item.id + '/' + descriptionId, onDescriptionLoaded);
+          if (!onServerResponse || onServerResponse()) {
+            this._getData('descriptions/forElement/' + item.id + '/' + descriptionId, onDescriptionLoaded);
+          }
         } else {
           // already loaded description with provided ID, so ensure segments are all loaded
           loadSegments();
@@ -749,6 +874,7 @@ this license.
             var segmentVariationId = Number(Object.keys(dataItem)[0]);
             segmentVariation = dataItem[segmentVariationId];
           }
+          // TODO: add/update segment for description
           if (!segment.typeId) {
             segment.typeId = Number(segmentVariation.type);
             segment.type = this.segmentTypes[segment.typeId];

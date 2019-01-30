@@ -45,7 +45,10 @@ this license.
          * The unique key identifying a cTree.  If the site only has one cTree
          * this doesn't need to be set.
          */
-        ctreeKey: String,
+        ctreeKey: {
+          type: String,
+          observer: '_ctreeKeyChanged',
+        },
 
         _dialog: Object,
       };
@@ -71,6 +74,14 @@ this license.
       }
     }
 
+    updateDialogProperty(propertyName) {
+      if (!this._dialog) return;
+
+      this._dialog.accessorPropertyUpdated(this, propertyName);
+    }
+
+    // TODO: we may want to support passing change events for children of Object properties through to dialogs too
+
     _addDialogInternal() {
       this._dialog = document.createElement('ctree-dialogs');
       document.getElementsByTagName('body')[0].appendChild(this._dialog);
@@ -79,6 +90,10 @@ this license.
 
     _openInternal() {
       // TODO: override
+    }
+
+    _ctreeKeyChanged(ctreeKey) {
+      this.updateDialogProperty('ctreeKey');
     }
   };
   </script>

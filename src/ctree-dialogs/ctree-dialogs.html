@@ -32,6 +32,7 @@ this license.
 <link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <!-- TODO: try using Polymer.importHref to load these (had issues when loading link with dialog url) -->
 <link rel="import" href="../ctree-element-screen/ctree-element-screen.html">
@@ -65,6 +66,19 @@ this license.
           margin: 0;
         }
       }
+      paper-dialog[hidden] {
+        display: none;
+      }
+      paper-spinner {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 64px;
+        height: 64px;
+      }
       ctree-element-screen {
         width: 100%;
         height: 100%;
@@ -76,13 +90,15 @@ this license.
     <iron-location query="{{query}}" dwell-time="800"></iron-location>
     <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
 
-    <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" with-backdrop>
-      <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="[[element]]" element-id="{{queryParams.e}}" description-config="{{queryParams.c}}" description-segments="{{descriptionSegmentIds}}"></ctree-element-screen>
+    <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" with-backdrop hidden$="[[_loadingElement(dialog, element)]]">
+      <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="{{element}}" element-id="{{queryParams.e}}" description-config="{{queryParams.c}}" description-segments="{{descriptionSegmentIds}}"></ctree-element-screen>
     </paper-dialog>
+    <paper-spinner active$="[[_loadingElement(dialog, element)]]"></paper-spinner>
 
-    <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" with-backdrop>
+    <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" with-backdrop hidden$="[[_loadingUser(dialog)]]">
       <ctree-user-screen ctree-key="[[ctreeKey]]" page="{{_userPage}}" on-close-tapped="_userDialogClosed"></ctree-user-screen>
     </paper-dialog>
+    <paper-spinner active$="[[_loadingUser(dialog)]]"></paper-spinner>
 
     <paper-dialog id="newElementDialog" on-iron-overlay-closed="_newElementDialogClosed" with-backdrop>
       <ctree-new-element-screen ctree-key="[[ctreeKey]]" parent-id="{{queryParams.e}}" type-id="[[typeId]]" on-close-tapped="_newElementDialogClosed"></ctree-new-element-screen>
@@ -148,6 +164,13 @@ this license.
 
           historyContributor: Number,
 
+          loadingTimeout: {
+            type: Number,
+            value: 7500,
+          },
+
+          _accessor: Object,
+
           _elementPage: {
             type: String,
             observer: '_elementPageChanged',
@@ -170,16 +193,46 @@ this license.
         ];
       }
 
-      openElementDialog() {
+      openElementDialog(accessor) {
+        this._accessor = accessor
+
+        // if element ID not provided, try to get it and all other data from query params
+        if (!this.elementId && this.queryParams.d === 'element' && this.queryParams.e) {
+          this.elementId = this.queryParams.e;
+          this.page = this.queryParams.p;
+          this.descriptionConfigId = this.queryParams.c;
+          if (this.queryParams.s) {
+            this.descriptionSegmentIds = this.queryParams.s.split(',');
+          } else {
+            this.descriptionSegmentIds = [];
+          }
+        }
+
         this._setDialog('element');
       }
 
-      openNewElementDialog() {
+      openNewElementDialog(accessor) {
+        this._accessor = accessor
         this._setNewElement(true);
       }
 
-      openUserDialog() {
+      openUserDialog(accessor) {
+        this._accessor = accessor
         this._setDialog('user');
+      }
+
+      accessorPropertyUpdated(accessor, propertyName) {
+        if (this._accessor !== accessor) return;
+
+        this.set(propertyName, accessor[propertyName]);
+      }
+
+      _loadingElement(dialog, element) {
+        return dialog === 'element' && !element;
+      }
+
+      _loadingUser(dialog) {
+        return false;//dialog === 'user';
       }
 
       _elementDialogClosed() {
@@ -206,10 +259,21 @@ this license.
         var isElement = (dialog === 'element');
         var isUser = (dialog === 'user');
 
+        // TODO: don't set query params directly, update
         if ((isElement || isUser) && dialog) {
           // TODO: use this for Polymer 2.0
           //this.queryParams.d = dialog;
           this.set('queryParams.d', dialog);
+
+          // TODO: this could be improved because loading, closing, then reopening could result in timeout happening too quickly
+          if (isElement) {
+            setTimeout(() => {
+              if (!this.element) {
+                // TODO: there's a bug where if the element loads after this happens the params are updated
+                this._setDialog(undefined);
+              }
+            }, this.loadingTimeout);
+          }
         } else if (this.queryParams.hasOwnProperty('d')) {
           delete this.queryParams.d;
         }
@@ -287,6 +351,23 @@ this license.
       }
 
       _dialogParamChanged(dialog) {
+        if (dialog === this.dialog) return;
+
+        // opening dialog because parameter changed, so populate other properties from parameters
+        if (dialog === 'element') {
+          this.elementId = this.queryParams.e;
+          this.page = this.queryParams.p;
+          this.descriptionConfigId = this.queryParams.c;
+          if (this.queryParams.s) {
+            this.descriptionSegmentIds = this.queryParams.s.split(',');
+          } else {
+            this.descriptionSegmentIds = [];
+          }
+
+        } else if (dialog === 'user') {
+          this.page = this.queryParams.p;
+        }
+
         this._setDialog(dialog);
       }
 
@@ -411,7 +492,7 @@ this license.
 
       _descriptionSegmentIdsChanged(descriptionSegmentIds) {
         if (this.queryParams.d === 'element') {
-          if (descriptionSegmentIds.length > 0) {
+          if (descriptionSegmentIds && descriptionSegmentIds.length > 0) {
             this.set('queryParams.s', descriptionSegmentIds.join(','));
           } else if (this.queryParams.hasOwnProperty('s')) {
             delete this.queryParams.s;

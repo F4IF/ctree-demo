@@ -164,7 +164,7 @@ this license.
     __updateDescription(element, descriptionConfig, descriptionSegments) {
       if (this.__bulkChange || !element || !element.description || element.description.length == 0) return;
       var description = this._getFromArrayWithId(element.description, descriptionConfig);
-      if (!description || !description.segments || (descriptionSegments && description.segments.length != descriptionSegments.length)) return;
+      if (!description || !description.segments || (descriptionSegments && descriptionSegments.length > 0 && description.segments.length != descriptionSegments.length)) return;
 
       this._descriptionChanged(description, descriptionSegments);
     }

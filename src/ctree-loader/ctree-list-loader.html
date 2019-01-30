@@ -52,24 +52,6 @@ this license.
           },
 
           /**
-           * Total time before stop trying to load the next page of items and return any items
-           * which have been fully loaded.
-           */
-          timeout: {
-            type: Number,
-            value: 7500,
-          },
-
-          /**
-           * Maximum time between different responses from server before we give up and return any
-           * items which have been fully loaded.
-           */
-          timeoutBetweenResponses: {
-            type: Number,
-            value: 1500,
-          },
-
-          /**
            * The type of list to load in current properties.  Supported values:
            *   - suggested
            *   - bookmarked
@@ -217,7 +199,8 @@ this license.
         listData.loading = true;
         this._setLoading('suggested', true);
 
-        var quit = false;
+        var quitHolder = {value: false};
+        var startOperationTimeout = null; // will be a Function returned by _startTimeoutCountdown
         var items = [];
         var loadedItems = [];
         var itemCount = 0;
@@ -238,20 +221,6 @@ this license.
             this._setHasMore('suggested', false);
           }
         }.bind(this);
-        var operationCount = 0;
-        var startOperationTimeout = () => {
-          if (quit) return true;
-
-          operationCount++;
-          var operationIndex = operationCount;
-          setTimeout(() => {
-            if (operationCount == operationIndex) {
-              // no additional operations, so timeout loading
-              quit = true;
-            }
-          }, this.timeoutBetweenResponses);
-          return quit;
-        }
         var checkHasNextItem = (dataContainer, options) => {
           if (!dataContainer.allLoaded) {
             this._hasNextItem(dataContainer, (hasNext) => {
@@ -263,7 +232,7 @@ this license.
           }
         }
         var loadItem = (dataContainerArray) => {
-          if (quit || items.length >= maxItems) {
+          if (quitHolder.value || items.length >= maxItems) {
             onDoneLoading(dataContainerArray);
             return;
           }
@@ -278,7 +247,7 @@ this license.
           // get random item from available options
           var item = null;
           var randomOption = () => {
-            if (quit) {
+            if (quitHolder.value) {
               onDoneLoading(dataContainerArray);
               return;
             }
@@ -324,7 +293,7 @@ this license.
                   item.type = this.types[item.typeId];
                 }
               }
-            } while (!item && this._hasNextItem(dataContainer) && !quit);
+            } while (!item && this._hasNextItem(dataContainer) && !quitHolder.value);
             if (!item) {
               // item was invalid and option has no more items, so remove option and check again
               options.splice(optionIndex, 1);
@@ -349,7 +318,7 @@ this license.
           }
           randomOption()
         }
-        setTimeout(() => { quit = true; }, this.timeout);
+        startOperationTimeout = this._startTimeoutCountdown(quitHolder);
         this._loadAllDataListItems(cTreeData.suggestionTypes, loadItem, this.timeout);
       }
 
