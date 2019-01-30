@@ -125,14 +125,14 @@ this license.
            *
            * Structure:
            *   [{
-           *     id: Number,
+           *     id: String,
            *     name: String,
            *     description: String,
            *     iconUrl: String,
            *     color: String,
            *     parentsRequired: Boolean,
            *     parentsMax: Number,
-           *     parentTypes: [Numbers],
+           *     parentTypes: [Strings],
            *     elements: [Elements],
            *   }, ...]
            */
@@ -147,7 +147,7 @@ this license.
            *
            * Structure:
            *   [{
-           *     id: Number,
+           *     id: String,
            *     componentName: String,
            *     canBeThumbnail: Boolean,
            *   }, ...]
@@ -174,26 +174,26 @@ this license.
            *       items: [SuggestedItems],
            *       loading: Boolean,
            *       hasMore: Boolean,
-           *       offset: String,			// test: Number
+           *       offset: String,
            *     },
            *     bookmarked: {
            *       items: [BookmarkedItems],
            *       loading: Boolean,
            *       hasMore: Boolean,
-           *       offset: String,			// test: Number
+           *       offset: String,
            *     },
            *     history: {
            *       items: [HistoryItems],
            *       loading: Boolean,
            *       hasMore: Boolean,
-           *       offset: String,			// test: Number
+           *       offset: String,
            *     },
            *   },
            *   cachedElements: [Elements],
            *   cachedElementsWithoutParents: [Elements],
-           *   cachedSuggested: [Numbers],
-           *   cachedBookmarks: [Numbers],
-           *   cachedHistory: [Numbers],
+           *   cachedSuggested: [Strings],
+           *   cachedBookmarks: [Strings],
+           *   cachedHistory: [Strings],
            *   suggestionTypes: [{
            *     key: String,
            *     ascending: Boolean,
@@ -205,21 +205,21 @@ this license.
            *
            * Elements Structure:
            *   [{
-           *     id: Number,
+           *     id: String,
            *     type: ElementType,
            *     title: String,
-           *     parents: [Numbers],
-           *     children: [Numbers],
+           *     parents: [Strings],
+           *     children: [Strings],
            *     childrenSearchComplete: Boolean,
            *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
            *     description: [{
-           *       id: Number,
+           *       id: String,
            *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
            *       segments: [{
-           *         id: Number,
+           *         id: String,
            *         type: SegmentType,
            *         variations: [{
-           *           id: Number,
+           *           id: String,
            *           data: dynamic,	// data type depends on segment type
            *         }, ...],
            *       }, ...],
@@ -233,7 +233,7 @@ this license.
            *
            * Users Structure:
            *   [{
-           *     id: Number,
+           *     id: String,
            *     name: String,
            *     avatar: String,
            *     // TODO: add more public data
@@ -323,9 +323,13 @@ this license.
         if (cTreeData.types.length == 0) {
           this._getData('types', (data) => {
             if (data) {
-              cTreeData.types = this._dataArrayToIndexedItems(data);
+              if (Array.isArray(data)) {
+                cTreeData.types = this._dataArrayToIndexedItems(data);
+              } else {
+                cTreeData.types = data;
+              }
             } else {
-              cTreeData.types = [];
+              cTreeData.types = {};
             }
             if (this.ctreeKey === cTreeData.key) {
               this._setTypes(cTreeData.types);
@@ -335,9 +339,13 @@ this license.
         if (cTreeData.segmentTypes.length == 0) {
           this._getData('segmentTypes', (data) => {
             if (data) {
-              cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
+              if (Array.isArray(data)) {
+                cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
+              } else {
+                cTreeData.segmentTypes = data;
+              }
             } else {
-              cTreeData.segmentTypes = [];
+              cTreeData.segmentTypes = {};
             }
             if (this.ctreeKey === cTreeData.key) {
               this._setSegmentTypes(cTreeData.segmentTypes);
@@ -484,7 +492,7 @@ this license.
        * {id: dataEntry}, to an item with ID as a property of the item.
        */
       _dataToItem(data) {
-        var id = Number(Object.keys(data)[0]);
+        var id = String(Object.keys(data)[0]);
         return Object.assign({id: id}, data[id]);
       }
 
@@ -689,9 +697,9 @@ this license.
        * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
        * called with the final, fully loaded item.
        *
-       * @param  {Number} elementId           ID of the element to load data for.
+       * @param  {String} elementId           ID of the element to load data for.
        * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-       * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
+       * @param  {String} descriptionId       (Optional) ID of the description you want to load.
        * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
        */
       _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
@@ -714,7 +722,7 @@ this license.
         var onElementLoaded = data => {
           element = elements[elementId];
           if (!element) {
-            var typeId = Number(data.type);
+            var typeId = String(data.type);
             element = Object.assign(data, {
               id: elementId,
               typeId: typeId,
@@ -748,7 +756,7 @@ this license.
        * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
        * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
        * @param  {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
-       * @param  {Number} descriptionId       (Optional) ID of the description you want to load.
+       * @param  {String} descriptionId       (Optional) ID of the description you want to load.
        * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
        */
       _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
@@ -802,7 +810,7 @@ this license.
           } else {
             // searched for best match, so look up ID and description from data
             var dataItem = data[0];
-            descriptionId = Number(Object.keys(dataItem)[0]);
+            descriptionId = String(Object.keys(dataItem)[0]);
             descriptionData = dataItem[descriptionId];
           }
           // TODO: add/update description for element
@@ -839,7 +847,7 @@ this license.
        *
        * @param  {Segment} segment            Element data to load the description data for.  The description and segment data will be added to the item.
        * @param  {Function} onLoadingComplete (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
-       * @param  {Number} segmentVariationId  (Optional) ID of the segment variation you want to load.
+       * @param  {String} segmentVariationId  (Optional) ID of the segment variation you want to load.
        */
       _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
         var segmentVariations = segment.variations;
@@ -871,12 +879,12 @@ this license.
           } else {
             // searched for best match, so look up ID and segment variation from data
             var dataItem = data[0];
-            var segmentVariationId = Number(Object.keys(dataItem)[0]);
+            var segmentVariationId = String(Object.keys(dataItem)[0]);
             segmentVariation = dataItem[segmentVariationId];
           }
           // TODO: add/update segment for description
           if (!segment.typeId) {
-            segment.typeId = Number(segmentVariation.type);
+            segment.typeId = String(segmentVariation.type);
             segment.type = this.segmentTypes[segment.typeId];
           }
           if (!checkForSegmentVariation(segmentVariationId) && segmentVariation.type == segment.typeId) {
@@ -954,8 +962,8 @@ this license.
      * will return undefined.
      *
      * @param {Array} array
-     * @param {number} id
-     * @param {boolean} [defaultToFirst=true]
+     * @param {String} id
+     * @param {Boolean} [defaultToFirst=true]
      */
     CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
       if (!array) return undefined;

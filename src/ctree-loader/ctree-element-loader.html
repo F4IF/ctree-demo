@@ -53,8 +53,8 @@ this license.
            *   {
            *     element: Element,
            *     feedback: Feedback,
-           *     descriptionConfig: Number,
-           *     descriptionSegments: [Number],
+           *     descriptionConfig: String,
+           *     descriptionSegments: [String],
            *     commentCode: Number,
            *     commentData: Object,	// type depends on commentCode
            *   }
@@ -92,21 +92,21 @@ this license.
            *
            * Structure:
            *   {
-           *     id: Number,
+           *     id: String,
            *     type: ElementType,
            *     title: String,
-           *     parents: [Numbers],
-           *     children: [Numbers],
+           *     parents: [Strings],
+           *     children: [Strings],
            *     childrenSearchComplete: Boolean,
            *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
            *     description: [{
-           *       id: Number,
+           *       id: String,
            *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
            *       segments: [{
-           *         id: Number,
+           *         id: String,
            *         type: SegmentType,
            *         variations: [{
-           *           id: Number,
+           *           id: String,
            *           data: dynamic,	// data type depends on segment type
            *         }, ...],
            *       }, ...],
@@ -125,12 +125,12 @@ this license.
           },
 
           elementId: {
-            type: Number,
+            type: String,
             observer: '_elementIdChanged',
           },
 
           descriptionConfigId: {
-            type: Number,
+            type: String,
             observer: '_descriptionConfigIdChanged',
           },
 

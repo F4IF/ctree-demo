@@ -48,21 +48,21 @@ this license.
          *
          * Structure:
          *   {
-         *     id: Number,
+         *     id: String,
          *     type: ElementType,
          *     title: String,
-         *     parents: [Number],
-         *     children: [Number],
+         *     parents: [String],
+         *     children: [String],
          *     childrenSearchComplete: Boolean,
          *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
          *     description: [{
-         *       id: Number,
+         *       id: String,
          *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
          *       segments: [{
-         *         id: Number,
+         *         id: String,
          *         type: SegmentType,
          *         variations: [{
-         *           id: Number,
+         *           id: String,
          *           data: dynamic,	// data type depends on segment type
          *         }, ...],
          *       }, ...],
@@ -84,7 +84,7 @@ this license.
          * element the first config from the element is used.
          */
         descriptionConfig: {
-          type: Number,
+          type: String,
           observer: '__descriptionConfigChanged',
         },
 
@@ -93,7 +93,7 @@ this license.
          * ID isn't included in the description config the first variation is used.
          *
          * Structure:
-         *   [Number, ...]
+         *   [String, ...]
          */
         descriptionSegments: {
           type: Array,
@@ -111,8 +111,8 @@ this license.
      * will return undefined.
      *
      * @param {Array} array
-     * @param {number} id
-     * @param {boolean} [defaultToFirst=true]
+     * @param {String} id
+     * @param {Boolean} [defaultToFirst=true]
      */
     _getFromArrayWithId(array, id, defaultToFirst=true) {
       return CTree.Loader.getFromArrayWithId(array, id, defaultToFirst);

@@ -122,7 +122,7 @@ this license.
       var type = types[typeId];
       var childCount = Math.floor(1 + Math.random() * Test.MAX_CHILDREN);
       for (var j = 0; j < childCount; j++) {
-        var element = {id: nextElementId++, type: type, title: type.name + ' ' + ++elementTypeCount[typeId]};
+        var element = {id: nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId]};
         testElements[element.id] = element;
         nextLevelElements.push(element);
       }
@@ -195,7 +195,7 @@ this license.
               if (!element) {
                 // create new element
                 var type = types[typeId];
-                element = {id: nextElementId++, type: type, title: type.name + ' ' + ++elementTypeCount[typeId], parents: [parent.id]};
+                element = {id: nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId], parents: [parent.id]};
                 testElements[element.id] = element;
                 nextLevelElements.push(element);
                 if (sharedPoolIndex >= 0) {
@@ -320,7 +320,7 @@ this license.
          *
          * Structure:
          *   [{
-         *     id: Number,
+         *     id: String,
          *     name: String,
          *     description: String,
          *     prompt: String,
@@ -328,7 +328,7 @@ this license.
          *     color: String,
          *     parentsRequired: Boolean,
          *     parentsMax: Number,
-         *     parentTypes: [Numbers],
+         *     parentTypes: [Strings],
          *     elements: [Elements],
          *   }, ...]
          */
@@ -343,7 +343,7 @@ this license.
          *
          * Structure:
          *   [{
-         *     id: Number,
+         *     id: String,
          *     componentName: String,
          *     canBeThumbnail: Boolean,
          *   }, ...]
@@ -386,27 +386,27 @@ this license.
          *   },
          *   testElements: [Elements],
          *   testElementsWithoutParents: [Elements],
-         *   testSuggested: [Numbers],
-         *   testBookmarks: [Numbers],
-         *   testHistory: [Numbers],
+         *   testSuggested: [Strings],
+         *   testBookmarks: [Strings],
+         *   testHistory: [Strings],
          *
          * Elements Structure:
          *   [{
-         *     id: Number,
+         *     id: String,
          *     type: ElementType,
          *     title: String,
-         *     parents: [Numbers],
-         *     children: [Numbers],
+         *     parents: [Strings],
+         *     children: [Strings],
          *     childrenSearchComplete: Boolean,
          *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
          *     description: [{
-         *       id: Number,
+         *       id: String,
          *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
          *       segments: [{
-         *         id: Number,
+         *         id: String,
          *         type: SegmentType,
          *         variations: [{
-         *           id: Number,
+         *           id: String,
          *           data: dynamic,	// data type depends on segment type
          *         }, ...],
          *       }, ...],
@@ -420,7 +420,7 @@ this license.
          *
          * Users Structure:
          *   [{
-         *     id: Number,
+         *     id: String,
          *     name: String,
          *     avatar: String,
          *     // TODO: add more public data
@@ -465,15 +465,18 @@ this license.
           // TODO: enable async (wait to load items until done loading types)
           // types (can replace/alter to test other type configurations)
           var rootPath = document.createElement('iron-meta').byKey('rootPath');
-          ElementTypes[0].forEach(function(type) {
+          var types = ElementTypes[0];
+          for (var key in types) {
+            var type = types[key];
             if (!type.iconUrl.startsWith(rootPath)) {
               type.iconUrl = rootPath + type.iconUrl;
             }
             cTreeData.types[type.id] = type;
-          }, this);
-          SegmentTypes.forEach(function(type) {
+          }
+          for (var key in SegmentTypes) {
+            var type = SegmentTypes[key];
             cTreeData.segmentTypes[type.id] = type;
-          }, this);
+          }
 
           populateCTreeTestData(cTreeData);
 
@@ -552,8 +555,8 @@ this license.
    * will return undefined.
    *
    * @param {Array} array
-   * @param {number} id
-   * @param {boolean} [defaultToFirst=true]
+   * @param {String} id
+   * @param {Boolean} [defaultToFirst=true]
    */
   CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
     if (!array) return undefined;
