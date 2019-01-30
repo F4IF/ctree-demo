@@ -108,13 +108,13 @@ this license.
       <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
       <div id="childButtonPrompts">
         <template is="dom-repeat" items="[[childTypes]]" as="type">
-          <paper-button raised style="background: [[type.color]]" on-tap="_addChildClicked" type="[[type]]">[[type.prompt]]</paper-button>
+          <paper-button raised style$="background: [[type.color]]" on-tap="_addChildClicked" type="[[type]]">[[type.prompt]]</paper-button>
         </template>
        <ctree-feedback-bar rating="{{rating}}" element-id="[[element.id]]"></ctree-feedback-bar>
       </div>
       <div class="commentContainer" hidden$="[[_commentSubmitted]]">
         <div class="divider"></div>
-        <paper-textarea id="comment" class="comment" label="Comment" on-value-changed="_onCommentChanged" no-label-float></paper-textarea>
+        <paper-textarea id="comment" class="comment" label="Comment" value="{{_comment}}" no-label-float></paper-textarea>
         <paper-button id="submit" raised disabled on-tap="_submitComment">Submit</paper-button>
       </div>
       <template is="dom-repeat" items="{{element.feedback}}" as="item">
@@ -187,6 +187,11 @@ this license.
 
           childTypes: Array,
 
+          _comment: {
+            type: String,
+            observer: '_onCommentChanged',
+          },
+
           _commentSubmitted: Boolean,
 
           __tempSegments: Array,
@@ -218,16 +223,16 @@ this license.
         } else {
           this.__tempSegments = this.segments;
         }
-        this.$.comment.value = "";
+        this._value = "";
         this._commentSubmitted = false;
       }
 
-      _onCommentChanged() {
-        this.$.submit.disabled = this.$.comment.value.trim().length <= 0;
+      _onCommentChanged(value) {
+        this.$.submit.disabled = value.trim().length <= 0;
       }
 
       _submitComment(e) {
-        this.dispatchEvent(new CustomEvent('comment-submitted', {detail: {comment: this.$.comment.value}, bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('comment-submitted', {detail: {comment: this._value}, bubbles: true, composed: true}));
         this._commentSubmitted = true;
       }
 
