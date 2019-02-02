@@ -47,7 +47,7 @@ this license.
          width: 100%;
       }
       #image {
-        position:  absolute;
+        position: absolute;
         top: 0;
         left: 0;
         bottom: 0;
@@ -56,12 +56,10 @@ this license.
         background-color: #000;
       }
       #url {
-        position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
         padding: 8px;
-        background-color: rgba(255, 255, 255, 0.8);
       }
       #loadingIndicator {
         position: absolute;
@@ -69,18 +67,25 @@ this license.
         top: 50%;
         transform: translate(-50%, -50%);
       }
+      iron-image[hidden] {
+        display: none !important;
+      }
       paper-input[hidden] {
         display: none !important;
       }
       paper-icon-button[hidden] {
         display: none !important;
       }
+      /* TODO: remove once segments can be added/edited */
+      paper-icon-button {
+        display: none !important;
+      }
     </style>
 
     <div id="container">
-      <iron-image preload fade id="image" sizing="cover" loading="{{loading}}" error="{{error}}"></iron-image>
+      <iron-image preload fade id="image" sizing="cover" loading="{{loading}}" error="{{error}}" hidden$="[[!_isValidUrl(_value)]]"></iron-image>
       <paper-spinner id="loadingIndicator" active$="[[loadingChangeMade]]" hidden$="[[!loadingChangeMade]]"></paper-spinner>
-      <paper-input label="Image URL" id="url" on-value-changed="_inputChanged" on-keydown="_checkForEnter" hidden$="[[!editing]]">
+      <paper-input label="[[prompt]]" id="url" value="{{_value}}" on-keydown="_checkForEnter" hidden$="[[!editing]]" style$="position: [[_inputPosition]]; background-color: [[_inputBackground]]">
         <paper-icon-button slot="suffix" on-tap="_editSaveClicked" icon="segment-save" alt="Save" title="Save" hidden$="[[!validChangeMade]]"></paper-icon-button>
         <paper-icon-button slot="suffix" on-tap="_editCancelClicked" icon="segment-cancel" alt="Cancel" title="Cancel"></paper-icon-button>
       </paper-input>
@@ -94,9 +99,29 @@ this license.
 
       static get properties() {
         return {
+          prompt: {
+            type: String,
+            value: 'Image URL',
+          },
+
+          _value: {
+            type: String,
+            observer: '_valueChanged',
+          },
+
           _changed: {
             type: Boolean,
             value: false,
+          },
+
+          _inputPosition: {
+            type: String,
+            value: 'relative',
+          },
+
+          _inputBackground: {
+            type: String,
+            value: 'rgba(255, 255, 255, 0.8)',
           },
         };
       }
@@ -105,10 +130,18 @@ this license.
         return [
           '_editingChanged(editing)',
           '_dataChanged(data)',
-          '_heightPercentageChanged(heightPercent)',
+          '_heightPercentageChanged(heightPercent, _value)',
           '__updateValidChangeMade(_changed, loading, error)',
           '__updatLoadingChangeMade(editing, loading)',
         ];
+      }
+
+      _isValidUrl(url) {
+        if (!url) return false;
+
+        var trimmedUrl = url.trim();
+        // TODO: check regex
+        return trimmedUrl.length > 0;
       }
 
       _editingChanged(editing) {
@@ -120,7 +153,6 @@ this license.
       }
 
       _dataChanged(data) {
-        this._inputChanged(data);
         this.validChangeMade = false;
         this.loadingChangeMade = false;
         this._changed = false;
@@ -129,22 +161,31 @@ this license.
         this.$.url.value = data;
       }
 
-      _heightPercentageChanged(heightPercentage) {
-        if (heightPercentage && heightPercentage.length > 0) {
+      _heightPercentageChanged(heightPercentage, value) {
+        if (heightPercentage && heightPercentage.length > 0 && this._isValidUrl(value)) {
           this.$.image.style.height = '100%';
           this.$.image.sizing = 'cover';
           this.$.container.style.paddingTop = heightPercentage;
         } else {
           this.$.image.style.height = 'auto';
+          this.$.container.style.paddingTop = '0px';
         }
       }
 
-      _inputChanged(value) {
+      _valueChanged(value) {
         if (value === this.$.image.src) {
           super._cancelEditUpdate();
           this._waiting = false;
         } else {
           super._delayEditUpdate();
+        }
+
+        if (this._isValidUrl(value)) {
+          this._inputPosition = 'absolute';
+          this._inputBackground = 'rgba(255, 255, 255, 0.8)';
+        } else {
+          this._inputPosition = 'relative';
+          this._inputBackground = 'transparent';
         }
       }
 
@@ -159,6 +200,7 @@ this license.
         var value = this.$.url.value.trim();
         this.$.image.src = value;
         this._changed = (value !== this.data);
+        this._value = value;
       }
 
       _editSaveClicked() {
@@ -170,7 +212,7 @@ this license.
       }
 
       __updateValidChangeMade(changed, loading, error) {
-        this.validChangeMade = changed && !loading && !error;
+        this.validChangeMade = changed && !loading && !error && this._value.length > 0;
       }
 
       __updatLoadingChangeMade(editing, loading) {

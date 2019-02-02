@@ -28,15 +28,14 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="stylesheet" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-segments/ctree-segment-image.html">
+<link rel="import" href="../ctree-segments/ctree-segment-text.html">
 <link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-behavior.html">
 <link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-shared-styles.html">
 
@@ -60,54 +59,63 @@ this license.
 
         @apply --shadow-elevation-2dp;
       }
-      #typeIcon {
-        width: 48px
-      }
       .title {
         font-size: 16px !important;
+        pointer-events: all;
+        --paper-input-container-input: {
+          color: white;
+        }
       }
       .type-description {
         width: 180px;
       }
-      .content {
+      #content {
         background: #fdf0bd;
         height: calc(100% - 48px);
         width: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
-      .title-input {
-        width: 90%;
+      #submitContainer {
+        width: 100%;
+        text-align: right;
+      }
+      #submit {
+        margin: 8px;
+        background-color: var(--paper-indigo-500);
+        color: white;
+        font-weight: bold;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      #submit[disabled] {
+        background-color: lightgray;
       }
     </style>
 
     <!--<ctree-import id="importPage" href="/src/ctree-new-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>-->
+    <ctree-element-loader ctree-key="[[ctreeKey]]" types="{{_types}}"></ctree-element-loader>
 
     <div id="container">
-      <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
-        <!-- TODO: use custom control so it shows an icon instead of text -->
-        <paper-dropdown-menu id="typeIcon" slot="top" horizontal-align="left">
-          <iron-icon slot="prefix" src="/images/app-icon-32.png"></iron-icon>
-          <paper-listbox slot="dropdown-content" class="dropdown-content" selected="0">
-            <!-- TODO: populate programmatically with element types -->
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-            <paper-item><iron-icon src="/images/app-icon-32.png"></iron-icon> Seed</paper-item>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <paper-input slot="top" class="title-input"></paper-input>
-        <span slot="top" class="title">[[element.title]]</span>
+      <paper-toolbar class="toolbar" style="background-color: [[_calculateHeaderColor(typeId, types)]];">
+        <!-- TODO: get icon from type for new element -->
+        <iron-icon slot="top" id="typeIcon" src="[[_type.iconUrl]]"></iron-icon>
+        <paper-input slot="top" id="title" class="title" on-value-changed="_titleChanged" no-label-float label="Title"></paper-input>
         <paper-icon-button slot="top" id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
         <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
-        <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+        <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[_type.name]]: [[_type.description]]</paper-tooltip>
       </paper-toolbar>
-      <iron-pages id="pages" class="content" selected="[[page]]" attr-for-selected="name">
-        <!--<ctree-details-page name="details" element="{{element}}" description-config="[[descriptionConfig]]" description-segments="[[descriptionSegments]]" on-contributors-tapped="_onContributorsTapped" on-related-tapped="_onRelatedTapped" on-feedback-tapped="_onFeedbackTapped"></ctree-details-page>
-        <ctree-contributors-page name="contributors" description-config="[[descriptionConfig]]" on-history-tapped="_onHistoryTapped"></ctree-contributors-page>
-        <ctree-history-page name="history" description-config="[[descriptionConfig]]" contributor="[[historyContributor]]"></ctree-history-page>
-        <ctree-related-page name="related"></ctree-related-page>
-        <ctree-feedback-page name="feedback" description-config="[[descriptionConfig]]" segment="[[feedbackSegment]]"></ctree-feedback-page>-->
-      </iron-pages>
+
+      <div id="content">
+        <!-- TODO: don't set height percentage, let full image size be visible -->
+        <ctree-segment-image id="image" data="{{imageData}}" prompt="Image URL (Optional)" height-percent="56.25%" valid-change-made="{{validImage}}" editing></ctree-segment-image>
+        <ctree-segment-text id="description" data="{{textData}}" prompt="Description" valid-change-made="{{validDescription}}" editing></ctree-segment-text>
+        <div id="submitContainer"><paper-button id="submit" raised disabled on-tap="_submit">Submit</paper-button></div>
+
+        <!-- TODO: divider line and grid of similar suggestions -->
+      </div>
     </div>
   </template>
 
@@ -118,14 +126,15 @@ this license.
 
       static get properties() {
         return {
+          /**
+           * The unique key identifying a cTree.  If the site only has one cTree
+           * this doesn't need to be set.
+           */
+          ctreeKey: String,
+
           parentId: {
             type: Number,
             notify: true,
-          },
-
-          element: {
-            type: Object,
-            observer: '_elementChanged',
           },
 
           typeId: {
@@ -136,41 +145,50 @@ this license.
           headerColor: {
             type: String,
             value: "#cfcfcf",
-            computed: '_calculateHeaderColor(element)'
+            computed: '_calculateHeaderColor(_type)',
           },
 
-          /**
-           * Toggle icon names.
-           */
-          _toggleButtonIconNames: {
-            type: Array,
-            value: ['bookmark-border', 'bookmark'],
+          title: String,
+
+          _types: Array,
+
+          _type: {
+            type: Object,
+            computed: '_calculateType(_types, typeId)',
           },
         };
       }
 
-      _onToggleButton() {
-        this.element.bookmarked = !this.element.bookmarked;
+      static get observers() {
+        return [
+          '_dataChanged(title, validImage, validDescription)',
+        ];
       }
 
-      _getToggleButtonValue() {
-        return this.element ? (this.element.bookmarked ? true : false) : undefined;
+      _titleChanged() {
+        this.title = this.$.title.value;
       }
 
-      _calculateHeaderColor(element) {
-        var headerColor = "#cfcfcf";//this.headerColor;
-        if (element) {
-          if (element.color) {
-            headerColor = element.color;
-          } else if (element.type && element.type.color) {
-            headerColor = element.type.color;
-          }
+      _dataChanged(title, validImage, validDescription) {
+        this.$.submit.disabled = !title || title.trim().length <= 0 || !validDescription;
+      }
+
+      _submit() {
+        // TODO: save element
+      }
+
+      _calculateHeaderColor(type) {
+        var headerColor = this.headerColor;
+        if (type && type.color) {
+          headerColor = type.color;
         }
         return headerColor;
       }
 
-      _elementChanged(element) {
-        super._updateToggleButtonIcon();
+      _calculateType(types, typeId) {
+        if (!types || typeId < 0 || typeId >= types.length) return null;
+
+        return types[typeId];
       }
     }
 

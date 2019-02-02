@@ -56,11 +56,15 @@ this license.
       #buttons > div[hidden] {
         display: none !important;
       }
+      /* TODO: remove once segments can be added/edited */
+      #buttons {
+        display: none !important;
+      }
     </style>
 
     <div id="text" class="text" hidden$="[[editing]]"></div>
     <div id="edit" class="text" hidden$="[[!editing]]">
-      <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
+      <paper-textarea id="input" value="{{_value}}" no-label-float label="[[prompt]]"></paper-textarea>
       <div id="buttons" align="right">
         <div on-tap="_editSaveClicked" hidden$="[[!validChangeMade]]">
           <iron-icon icon="segment-save"></iron-icon>
@@ -94,6 +98,11 @@ this license.
       static get properties() {
         return {
           _updatedText: String,
+
+          _value: {
+            type: String,
+            observer: '_inputChanged',
+          },
         };
       }
 
@@ -119,10 +128,9 @@ this license.
       }
 
       _dataChanged(data) {
-        this._inputChanged(data);
-        this.validChangeMade = false;
         this.$.text.textContent = data;
         this._updatedText = data;
+        this._inputChanged(data);
         this.$.input.value = data;
       }
 
