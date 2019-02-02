@@ -68,7 +68,12 @@ CTree.SegmentBehavior = class extends Polymer.Element {
 
   static get properties() {
     return {
-      data: Object,
+      data: {
+        type: Object,
+        notify: true,
+      },
+
+      prompt: String,
 
       editing: {
         type: Boolean,
@@ -79,6 +84,7 @@ CTree.SegmentBehavior = class extends Polymer.Element {
       validChangeMade: {
         type: Boolean,
         value: false,
+        notify: true,
       },
 
       loadingChangeMade: {
