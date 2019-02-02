@@ -136,12 +136,12 @@ this license.
           },
 
           elementId: {
-            type: Number,
+            type: String,
             notify: true,
           },
 
           descriptionConfig: {
-            type: Number,
+            type: String,
             observer: '_descriptionConfigChanged',
             notify: true,
           },
@@ -158,9 +158,9 @@ this license.
             notify: true,
           },
 
-          feedbackSegment: Number,
+          feedbackSegment: String,
 
-          historyContributor: Number,
+          historyContributor: String,
 
           _types: Array,
 
@@ -176,7 +176,7 @@ this license.
 
       static get observers() {
         return [
-          '_updateChildTypes(element.type, _types)',
+          '_updateChildTypes(element.typeId, _types)',
         ];
       }
 
@@ -232,15 +232,16 @@ this license.
         //}
       }
 
-      _updateChildTypes(elementType, types) {
+      _updateChildTypes(typeId, types) {
         var childTypes = []
-        if (elementType && types) {
-          types.forEach(function(type) {
+        if (typeId && types) {
+          for (var key in types) {
+            var type = types[key];
             var parentTypes = type.parentTypes;
-            if (parentTypes && parentTypes.includes(elementType.id)) {
+            if (parentTypes && parentTypes.includes(typeId)) {
               childTypes.push(type)
             }
-          }, this);
+          }
         }
         this._childTypes = childTypes;
       }

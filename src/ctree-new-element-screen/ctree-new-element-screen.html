@@ -133,12 +133,12 @@ this license.
           ctreeKey: String,
 
           parentId: {
-            type: Number,
+            type: String,
             notify: true,
           },
 
           typeId: {
-            type: Number,
+            type: String,
             notify: true,
           },
 
@@ -186,7 +186,7 @@ this license.
       }
 
       _calculateType(types, typeId) {
-        if (!types || typeId < 0 || typeId >= types.length) return null;
+        if (!types || !typeId || types.length <= 0) return null;
 
         return types[typeId];
       }

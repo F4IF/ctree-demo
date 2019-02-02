@@ -87,10 +87,10 @@ this license.
            *
            * Structure:
            *   [{
-           *     id: Number,
+           *     id: String,
            *     type: SegmentType,
            *     variations: [{
-           *       id: Number,
+           *       id: String,
            *       data: dynamic,	// data type depends on segment type
            *     }, ...],
            *   }, ...],
@@ -108,7 +108,7 @@ this license.
           },
 
           editingSegmentId: {
-            type: Number,
+            type: String,
             notify: true,
           },
         };
