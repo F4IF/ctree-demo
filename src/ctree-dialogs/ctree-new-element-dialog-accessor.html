@@ -55,12 +55,12 @@ this license.
 
     _openInternal() {
       // TODO: initialize values & listeners
-      if (!this._dialog.newElement) {
-        this._dialog.ctreeKey = this.ctreeKey;
-        this._dialog.parentElementId = this.parentElementId;
+      this._dialog.ctreeKey = this.ctreeKey;
+      //if (!this._dialog.newElement) {
+        this._dialog.elementId = this.parentElementId;
         this._dialog.typeId = this.typeId;
         this._dialog.openNewElementDialog(this);
-      }
+      //}
     }
 
     _parentElementIdChanged() {

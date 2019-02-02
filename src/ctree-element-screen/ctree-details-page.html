@@ -204,7 +204,7 @@ this license.
 
       _addChildClicked(e) {
           var dialog = this.$.newElementDialog;
-          dialog.elementId = this.element.id
+          dialog.parentElementId = this.element.id
           dialog.typeId = e.target.type.id
           dialog.open();
       }

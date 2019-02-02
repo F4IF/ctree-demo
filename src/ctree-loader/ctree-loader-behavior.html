@@ -326,7 +326,7 @@ this license.
               if (Array.isArray(data)) {
                 cTreeData.types = this._dataArrayToIndexedItems(data);
               } else {
-                cTreeData.types = data;
+                cTreeData.types = this._addIdsToItems(data);
               }
             } else {
               cTreeData.types = {};
@@ -342,7 +342,7 @@ this license.
               if (Array.isArray(data)) {
                 cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
               } else {
-                cTreeData.segmentTypes = data;
+                cTreeData.segmentTypes = this._addIdsToItems(data);
               }
             } else {
               cTreeData.segmentTypes = {};
@@ -507,6 +507,19 @@ this license.
           items[item.id] = item;
         }
         return items;
+      }
+
+      /**
+       * Adds the key for each item in the collection as an ID value for the item.
+       */
+      _addIdsToItems(items) {
+        var updatedItems = {};
+        for (var key in items) {
+          var item = items[key];
+          item.id = key;
+          updatedItems[key] = item;
+        }
+        return updatedItems;
       }
 
       /**
