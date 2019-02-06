@@ -56,18 +56,20 @@ this license.
   };
   var ElementTypes = [
     [
-      {id: 1, name: "Seed",	description: "Core design goals.", iconUrl: "/images/app-icon-32.png",
-        color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
-      {id: 2, name: "Root",	description: "Core principles, based on the design goals.", iconUrl: "/images/app-icon-32.png",
-        color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1], elements: []},
-      {id: 3, name: "Xylem",	description: "Extrapolated principles based on the core principles.", iconUrl: "/images/app-icon-32.png",
-        color: "#e12323", parentsRequired: true,	parentsMax: -1,	parentTypes: [2, 3], elements: []},
-      {id: 4, name: "Node",	description: "Issue which needs to be solved for a principle.", iconUrl: "/images/app-icon-32.png",
-        color: "#00aeae", parentsRequired: true,	parentsMax: 1,	parentTypes: [3], elements: []},
-      {id: 5, name: "Bud",	description: "Possible solution to an issue.", iconUrl: "/images/app-icon-32.png",
-        color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
-      {id: 6, name: "Vein",	description: "Implementation detail for a solution.", iconUrl: "/images/app-icon-32.png",
-        color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [5, 6], elements: []},
+      {id: 1, name: "Subject",	description: "What this cTree is about",	prompt: "Create cTree",
+      	iconUrl: "/images/app-icon-32.png",	color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
+      {id: 2, name: "Goals",	description: "Areas which need to be addresed",	prompt: "Add goal",
+        iconUrl: "/images/app-icon-32.png",	color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1, 2], elements: []},
+      {id: 3, name: "Implementation",	description: "How to structure or accomplish suggestion", prompt: "",
+        iconUrl: "/images/app-icon-32.png",	color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [3, 5, 7], elements: []},
+      {id: 4, name: "Question",	description: "Something which needs to be answered", prompt: "Ask question",
+        iconUrl: "/images/app-icon-32.png",	color: "#d1d100", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
+      {id: 5, name: "Answer",	description: "Possible answer to question", prompt: "Answer question",
+        iconUrl: "/images/app-icon-32.png",	color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
+      {id: 6, name: "Problem",	description: "Issue which needs to be solved", prompt: "Identify problem",
+        iconUrl: "/images/app-icon-32.png",	color: "#e12323", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
+      {id: 7, name: "Solution",	description: "Potential way to address problem", prompt: "Suggest solution",
+        iconUrl: "/images/app-icon-32.png",	color: "#00aeae", parentsRequired: true,	parentsMax: -1,	parentTypes: [6], elements: []},
     ],
   ];
   var SegmentTypes = [

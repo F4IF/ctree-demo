@@ -76,15 +76,15 @@ this license.
     <iron-location query="{{query}}" dwell-time="800"></iron-location>
     <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
 
-    <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+    <paper-dialog id="elementDialog" on-iron-overlay-closed="_elementDialogClosed" with-backdrop>
       <ctree-element-screen ctree-key="[[ctreeKey]]" page="{{_elementPage}}" on-close-tapped="_elementDialogClosed" element="[[element]]" element-id="{{queryParams.e}}" description-config="{{queryParams.c}}" description-segments="{{descriptionSegmentIds}}"></ctree-element-screen>
     </paper-dialog>
 
-    <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+    <paper-dialog id="userDialog" on-iron-overlay-closed="_userDialogClosed" with-backdrop>
       <ctree-user-screen ctree-key="[[ctreeKey]]" page="{{_userPage}}" on-close-tapped="_userDialogClosed"></ctree-user-screen>
     </paper-dialog>
 
-    <paper-dialog id="newElementDialog" on-iron-overlay-closed="_newElementDialogClosed" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+    <paper-dialog id="newElementDialog" on-iron-overlay-closed="_newElementDialogClosed" with-backdrop>
       <ctree-new-element-screen ctree-key="[[ctreeKey]]" on-close-tapped="_newElementDialogClosed"></ctree-new-element-screen>
     </paper-dialog>
   </template>
