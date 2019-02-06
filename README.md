@@ -228,6 +228,8 @@ _**Note:** if you're unfamiliar with Git it may be useful to install a visual Gi
 #####  Install the current LTS version (4.x) of Node.js or newer
 
 	https://nodejs.org/en/download/
+	
+_**Note:** For the latest version of nodejs via package manager, visit: https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages
 
 #####  Install the latest version of Bower
 
