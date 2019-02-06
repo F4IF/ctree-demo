@@ -1,4 +1,4 @@
-[Click here for steps to set up this project on your local machine](https://github.com/F4IF/ctree-demo/tree/master#setup)
+[Click here for steps to set up this project on your local machine](#setup)
 
 # Events
 
