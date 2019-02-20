@@ -30,21 +30,21 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
-<link rel="import" href="ctree-loader-behavior-test.html">
+<link rel="import" href="ctree-loader-behavior-firebase.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  class CTreeUserLoader extends CTree.UserLoaderMixin(CTree.LoaderBehavior) {
+  class CTreeElementLoader extends CTree.ElementLoaderMixin(CTree.LoaderBehavior) {
 
-    static get is() { return 'ctree-user-loader'; }
+    static get is() { return 'ctree-element-loader'; }
   }
-  CTree.UserLoader = CTreeUserLoader;
+  CTree.ElementLoader = CTreeElementLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeUserLoader.is, CTreeUserLoader);
+  customElements.define(CTreeElementLoader.is, CTreeElementLoader);
 
 })();
 

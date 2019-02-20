@@ -92,190 +92,41 @@ this license.
     return items;
   }
 
-  class CTreeListLoader extends CTree.LoaderBehavior {
+  class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
 
     static get is() { return 'ctree-list-loader'; }
 
-    static get properties() {
-      return {
-        pageSize: {
-          type: Number,
-          value: 20,
-        },
-
-        /**
-         * The type of list to load in current properties.  Supported values:
-         *   - suggested
-         *   - bookmarked
-         *   - history
-         */
-        currentName: {
-          type: String,
-          observer: "_currentChanged",
-        },
-
-        /**
-         * All items loaded for the current list.
-         *
-         * Structure:
-         *   [{
-         *     element: Element,
-         *     feedback: Feedback,
-         *     descriptionConfig: String,
-         *     descriptionSegments: [String],
-         *     commentCode: Number,
-         *     commentData: Object,	// type depends on commentCode
-         *   }, ...]
-         */
-        currentItems: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        /**
-         * Indicates if the next page of items for the current list is loading.
-         */
-        currentLoading: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: false,
-        },
-
-        /**
-         * Indicates if the current list has more items to load.
-         */
-        currentHasMore: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: true,
-        },
-
-        /**
-         * Structure:
-         *   [{
-         *     element: Element,
-         *     feedback: Feedback,
-         *     descriptionConfig: String,
-         *     descriptionSegments: [Strings],
-         *     commentCode: Number,
-         *     commentData: Object,	// type depends on commentCode
-         *   }, ...]
-         */
-        suggestedItems: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        suggestedLoading: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: false,
-        },
-
-        suggestedHasMore: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: true,
-        },
-
-        /**
-         * Structure:
-         *   [{
-         *     element: Element,
-         *   }, ...]
-         */
-        bookmarkedItems: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        bookmarkedLoading: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: false,
-        },
-
-        bookmarkedHasMore: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: true,
-        },
-
-        /**
-         * Structure:
-         *   [{
-         *     element: Element,
-         *     feedback: Feedback,
-         *     descriptionConfig: String,
-         *     descriptionSegments: [Strings],
-         *     commentCode: Number,
-         *   }, ...]
-         */
-        historyItems: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        historyLoading: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: false,
-        },
-
-        historyHasMore: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          value: true,
-        },
-      };
-    }
-
-    loadSuggested() {
-      var cTreeData = this._cTreeData;
-      if (!cTreeData) return;
-      var listData = cTreeData.lists.suggested;
-      if (!listData.hasMore || listData.loading) return;
-
-      listData.loading = true;
-      this._setLoading('suggested', true);
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadSuggestedItems(cTreeData, listData) {
       setTimeout(() => {
         this._loadListItems(cTreeData, listData, 'suggested', 'suggestedItems', cTreeData.testSuggested, Test.SUGGESTED_COMMENTS, this._setSuggestedHasMore);
       }, Test.LOAD_DELAY);
     }
 
-    loadBookmarked() {
-      var cTreeData = this._cTreeData;
-      if (!cTreeData) return;
-      var listData = cTreeData.lists.bookmarked;
-      if (!listData.hasMore || listData.loading) return;
-
-      listData.loading = true;
-      this._setLoading('bookmarked', true);
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadBookmarkedItems(cTreeData, listData) {
       setTimeout(() => {
         this._loadListItems(cTreeData, listData, 'bookmarked', 'bookmarkedItems', cTreeData.testBookmarked, null, this._setBookmarkedHasMore);
       }, Test.LOAD_DELAY);
     }
 
-    loadHistory() {
-      var cTreeData = this._cTreeData;
-      if (!cTreeData) return;
-      var listData = cTreeData.lists.history;
-      if (!listData.hasMore || listData.loading) return;
-
-      listData.loading = true;
-      this._setLoading('history', true);
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadHistoryItems(cTreeData, listData) {
       setTimeout(() => {
         this._loadListItems(cTreeData, listData, 'history', 'historyItems', cTreeData.testHistory, Test.HISTORY_COMMENTS, this._setHistoryHasMore);
       }, Test.LOAD_DELAY);
@@ -315,67 +166,6 @@ this license.
       if (this._cTreeData == cTreeData) {
         this._setLoading(name, false);
       }
-    }
-
-    _setLoading(name, loading) {
-      if (name == 'suggested') {
-        this._setSuggestedLoading(loading);
-      } else if (name == 'bookmarked') {
-        this._setBookmarkedLoading(loading);
-      } else if (name == 'history') {
-        this._setHistoryLoading(loading);
-      }
-      if (name == this.currentName) {
-        this._setCurrentLoading(loading);
-      }
-    }
-
-    _setHasMore(name, hasMore) {
-      if (name == 'suggested') {
-        this._setSuggestedHasMore(hasMore);
-      } else if (name == 'bookmarked') {
-        this._setBookmarkedHasMore(hasMore);
-      } else if (name == 'history') {
-        this._setHistoryHasMore(hasMore);
-      }
-      if (name == this.currentName) {
-        this._setCurrentHasMore(hasMore);
-      }
-    }
-
-    _cTreeDataChanged(cTreeData) {
-      var listData = cTreeData.lists.suggested;
-      this._setSuggestedItems(listData.items);
-      this._setSuggestedLoading(listData.loading);
-      this._setSuggestedHasMore(listData.hasMore);
-      listData = cTreeData.lists.bookmarked;
-      this._setBookmarkedItems(listData.items);
-      this._setBookmarkedLoading(listData.loading);
-      this._setBookmarkedHasMore(listData.hasMore);
-      listData = cTreeData.lists.history;
-      this._setHistoryItems(listData.items);
-      this._setHistoryLoading(listData.loading);
-      this._setHistoryHasMore(listData.hasMore);
-      this._currentChanged(this.currentName, this.currentName);
-    }
-
-    _currentChanged(currentName, previousName) {
-      if (currentName == "suggested") {
-        this.__setCurrent(this.loadSuggested, this.suggestedItems, this.suggestedLoading, this.suggestedHasMore);
-      } else if (currentName == "bookmarked") {
-        this.__setCurrent(this.loadBookmarked, this.bookmarkedItems, this.bookmarkedLoading, this.bookmarkedHasMore);
-      } else if (currentName == "history") {
-        this.__setCurrent(this.loadHistory, this.historyItems, this.historyLoading, this.historyHasMore);
-      } else {
-        this.__setCurrent(null, [], false, false);
-      }
-    }
-
-    __setCurrent(load, items, loading, hasMore) {
-      this._setCurrentItems(items);
-      this._setCurrentLoading(loading);
-      this._setCurrentHasMore(hasMore);
-      this.loadCurrent = load;
     }
   }
   CTree.ListLoader = CTreeListLoader;

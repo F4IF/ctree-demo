@@ -32,46 +32,32 @@ this license.
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
-<link rel="import" href="ctree-loader-behavior.html">
-
 <script>
 (function() {
 
   'use strict';
 
-  if (CTree.firebaseConfig) {
-    class CTreeUserLoader extends CTree.LoaderBehavior {
-
-      static get is() { return 'ctree-user-loader'; }
-
-      static get properties() {
-        return {};
-      }
-
-      _urlChanged(url) {
-        // do nothing for test loader
-      }
-
-      _cTreeDataChanged(cTreeData) {
-        this.cTreeData = cTreeData;
-        // TODO: set/clear data as needed
-      }
-
-      _userChanged(user) {
-        // do nothing for test loader
-      }
-    }
-    CTree.UserLoader = CTreeUserLoader;
-
-    // Register custom element definition using standard platform API
-    customElements.define(CTreeUserLoader.is, CTreeUserLoader);
-
-  } else {
-    // fallback to test loader
-    var ctreeImport = document.createElement('ctree-import');
-    ctreeImport.href = '/src/ctree-loader/ctree-user-loader-test.html';
-    ctreeImport.load();
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
   }
+
+  CTree.UserLoaderMixin = (superClass) => class extends superClass {
+
+    static get properties() {
+      return {};
+    }
+  }
+
+  var ctreeImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-user-loader-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-user-loader-firebase.html';
+  } else {
+    ctreeImport.href = '/src/ctree-loader/ctree-user-loader-test.html';
+  }
+  ctreeImport.load();
 
 })();
 
