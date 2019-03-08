@@ -128,10 +128,15 @@ this license.
       }
 
       _dataChanged(data) {
-        this.$.text.textContent = data;
-        this._updatedText = data;
-        this._inputChanged(data);
-        this.$.input.value = data;
+        if (data !== this.$.text.textContent) {
+          this.$.text.textContent = data;
+        }
+        if (data !== this._updatedText) {
+          this._updatedText = data;
+        }
+        if (data !== this._value) {
+          this._value = data;
+        }
       }
 
       _scaleChanged(scale) {
@@ -151,7 +156,10 @@ this license.
       _editUpdate() {
         var value = this.$.input.value.trim();
         this._updatedText = value;
-        this.validChangeMade = (value !== this.data && value.length > 0);
+        // TODO: uncomment and remove the following lines once segments can be added/edited
+        //this.validChangeMade = (value !== this.data && value.length > 0);
+        this.validChangeMade = value.length > 0;
+        this.data = value;
       }
 
       _editSaveClicked() {
