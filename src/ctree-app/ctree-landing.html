@@ -59,6 +59,20 @@ this license.
 <dom-module id="ctree-landing">
   <template>
     <style>
+      /* all elements use box-sizing property */
+      * {
+        box-sizing: border-box;
+      }
+      .row::after {
+        content: "";
+        clear: both;
+        display: block;
+      }
+      [class*="col-"] {
+        float: left;
+        padding: 15px;
+      }
+
       :host {
         display: block;
         --app-primary-color: #5F9F00;
@@ -112,8 +126,26 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
+
+      /* Desktop Grid-View 12 column scaling */
+      .col-1 {width: 8.33%;}
+      .col-2 {width: 16.66%;}
+      .col-3 {width: 25%;}
+      .col-4 {width: 33.33%;}
+      .col-5 {width: 41.66%;}
+      .col-6 {width: 50%;}
+      .col-7 {width: 58.33%;}
+      .col-8 {width: 66.66%;}
+      .col-9 {width: 75%;}
+      .col-10 {width: 83.33%;}
+      .col-11 {width: 91.66%;}
+      .col-12 {width: 100%;}
+
       /* Mobile Phones */
       @media (max-width: 500px) {
+        [class*="col-"] {
+          width: 100%;
+        }
         paper-tabs {
           display: none;
         }
@@ -141,6 +173,7 @@ this license.
       }
       #participate.sectionStyling {
         background-color: #2B2B2B;
+        color: #E7E7E7;
       }
     </style>
 
@@ -155,6 +188,7 @@ this license.
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
     <app-header-layout id="mainLayout" has-scrolling-region>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <app-header slot="header" reveals effects="waterfall">
         <app-toolbar>
           <ctree-app-icon></ctree-app-icon>
@@ -256,18 +290,16 @@ this license.
           <p>W</p>
           <p>W</p>
         </div><div id="participate" class="sectionStyling">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
+          <div class="col-5">
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean semper, risus nec sollicitudin facilisis, ex nunc aliquet purus, dictum dignissim velit tellus at magna. Vivamus dignissim volutpat nisi, in pretium mauris dictum ac. Quisque commodo pharetra purus nec accumsan. Phasellus bibendum purus in ligula semper tristique. Pellentesque gravida nisl eu mattis tempus. Suspendisse fermentum mauris nec mauris pretium, ut efficitur dolor sollicitudin. Sed scelerisque neque sed turpis tempor, vitae tristique augue scelerisque. Cras lacinia magna a tristique elementum. Etiam id sodales dui. Sed feugiat non leo nec maximus. Proin sit amet mi eros.
+              </p>
+            </div>
+            <div class="col-7">
+              <p>
+                Nulla facilisi. Donec felis ligula, feugiat nec imperdiet vitae, gravida quis felis. Aliquam ultrices ultrices eros, sit amet tristique dui ultrices quis. Vivamus semper mauris eget mauris lacinia, sit amet interdum neque mollis. Suspendisse potenti. Phasellus ut eros tempus, cursus nulla id, accumsan diam. Phasellus rhoncus metus sit amet mattis mollis. Donec elementum in magna ut vehicula. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+              </div>
         </div>
       </div>
     </app-header-layout>
