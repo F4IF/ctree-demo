@@ -127,7 +127,30 @@ this license.
         display: none !important;
       }
 
+      /* social media icon bar stuff */
+      #social-media-icon-bar ul {
+        list-style: none;
+        margin: 0;
+        padding: 9px;
+        text-align: left;
+      }
+
+      #social-media-icon-bar li {
+        display: inline-block;
+        padding: 6px;
+      }
+
+      /* ctree blub text formatting */
+      #ctree-blurb p {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 15px;
+        margin-right: 0;
+}
+
       /* Desktop Grid-View 12 column scaling */
+      /* columns */
       .col-1 {width: 8.33%;}
       .col-2 {width: 16.66%;}
       .col-3 {width: 25%;}
@@ -140,6 +163,12 @@ this license.
       .col-10 {width: 83.33%;}
       .col-11 {width: 91.66%;}
       .col-12 {width: 100%;}
+
+      /* rows */
+      .row-1 {height: 33.33%;}
+      .row-2 {height: 33.33%;}
+      .row-3 {height: 33.33%;}
+
 
       /* Mobile Phones */
       @media (max-width: 500px) {
@@ -316,9 +345,18 @@ this license.
           <p>W</p>
         </div><div id="footer" class="sectionStyling">
           <div class="col-5">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean semper, risus nec sollicitudin facilisis, ex nunc aliquet purus, dictum dignissim velit tellus at magna. Vivamus dignissim volutpat nisi, in pretium mauris dictum ac. Quisque commodo pharetra purus nec accumsan. Phasellus bibendum purus in ligula semper tristique. Pellentesque gravida nisl eu mattis tempus. Suspendisse fermentum mauris nec mauris pretium, ut efficitur dolor sollicitudin. Sed scelerisque neque sed turpis tempor, vitae tristique augue scelerisque. Cras lacinia magna a tristique elementum. Etiam id sodales dui. Sed feugiat non leo nec maximus. Proin sit amet mi eros.
-              </p>
+            <div class="row-1">
+              <div id="social-media-icon-bar">
+                <ul>
+                  <li><a href="#"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
+                  <li><a href="#"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
+                  <li><a href="#"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
+                  </ul>
+              </div>
+            </div>
+              <div class="row-2" id="ctree-blurb">
+                <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                </div>
             </div>
             <div class="col-7">
               <p>
