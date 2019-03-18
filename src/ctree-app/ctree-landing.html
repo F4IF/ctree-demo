@@ -66,7 +66,7 @@ this license.
       .row::after {
         content: "";
         clear: both;
-        display: block;
+        display: table;
       }
       [class*="col-"] {
         float: left;
@@ -157,10 +157,20 @@ this license.
       #ctree-blurb p {
         display: block;
         margin-top: 0;
-        margin-bottom: 0;
+        margin-bottom: 25px;
         margin-left: 25px;
         margin-right: 0;
         width: 75%;
+      }
+
+      #copyright {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 25px;
+        margin-right: 0;
+        padding-right: 25px;
+        width: 100%;
       }
 
       /* Desktop Grid-View 12 column scaling */
@@ -183,6 +193,24 @@ this license.
       .inner-row-2 {height: 33.33%;}
       .inner-row-3 {height: 33.33%;}
 
+      /* add table-cell as element of column */
+      .table-cell {
+        display: table-cell;
+      }
+
+      /* separator line */
+      .line {
+          padding-right: 21px; /* 20+1 */
+          position: relative;
+      }
+      .line:after {
+          content: '';
+          position: absolute;
+          right: 0;
+          border-right: 1px solid #B4B4B4;
+          top: 10%;
+          bottom: 10%;
+      }
 
       /* Mobile Phones */
       @media (max-width: 500px) {
@@ -224,7 +252,7 @@ this license.
       }
       #footer.section-styling {
         background-color: #2B2B2B;
-        color: #E7E7E7;
+        color: #B4B4B4;
       }
     </style>
 
@@ -365,7 +393,7 @@ this license.
         </div>
         <div id="footer" class="section-styling">
           <div class="row">
-            <div class="col-5">
+            <div class="col-5 table-cell line">
               <div class="inner-row-1">
                 <div id="social-media-icon-bar">
                   <ul>
@@ -379,10 +407,12 @@ this license.
                 <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
               </div>
             </div>
-            <div class="col-7">
-              <p>
-                Nulla facilisi. Donec felis ligula, feugiat nec imperdiet vitae, gravida quis felis. Aliquam ultrices ultrices eros, sit amet tristique dui ultrices quis. Vivamus semper mauris eget mauris lacinia, sit amet interdum neque mollis. Suspendisse potenti. Phasellus ut eros tempus, cursus nulla id, accumsan diam. Phasellus rhoncus metus sit amet mattis mollis. Donec elementum in magna ut vehicula. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              </p>
+            <div class="col-7 table-cell">
+              <div id="copyright">
+                <p>
+                  Nulla facilisi. Donec felis ligula, feugiat nec imperdiet vitae, gravida quis felis. Aliquam ultrices ultrices eros, sit amet tristique dui ultrices quis. Vivamus semper mauris eget mauris lacinia, sit amet interdum neque mollis. Suspendisse potenti. Phasellus ut eros tempus, cursus nulla id, accumsan diam. Phasellus rhoncus metus sit amet mattis mollis. Donec elementum in magna ut vehicula. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+                </div>
             </div>
           </div>
         </div>
