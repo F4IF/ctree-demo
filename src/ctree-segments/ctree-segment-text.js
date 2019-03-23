@@ -1,0 +1,160 @@
+/**
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+*/
+import '@polymer/polymer/polymer-legacy.js';
+
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/paper-input/paper-textarea.js';
+import '@polymer/paper-ripple/paper-ripple.js';
+import './ctree-segment-behavior.js';
+import '../ctree-loader/lorem.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+class CTreeSegmentText extends CTree.SegmentBehavior {
+  static get template() {
+    return html`
+    <style>
+      :host {
+        display: block;
+      }
+      .text {
+        width: calc(100% - 16px);
+        padding: 4px 8px;
+      }
+      #input {
+        width: 100%;
+      }
+      #buttons > div {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+      }
+      #buttons > div[hidden] {
+        display: none !important;
+      }
+    </style>
+
+    <div id="text" class="text" hidden\$="[[editing]]"></div>
+    <div id="edit" class="text" hidden\$="[[!editing]]">
+      <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float="" label="test"></paper-textarea>
+      <div id="buttons" align="right">
+        <div on-tap="_editSaveClicked" hidden\$="[[!validChangeMade]]">
+          <iron-icon icon="segment-save"></iron-icon>
+          Save
+          <paper-ripple></paper-ripple>
+        </div>
+        <div on-tap="_editCancelClicked">
+          <iron-icon icon="segment-cancel"></iron-icon>
+          Cancel
+          <paper-ripple></paper-ripple>
+        </div>
+      </div>
+    </div>
+`;
+  }
+
+  static get is() { return 'ctree-segment-text'; }
+
+  /**
+   * Gets text interpretation of data for segment type.
+   *
+   * @param  {Object} data Segment type specific data to get text interpretation for
+   * @return {String}      Text interpretation of data
+   */
+  static getText(data) {
+    return data;
+  }
+
+  static get properties() {
+    return {
+      _updatedText: String,
+    };
+  }
+
+  static get observers() {
+    return [
+      '_editingChanged(editing)',
+      '_dataChanged(data)',
+      '_scaleChanged(scale)',
+    ];
+  }
+
+  ready() {
+    super.ready();
+    this._editUpdateDelay = 250;
+  }
+
+  _editingChanged(editing) {
+    if (editing) {
+      this.$.input.focus();
+    } else {
+      this._dataChanged(this.data);
+    }
+  }
+
+  _dataChanged(data) {
+    this._inputChanged(data);
+    this.validChangeMade = false;
+    this.$.text.textContent = data;
+    this._updatedText = data;
+    this.$.input.value = data;
+  }
+
+  _scaleChanged(scale) {
+    this.$.text.style.fontSize = scale;
+    this.$.edit.style.fontSize = scale;
+  }
+
+  _inputChanged(value) {
+    this.validChangeMade = false;
+    if (value === this._updatedText) {
+      super._cancelEditUpdate();
+    } else {
+      super._delayEditUpdate();
+    }
+  }
+
+  _editUpdate() {
+    var value = this.$.input.value.trim();
+    this._updatedText = value;
+    this.validChangeMade = (value !== this.data && value.length > 0);
+  }
+
+  _editSaveClicked() {
+    super._addSegmentVariation(this._updatedText);
+  }
+
+  _editCancelClicked() {
+    this.editing = false;
+  }
+}
+
+// Register custom element definition using standard platform API
+customElements.define(CTreeSegmentText.is, CTreeSegmentText);
+
+// Register as cTree segment
+CTreeSegments['ctree-segment-text'] = CTreeSegmentText

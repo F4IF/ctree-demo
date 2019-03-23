@@ -1,0 +1,183 @@
+/**
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+*/
+import '@polymer/polymer/polymer-legacy.js';
+
+import '@polymer/iron-image/iron-image.js';
+import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-spinner/paper-spinner.js';
+import './ctree-segment-behavior.js';
+import '../ctree-loader/lorem.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+class CTreeSegmentImage extends CTree.SegmentBehavior {
+  static get template() {
+    return html`
+    <style>
+      :host {
+        display: block;
+      }
+      #container {
+         position: relative;
+         width: 100%;
+      }
+      #image {
+        position:  absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        background-color: #000;
+      }
+      #url {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 8px;
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+      #loadingIndicator {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      paper-input[hidden] {
+        display: none !important;
+      }
+      paper-icon-button[hidden] {
+        display: none !important;
+      }
+    </style>
+
+    <div id="container">
+      <iron-image preload="" fade="" id="image" sizing="cover" loading="{{loading}}" error="{{error}}"></iron-image>
+      <paper-spinner id="loadingIndicator" active\$="[[loadingChangeMade]]" hidden\$="[[!loadingChangeMade]]"></paper-spinner>
+      <paper-input label="Image URL" id="url" on-value-changed="_inputChanged" on-keydown="_checkForEnter" hidden\$="[[!editing]]">
+        <paper-icon-button slot="suffix" on-tap="_editSaveClicked" icon="segment-save" alt="Save" title="Save" hidden\$="[[!validChangeMade]]"></paper-icon-button>
+        <paper-icon-button slot="suffix" on-tap="_editCancelClicked" icon="segment-cancel" alt="Cancel" title="Cancel"></paper-icon-button>
+      </paper-input>
+    </div>
+`;
+  }
+
+  static get is() { return 'ctree-segment-image'; }
+
+  static get properties() {
+    return {
+      _changed: {
+        type: Boolean,
+        value: false,
+      },
+    };
+  }
+
+  static get observers() {
+    return [
+      '_editingChanged(editing)',
+      '_dataChanged(data)',
+      '_heightPercentageChanged(heightPercent)',
+      '__updateValidChangeMade(_changed, loading, error)',
+      '__updatLoadingChangeMade(editing, loading)',
+    ];
+  }
+
+  _editingChanged(editing) {
+    if (editing) {
+      this.$.url.focus();
+    } else {
+      this._dataChanged(this.data);
+    }
+  }
+
+  _dataChanged(data) {
+    this._inputChanged(data);
+    this.validChangeMade = false;
+    this.loadingChangeMade = false;
+    this._changed = false;
+    // TODO: should this use imagePath or rootPath for Polymer 2.0?
+    this.$.image.src = data;
+    this.$.url.value = data;
+  }
+
+  _heightPercentageChanged(heightPercentage) {
+    if (heightPercentage && heightPercentage.length > 0) {
+      this.$.image.style.height = '100%';
+      this.$.image.sizing = 'cover';
+      this.$.container.style.paddingTop = heightPercentage;
+    } else {
+      this.$.image.style.height = 'auto';
+    }
+  }
+
+  _inputChanged(value) {
+    if (value === this.$.image.src) {
+      super._cancelEditUpdate();
+      this._waiting = false;
+    } else {
+      super._delayEditUpdate();
+    }
+  }
+
+  _checkForEnter(e) {
+    // check if 'enter' was pressed
+    if (e.keyCode === 13) {
+      this._editSaveClicked();
+    }
+  }
+
+  _editUpdate() {
+    var value = this.$.url.value.trim();
+    this.$.image.src = value;
+    this._changed = (value !== this.data);
+  }
+
+  _editSaveClicked() {
+    super._addSegmentVariation(this.$.image.src);
+  }
+
+  _editCancelClicked() {
+    this.editing = false;
+  }
+
+  __updateValidChangeMade(changed, loading, error) {
+    this.validChangeMade = changed && !loading && !error;
+  }
+
+  __updatLoadingChangeMade(editing, loading) {
+    this.loadingChangeMade = editing && loading;
+  }
+}
+
+// Register custom element definition using standard platform API
+customElements.define(CTreeSegmentImage.is, CTreeSegmentImage);
+
+// Register as cTree segment
+CTreeSegments['ctree-segment-image'] = CTreeSegmentImage
