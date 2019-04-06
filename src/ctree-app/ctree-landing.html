@@ -27,41 +27,83 @@ Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
-<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../../bower_components/iron-list/iron-list.html">
-<link rel="import" href="../../bower_components/iron-location/iron-location.html">
-<link rel="import" href="../../bower_components/iron-location/iron-query-params.html">
-<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
-<link rel="import" href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
-<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
-<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html" />
+<link
+  rel="import"
+  href="../../bower_components/app-layout/app-drawer/app-drawer.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/app-layout/app-header/app-header.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/app-layout/app-header-layout/app-header-layout.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/app-layout/app-toolbar/app-toolbar.html"
+/>
+<link rel="import" href="../../bower_components/iron-list/iron-list.html" />
+<link
+  rel="import"
+  href="../../bower_components/iron-location/iron-location.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/iron-location/iron-query-params.html"
+/>
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html" />
+<link
+  rel="import"
+  href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/iron-selector/iron-selector.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/paper-button/paper-button.html"
+/>
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html" />
+<link
+  rel="import"
+  href="../../bower_components/paper-icon-button/paper-icon-button.html"
+/>
+<link rel="import" href="../../bower_components/paper-input/paper-input.html" />
+<link
+  rel="import"
+  href="../../bower_components/paper-spinner/paper-spinner.html"
+/>
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html" />
+<link
+  rel="import"
+  href="../../bower_components/paper-tooltip/paper-tooltip.html"
+/>
 
-<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
-<link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
-<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
-<link rel="import" href="../ctree-import/ctree-import.html">
-<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
+<link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html" />
+<link
+  rel="import"
+  href="../ctree-dialogs/ctree-new-element-dialog-accessor.html"
+/>
+<link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html" />
+<link rel="import" href="../ctree-import/ctree-import.html" />
+<link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html" />
 
-<link rel="import" href="ctree-app-icon.html">
-<link rel="import" href="icons.html">
+<link rel="import" href="ctree-app-icon.html" />
+<link rel="import" href="icons.html" />
 
 <dom-module id="ctree-landing">
   <template>
     <style>
       :host {
         display: block;
-        --app-primary-color: #5F9F00;
+        --app-primary-color: #5f9f00;
         --app-secondary-color: black;
       }
       #mainLayout app-toolbar {
@@ -72,7 +114,8 @@ this license.
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
-      #headerTitle, #menuButton {
+      #headerTitle,
+      #menuButton {
         display: none;
       }
       app-drawer ul {
@@ -82,7 +125,7 @@ this license.
         height: 100vh;
       }
       app-header {
-        background-color: #4F7F00;
+        background-color: #4f7f00;
         color: #fff;
       }
       app-header paper-icon-button {
@@ -112,33 +155,81 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
+      h2 {
+        font-size: 30px;
+      }
+      section {
+        margin: 5rem auto;
+        width: 50%;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 300;
+      }
+      .bold {
+        font-weight: 500;
+      }
       @media (max-width: 500px) {
         paper-tabs {
           display: none;
         }
-        #headerTitle, #menuButton {
+        #headerTitle,
+        #menuButton {
           display: inline-block;
         }
       }
     </style>
 
-    <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
-    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
-    <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
+    <iron-meta key="rootPath" value="{{ rootPath }}"></iron-meta>
+    <ctree-import
+      id="importLoader"
+      href="/src/ctree-loader/ctree-list-loader-test.html"
+      on-loading-changed="(_importLoaderLoadingChanged)"
+    ></ctree-import>
+    <ctree-import
+      id="importPreview"
+      href="/src/ctree-element-preview/ctree-element-preview.html"
+    ></ctree-import>
 
-    <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
-    <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
-    <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
-    <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
-    <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
+    <iron-location
+      path="{{ path }}"
+      query="{{ query }}"
+      dwell-time="800"
+    ></iron-location>
+    <iron-query-params
+      id="params"
+      params-string="{{ query }}"
+      params-object="{{ queryParams }}"
+    ></iron-query-params>
+    <ctree-element-dialog-accessor
+      id="elementDialog"
+      ctree-key="[[ctreeKey]]"
+    ></ctree-element-dialog-accessor>
+    <ctree-new-element-dialog-accessor
+      id="newElementDialog"
+      ctree-key="[[ctreeKey]]"
+    ></ctree-new-element-dialog-accessor>
+    <ctree-user-dialog-accessor
+      id="userDialog"
+      ctree-key="[[ctreeKey]]"
+    ></ctree-user-dialog-accessor>
 
     <app-header-layout id="mainLayout" has-scrolling-region>
       <app-header slot="header" reveals effects="waterfall">
         <app-toolbar>
           <ctree-app-icon></ctree-app-icon>
           <div id="headerTitle" main-title>Collaboration Trees</div>
-          <paper-icon-button id="menuButton" icon="menu" on-tap="_toggleDrawer"></paper-icon-button>
-          <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px">
+          <paper-icon-button
+            id="menuButton"
+            icon="menu"
+            on-tap="(_toggleDrawer)"
+          ></paper-icon-button>
+          <paper-tabs
+            selected="{{ section }}"
+            attr-for-selected="name"
+            fallback-selection="overview"
+            bottom-item
+            style="margin-left: 66px"
+          >
             <paper-tab id="overviewTab" name="overview" link>
               <a href="[[rootPath]]?section=overview" tabindex="-1">
                 Overview
@@ -169,8 +260,14 @@ this license.
       </app-header>
 
       <div id="content">
-        <div id="overview" style="height: 100vh; background-color: #FF0000">
-        </div><div id="feedback" style="display: inline-block; width: 100vw; background-color: #00FF00">
+        <div
+          id="overview"
+          style="height: 100vh; background-color: #FF0000"
+        ></div>
+        <div
+          id="feedback"
+          style="display: inline-block; width: 100vw; background-color: #00FF00"
+        >
           <p>W</p>
           <p>W</p>
           <p>W</p>
@@ -181,59 +278,6 @@ this license.
           <p>W</p>
           <p>W</p>
           <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="ctree" style="display: inline-block; width: 100vw; background-color: #FF00FF">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="participate" style="display: inline-block; width: 100vw; background-color: #FFFF00">
           <p>W</p>
           <p>W</p>
           <p>W</p>
@@ -247,29 +291,114 @@ this license.
           <p>W</p>
           <p>W</p>
         </div>
+        <div
+          id="features"
+          style="display: inline-block; width: 100vw; background-color: #0000FF"
+        >
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+        <div
+          id="ctree"
+          style="display: inline-block; width: 100vw; background-color: #FF00FF"
+        >
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+        <div
+          id="participate"
+          style="display: inline-block; width: 100vw; background-color: #2d6949"
+        >
+          <section class="join">
+            <h2>Participate</h2>
+            <p>
+              <span class="bold">Join the open source project</span>
+              <br />
+              Get course credit or professional grade experience working on a
+              large scale open source project. Be part of a team, working
+              closely with other programmers and designers to complete a part of
+              a project. All regular contributors can add the project to their
+              LinkedIn resume and request a recommendation based on their
+              completed work. Go to
+              <span class="bold">dev.ctree.org</span> to get started.
+            </p>
+            <p>
+              <span class="bold">Test the project</span>
+              <br />
+              As the project develops we need real world examples of how it can
+              be used. If you want to use it with your nonprofit, online
+              community, or other organization please email
+              <span class="bold">contact@innovativeFuture</span>.
+            </p>
+          </section>
+        </div>
       </div>
     </app-header-layout>
 
-    <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
+    <app-drawer
+      id="navDrawer"
+      class="nav-drawer"
+      align="right"
+      position="right"
+      swipe-open
+    >
       <ul>
         <li>
-          <a href="[[rootPath]]?section=overview" on-click="_toggleDrawer">
+          <a href="[[rootPath]]?section=overview" on-click="(_toggleDrawer)">
             Overview
           </a>
-        </li><li>
-          <a href="[[rootPath]]?section=feedback" on-click="_toggleDrawer">
+        </li>
+        <li>
+          <a href="[[rootPath]]?section=feedback" on-click="(_toggleDrawer)">
             Feedback
           </a>
-        </li><li>
-          <a href="[[rootPath]]?section=features" on-click="_toggleDrawer">
+        </li>
+        <li>
+          <a href="[[rootPath]]?section=features" on-click="(_toggleDrawer)">
             Features
           </a>
-        </li><li>
-          <a href="[[rootPath]]?section=ctree" on-click="_toggleDrawer">
+        </li>
+        <li>
+          <a href="[[rootPath]]?section=ctree" on-click="(_toggleDrawer)">
             cTree Examples
           </a>
-        </li><li>
-          <a href="[[rootPath]]?section=participate" on-click="_toggleDrawer">
+        </li>
+        <li>
+          <a href="[[rootPath]]?section=participate" on-click="(_toggleDrawer)">
             Participate
           </a>
         </li>
@@ -278,30 +407,32 @@ this license.
   </template>
 
   <script>
-    class CTreeLanding extends Polymer.mixinBehaviors([Polymer.IronScrollTargetBehavior], Polymer.Element) {
-
-      static get is() { return 'ctree-landing'; }
+    class CTreeLanding extends Polymer.mixinBehaviors(
+      [Polymer.IronScrollTargetBehavior],
+      Polymer.Element
+    ) {
+      static get is() {
+        return "ctree-landing";
+      }
 
       static get properties() {
         return {
           rootPath: {
             type: String,
-            value: '',
+            value: ""
           },
 
           section: String,
 
           _suppressInferSection: {
             type: Boolean,
-            value: false,
-          },
+            value: false
+          }
         };
       }
 
       static get observers() {
-        return [
-          '_dialogParamChanged(queryParams.section)',
-        ];
+        return ["_dialogParamChanged(queryParams.section)"];
       }
 
       ready() {
@@ -318,10 +449,17 @@ this license.
       _scrollHandler() {
         // throttle the work on the scroll event
         var THROTTLE_THRESHOLD = 200;
-        if (!this.isDebouncerActive('_updateSection') && !this._suppressInferSection) {
-          this.debounce('_updateSection', function() {
-            this._updateSection();
-          }, THROTTLE_THRESHOLD);
+        if (
+          !this.isDebouncerActive("_updateSection") &&
+          !this._suppressInferSection
+        ) {
+          this.debounce(
+            "_updateSection",
+            function() {
+              this._updateSection();
+            },
+            THROTTLE_THRESHOLD
+          );
         }
       }
 
@@ -331,8 +469,17 @@ this license.
         var contentMiddle = this.scrollTarget.offsetHeight / 2;
         for (var i = 0; i < children.length; i++) {
           if (children[i].id) {
-            if (currentChild != null && this.scrollTarget.scrollTop < children[i].offsetTop) {
-              if (this.scrollTarget.scrollTop + this.scrollTarget.offsetHeight - children[i].offsetTop - children[i].offsetHeight >= 0) {
+            if (
+              currentChild != null &&
+              this.scrollTarget.scrollTop < children[i].offsetTop
+            ) {
+              if (
+                this.scrollTarget.scrollTop +
+                  this.scrollTarget.offsetHeight -
+                  children[i].offsetTop -
+                  children[i].offsetHeight >=
+                0
+              ) {
                 currentChild = children[i];
               }
               break;
@@ -346,22 +493,23 @@ this license.
       _dialogParamChanged(section) {
         if (section && section.length > 0) {
           this._scrollTo(this.$.content, this.$[section].offsetTop, 500);
-          this.section = section
+          this.section = section;
         }
       }
 
       _scrollTo(container, position, duration) {
-        var MILLIS_PER_FRAME = 16
-        var t = this
+        var MILLIS_PER_FRAME = 16;
+        var t = this;
         t._suppressInferSection = true;
-        var scrollStep = (position - container.scrollTop) / (duration / MILLIS_PER_FRAME);
+        var scrollStep =
+          (position - container.scrollTop) / (duration / MILLIS_PER_FRAME);
         var scrollInterval = setInterval(function() {
           if (Math.abs(position - container.scrollTop) > Math.abs(scrollStep)) {
-            var newPosition = Math.floor(container.scrollTop + scrollStep)
+            var newPosition = Math.floor(container.scrollTop + scrollStep);
             container.scrollTop = newPosition;
             if (container.scrollTop != newPosition) {
               t._suppressInferSection = false;
-              clearInterval(scrollInterval)
+              clearInterval(scrollInterval);
             }
           } else {
             container.scrollTop = position;
