@@ -508,6 +508,39 @@ this license.
   // Initialize object to hold shared static constants and functions
   CTree.Loader = {};
 
+  /**
+   * Object containing all cached cTree data, with the cTreeKey as the key for each cTree data.
+   *
+   * Structure:
+   *   url: String,
+   *   name: String
+   *   types: [Types],
+   *   segmentTypes: [SegmentTypes],
+   *   elements: [Elements],
+   *   users: [Users],
+   *   lists: {
+   *     suggested: {
+   *       items: [SuggestedItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *     bookmarked: {
+   *       items: [BookmarkedItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *     history: {
+   *       items: [HistoryItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *   },
+   */
+  CTree.Loader.CTREES_DATA = cTreesData;
+
   // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
   // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
   CTree.Loader.COMMENT_CATEGORY = {

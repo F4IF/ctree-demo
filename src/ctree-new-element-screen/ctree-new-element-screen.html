@@ -100,6 +100,7 @@ this license.
     <!--<ctree-import id="importPage" href="/src/ctree-new-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>-->
     <ctree-element-loader ctree-key="[[ctreeKey]]" types="{{_types}}" segment-types="{{_segmentTypes}}"></ctree-element-loader>
     <ctree-element-writer id="writer" ctree-key="[[ctreeKey]]"></ctree-element-loader>
+    <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
 
     <div id="container">
       <paper-toolbar class="toolbar" style="background-color: [[_calculateHeaderColor(typeId, types)]];">
@@ -223,18 +224,19 @@ this license.
           description: [{
             segments: segments
           }],
-          title: this.title,
+          title: this._title,
           type: this.typeId
         };
         if (this.parentId) {
           element.parents = [this.parentId];
         }
-        this.$.writer.addElement((uuid) => {
-          // TODO: show toast/snackbar message indicating success or failure instead of an alert on failure
-          if (uuid) {
-            element.id = uuid;
+        this.$.writer.addElement((elementData) => {
+          if (elementData) {
             this._closeClicked();
+            this.$.dialog.element = elementData;
+            this.$.dialog.open();
           } else {
+            // TODO: show toast/snackbar message indicating success or failure instead of an alert on failure
             alert('Unable to submit, please try again.')
           }
         }, element);
