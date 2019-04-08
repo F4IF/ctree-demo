@@ -28,7 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
 <link rel="import" href="ctree-writer-behavior.html">
 
@@ -82,25 +81,17 @@ this license.
         return;
       }
 
-      var writer = document.createElement('firebase-document');
       var processed = false;
-      var processComplete = function(success) {
+      var processComplete = function() {
         if (processed) return;
 
         processed = true;
-        writer.remove();
-        if (writer.parentNode) writer.parentNode.removeChild(writer);
 
-        if (!success) console.log('Failed to write data to ' + path + ': ' + data);
-        if (onComplete) onComplete.bind(this)(success);
+        if (onComplete) onComplete.bind(this)(true);
       }
       setTimeout(() => {
-        processComplete(false);
-      }, this.timeout);
-      document.body.appendChild(writer);
-      writer.setStoredValue(path, data).then(
-        () => { processComplete(true) },
-        () => { processComplete(false) });
+        processComplete(true);
+      }, 1000);
     }
   };
 

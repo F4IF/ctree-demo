@@ -49,32 +49,32 @@ this license.
       1, 1, 1, 1, 1, 1, 1,  // Text (String)
       2,                    // Image (String)
     ],
-    MAX_CHILDREN: 5,
+    MAX_CHILDREN: 3,
     MAX_DESCRIPTION_CONFIGS: 3,
     MAX_DESCRIPTION_SEGMENTS: 5,
     MAX_DESCRIPTION_SEGMENT_VARIATIONS: 3,
   };
   var ElementTypes = [
     [
-      {id: 1, name: "Subject",	description: "What this cTree is about",	prompt: "Create cTree",
+      {id: "1", name: "Subject",	description: "What this cTree is about",	prompt: "Create cTree",
       	iconUrl: "/images/app-icon-32.png",	color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
-      {id: 2, name: "Goals",	description: "Areas which need to be addresed",	prompt: "Add goal",
-        iconUrl: "/images/app-icon-32.png",	color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1, 2], elements: []},
-      {id: 3, name: "Implementation",	description: "How to structure or accomplish suggestion", prompt: "Suggest implementation",
-        iconUrl: "/images/app-icon-32.png",	color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [3, 5, 7], elements: []},
-      {id: 4, name: "Question",	description: "Something which needs to be answered", prompt: "Ask question",
-        iconUrl: "/images/app-icon-32.png",	color: "#d1d100", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
-      {id: 5, name: "Answer",	description: "Possible answer to question", prompt: "Answer question",
-        iconUrl: "/images/app-icon-32.png",	color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
-      {id: 6, name: "Problem",	description: "Issue which needs to be solved", prompt: "Identify problem",
-        iconUrl: "/images/app-icon-32.png",	color: "#e12323", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
-      {id: 7, name: "Solution",	description: "Potential way to address problem", prompt: "Suggest solution",
-        iconUrl: "/images/app-icon-32.png",	color: "#00aeae", parentsRequired: true,	parentsMax: -1,	parentTypes: [6], elements: []},
+      {id: "2", name: "Goals",	description: "Areas which need to be addresed",	prompt: "Add goal",
+        iconUrl: "/images/app-icon-32.png",	color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: ["1", "2"], elements: []},
+      {id: "3", name: "Implementation",	description: "How to structure or accomplish suggestion", prompt: "Suggest implementation",
+        iconUrl: "/images/app-icon-32.png",	color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: ["3", "5", "7"], elements: []},
+      {id: "4", name: "Question",	description: "Something which needs to be answered", prompt: "Ask question",
+        iconUrl: "/images/app-icon-32.png",	color: "#d1d100", parentsRequired: true,	parentsMax: 1,	parentTypes: ["2", "3", "5", "7"], elements: []},
+      {id: "5", name: "Answer",	description: "Possible answer to question", prompt: "Answer question",
+        iconUrl: "/images/app-icon-32.png",	color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: ["4"], elements: []},
+      {id: "6", name: "Problem",	description: "Issue which needs to be solved", prompt: "Identify problem",
+        iconUrl: "/images/app-icon-32.png",	color: "#e12323", parentsRequired: true,	parentsMax: 1,	parentTypes: ["2", "3", "5", "7"], elements: []},
+      {id: "7", name: "Solution",	description: "Potential way to address problem", prompt: "Suggest solution",
+        iconUrl: "/images/app-icon-32.png",	color: "#00aeae", parentsRequired: true,	parentsMax: -1,	parentTypes: ["6"], elements: []},
     ],
   ];
   var SegmentTypes = [
-    {id: 1, componentName: 'ctree-segment-text', canBeThumbnail: false},
-    {id: 2, componentName: 'ctree-segment-image', canBeThumbnail: true},
+    {id: "1", componentName: 'ctree-segment-text', canBeThumbnail: false},
+    {id: "2", componentName: 'ctree-segment-image', canBeThumbnail: true},
   ];
 
   var populateCTreeTestData = function(cTreeData) {
@@ -83,29 +83,29 @@ this license.
     // get list of child types for each item type
     var childTypes = [];
     var elementTypeCount = [];
-    for (var i = 1; i < types.length; i++) {
-      var type = types[i];
+    for (var key in types) {
+      var type = types[key];
       if (type) {
-        elementTypeCount[i] = 0;
+        elementTypeCount[key] = 0;
         // add this type as child for each parent type
         for (var j = 0; j < type.parentTypes.length; j++) {
-          var parentTypeIndex = type.parentTypes[j];
-          var childTypesForParent = childTypes[parentTypeIndex];
+          var parentTypeId = type.parentTypes[j];
+          var childTypesForParent = childTypes[parentTypeId];
           if (!childTypesForParent) {
             childTypesForParent = [];
-            childTypes[parentTypeIndex] = childTypesForParent;
+            childTypes[parentTypeId] = childTypesForParent;
           }
-          childTypesForParent.push(i);
+          childTypesForParent.push(key);
         }
         if (!type.parentsRequired) {
           // no parents for type, so add to root node list
-          var parentTypeIndex = 0;
-          var childTypesForParent = childTypes[parentTypeIndex];
+          var rootNodesId = "";
+          var childTypesForParent = childTypes[rootNodesId];
           if (!childTypesForParent) {
             childTypesForParent = [];
-            childTypes[parentTypeIndex] = childTypesForParent;
+            childTypes[rootNodesId] = childTypesForParent;
           }
-          childTypesForParent.push(i);
+          childTypesForParent.push(key);
         }
       }
     }
@@ -114,7 +114,7 @@ this license.
     var nextElementId = 1;
     var currentLevelElements;
     var nextLevelElements = [];
-    var parentlessTypeIds = childTypes[0];
+    var parentlessTypeIds = childTypes[""];
     var testElements = [];
     cTreeData.testElements = testElements;
     for (var i = 0; i < parentlessTypeIds.length; i++) {
@@ -122,7 +122,7 @@ this license.
       var type = types[typeId];
       var childCount = Math.floor(1 + Math.random() * Test.MAX_CHILDREN);
       for (var j = 0; j < childCount; j++) {
-        var element = {id: nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId]};
+        var element = {id: '' + nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId]};
         testElements[element.id] = element;
         nextLevelElements.push(element);
       }
@@ -159,14 +159,15 @@ this license.
             }
           }
           // create children
-          childCount = Math.floor(Math.pow(Math.random(), 2) * (maxChildCount + 1));
+          childCount = Math.floor(Math.random() * (maxChildCount + 1));
           if (childCount == 0 && guaranteeChild) {
             childCount = 1;
           }
           if (childCount > 0) {
             parent.children = [];
+            var childTypesForIdKeys = Object.keys(childTypesForId);
             for (var j = 0; j < childCount; j++) {
-              var typeId = childTypesForId[Math.floor(Math.random() * childTypesForId.length)];
+              var typeId = childTypesForId[childTypesForIdKeys[Math.floor(Math.random() * childTypesForIdKeys.length)]];
               var sharedPoolIndex = (Math.random() < 0.5 ? -1 : Math.floor(Math.random() * sharedPoolSize));
               var element = (sharedPoolIndex >= 0 && sharedPool[typeId] ? sharedPool[typeId][sharedPoolIndex] : null);
               if (element && types[typeId].parentsMax >= 0 && element.parents.length < types[typeId].parentsMax) {
@@ -195,7 +196,7 @@ this license.
               if (!element) {
                 // create new element
                 var type = types[typeId];
-                element = {id: nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId], parents: [parent.id]};
+                element = {id: '' + nextElementId++, type: type, typeId: typeId, title: type.name + ' ' + ++elementTypeCount[typeId], parents: [parent.id]};
                 testElements[element.id] = element;
                 nextLevelElements.push(element);
                 if (sharedPoolIndex >= 0) {
@@ -216,24 +217,25 @@ this license.
     }
 
     var segmentTypes = cTreeData.segmentTypes;
+    var segmentTypesIds = Object.keys(segmentTypes);
     var imagePath = document.createElement('iron-meta').byKey('rootPath') + "/images/";
-    for (var i = 1; i < testElements.length; i++) {
-      var element = testElements[i];
+    for (var key in testElements) {
+      var element = testElements[key];
 
       var description = [];
-      for (var j = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_CONFIGS - 1)); j >= 0; j--) {
+      for (var j = Math.floor(Math.random() * Test.MAX_DESCRIPTION_CONFIGS); j >= 0; j--) {
         var segments = [];
         var contributors = [];  // TODO: add contributors, ordered from most contributions to least (pick contributors for each segment added, also include feedback)
-        for (var k = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENTS - 1)); k >= 0; k--) {
-          var descriptionSegmentTypeId = Math.floor(Math.random() * (segmentTypes.length - 1)) + 1; // no ID 0
+        for (var k = Math.floor(Math.random() * Test.MAX_DESCRIPTION_SEGMENTS); k >= 0; k--) {
+          var descriptionSegmentTypeId = segmentTypesIds[Math.floor(Math.random() * segmentTypesIds.length)];
           var descriptionSegmentVariations = [];
-          for (var l = Math.floor(Math.random() * (Test.MAX_DESCRIPTION_SEGMENT_VARIATIONS - 1)); l >= 0; l--) {
+          for (var l = Math.floor(Math.random() * Test.MAX_DESCRIPTION_SEGMENT_VARIATIONS); l >= 0; l--) {
             var segmentData;
             switch (descriptionSegmentTypeId) {
-              case 1: // Text (String)
+              case "1": // Text (String)
                 segmentData = Lorem.generate('2-5s');
                 break;
-              case 2: // Image (String)
+              case "2": // Image (String)
                 segmentData = Lorem.imageUrl();
                 if (!segmentData.startsWith('http')) {
                   segmentData = imagePath + segmentData;
@@ -241,14 +243,14 @@ this license.
                 break;
             }
             if (segmentData) {
-              descriptionSegmentVariations.push({id: nextVariationId++, data: segmentData});
+              descriptionSegmentVariations.push({id: '' + nextVariationId++, data: segmentData});
             } else {
               console.warn('failed to create segment');
             }
           }
-          segments.push({id: segmentId++, type: segmentTypes[descriptionSegmentTypeId], variations: descriptionSegmentVariations});
+          segments.push({id: '' + segmentId++, type: segmentTypes[descriptionSegmentTypeId], variations: descriptionSegmentVariations});
         }
-        description.push({id: descriptionConfigId++, contributors: contributors, segments: segments});
+        description.push({id: '' + descriptionConfigId++, contributors: contributors, segments: segments});
       }
       element.description = description;
 
@@ -258,12 +260,13 @@ this license.
       element.designer = "Anonymous";	// TODO: probably start passing user ID instead once can load public user data
     }
 
+    var testElementsKeys = Object.keys(testElements);
     var getTestElementSubset = function(minElements, onAddingItem) {
       var subset = [];
       var tempIds = [];
-      var count = testElements.length - 1;
+      var count = testElementsKeys.length;
       for (var i = 0; i < count; i++) {
-        tempIds[i] = i + 1;
+        tempIds[i] = testElementsKeys[i];
       }
       // ensure we get at least half a page worth unless there aren't enough items
       if (minElements * 2 < 10) {
@@ -281,11 +284,11 @@ this license.
       }
       return subset;
     };
-    cTreeData.testBookmarked = getTestElementSubset(testElements.length / 8, function(id) {
+    cTreeData.testBookmarked = getTestElementSubset(testElementsKeys.length / 8, function(id) {
       testElements[id].bookmarked = true;
     });
-    cTreeData.testSuggested = getTestElementSubset(testElements.length / 3);
-    cTreeData.testHistory = getTestElementSubset(testElements.length / 5);
+    cTreeData.testSuggested = getTestElementSubset(testElementsKeys.length / 3);
+    cTreeData.testHistory = getTestElementSubset(testElementsKeys.length / 5);
   };
 
   // Create my namespace, if it doesn't exist
