@@ -312,7 +312,7 @@ this license.
               loadItem(dataContainerArray);
             } else {
               // last option didn't result in an item, try a different option
-              randomOption();
+              setTimeout(randomOption, 5);
             }
           }
           randomOption()
