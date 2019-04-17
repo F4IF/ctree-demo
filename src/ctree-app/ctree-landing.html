@@ -53,6 +53,8 @@ this license.
 <link rel="import" href="../ctree-import/ctree-import.html">
 <link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
 
+<link rel="import" href="../ctree-testimonials/ctree-testimonials.html">
+
 <link rel="import" href="ctree-app-icon.html">
 <link rel="import" href="icons.html">
 
@@ -112,6 +114,16 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
+
+      #feedback {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        /* height: 100vh;  */
+        min-height: 100vh; 
+        width: 100vw; 
+        background-color: #f0f0f0
+      }
       @media (max-width: 500px) {
         paper-tabs {
           display: none;
@@ -169,31 +181,13 @@ this license.
       </app-header>
 
       <div id="content">
-        <div id="overview" style="height: 100vh; background-color: #FF0000">
-        </div><div id="feedback" style="display: inline-block; width: 100vw; background-color: #00FF00">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
+        <div id="overview" style="height: 100vh; width: 100vw; background-color: #FF0000"> -->
+        </div><div id="feedback">
+              <ctree-testimonials>
+                   
+              </ctree-testimonials>
+
+        </div><!--#feedback--><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
           <p>W</p>
           <p>W</p>
           <p>W</p>

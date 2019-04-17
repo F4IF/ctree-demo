@@ -1,0 +1,93 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="./ctree-testimony.html">
+
+
+<dom-module id="ctree-testimonials">
+ 
+  <template>
+    <style>
+      :host {
+        display: block
+      }
+      #ctree-testimonials-display {
+          background-color: #fff;
+          width: 70vw;
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+          padding: 30px;
+          flex: 1;
+          text-align: center;
+          color:#186848;
+      }
+      #ctree-testimonials-info {
+        margin-bottom: 2em;
+        padding-left: 15%;
+        padding-right: 15%;
+      }
+      #ctree-testimonies-container {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+      }
+      @media screen and (max-width: 700px) {
+        #ctree-testimonies-container {
+          flex-direction: column;
+        }
+        .ctree-testimony {
+          margin-top: 2em;
+        }
+      }
+    </style>
+
+    <div id="ctree-testimonials-display">
+      <h1> FEEDBACK </h1>
+      <div id="ctree-testimonials-info">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus. 
+      </div>
+      
+      <div id="ctree-testimonies-container">
+        <ctree-indiv-testimony></ctree-indiv-testimony>
+        <ctree-indiv-testimony></ctree-indiv-testimony>
+        <ctree-indiv-testimony></ctree-indiv-testimony>
+      </div>
+    </div>
+  </template>
+      
+  <script>
+    class CTreeTestimonials extends Polymer.Element {
+      static get is() { return  'ctree-testimonials' }
+    }
+
+    
+    customElements.define(CTreeTestimonials.is, CTreeTestimonials);
+  </script>
+
+</dom-module>

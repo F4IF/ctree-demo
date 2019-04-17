@@ -1,0 +1,113 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+
+<dom-module id="ctree-indiv-testimony">
+  <template>
+    <style>
+      :host {
+        display: block
+      }
+      .ctree-testimony {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        align-self: stretch;
+        padding: 10px;
+      }
+      .ctree-testimony-content {
+        position: relative;  
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.11), 0 6px 20px 0 rgba(0, 0, 0, 0.11);  
+        padding: 2em;     
+      }
+      .ctree-testimony-image {
+        border-radius: 50%;
+        background-size: cover;
+        height: 70px;
+        width: 70px;
+        align-items: center; 
+        position: absolute;
+        top: -30px;
+        left: 40%; 
+        right: 40%;
+      }
+      hr {
+        width: 50%;
+      }
+      .ctree-testimony-handle {
+        font-weight: bold;
+        margin-top: 3em;
+        font-size: 1.2em
+      }
+      .ctree-testimony-quote{
+        font-size: .9em;
+      }
+      .button {
+        padding: .4em 1.1em .4em 1.1em;
+        border-style: solid;
+        display: inline-block;
+        font-size: 1.2em;
+      }
+      
+      @media screen and (max-width: 700px) {
+        .ctree-testimony {
+          margin-top: 2em;
+        }
+      }
+    </style>
+    <div class="ctree-testimony">
+      <div class="ctree-testimony-content">
+        <div class="ctree-testimony-image" style="background-image: url('https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg')">
+          <!-- 
+             SAMPLE IMAGES FOR LATER: 
+             https://www.mills.edu/uniquely-mills/students-faculty/student-profiles/images/student-profile-veronica-mills-college.jpg
+             https://www.elitesingles.com/sites/www.elitesingles.com/files/2b_en_ta_tip_widows2.jpg
+           -->
+        </div>
+        <p class="ctree-testimony-handle">@ecojess</p>
+        <hr>
+        <p class="ctree-testimony-quote">Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper.</p>
+        <div class="button">View cTree</div>
+      </div>
+    </div>
+  </template>
+      
+  <script>
+    class CTreeIndivTestimony extends Polymer.Element {
+      static get is() { return  'ctree-indiv-testimony' }
+    }
+
+    
+    customElements.define(CTreeIndivTestimony.is, CTreeIndivTestimony);
+  </script>
+
+</dom-module>
