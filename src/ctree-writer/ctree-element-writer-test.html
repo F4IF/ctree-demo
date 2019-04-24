@@ -1,6 +1,6 @@
 <!--
 @license
-Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,48 +29,19 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../ctree-import/ctree-import.html">
-
-<link rel="import" href="ctree-loader-behavior.html">
+<link rel="import" href="ctree-element-writer-incremental-mixin.html">
+<link rel="import" href="ctree-writer-behavior-test.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  if (CTree.firebaseConfig) {
-    class CTreeUserLoader extends CTree.LoaderBehavior {
+  class CTreeElementWriter extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehaviorTest) {}
+  CTree.ElementWriter = CTreeElementWriter;
 
-      static get is() { return 'ctree-user-loader'; }
-
-      static get properties() {
-        return {};
-      }
-
-      _urlChanged(url) {
-        // do nothing for test loader
-      }
-
-      _cTreeDataChanged(cTreeData) {
-        this.cTreeData = cTreeData;
-        // TODO: set/clear data as needed
-      }
-
-      _userChanged(user) {
-        // do nothing for test loader
-      }
-    }
-    CTree.UserLoader = CTreeUserLoader;
-
-    // Register custom element definition using standard platform API
-    customElements.define(CTreeUserLoader.is, CTreeUserLoader);
-
-  } else {
-    // fallback to test loader
-    var ctreeImport = document.createElement('ctree-import');
-    ctreeImport.href = '/src/ctree-loader/ctree-user-loader-test.html';
-    ctreeImport.load();
-  }
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeElementWriter.is, CTreeElementWriter);
 
 })();
 

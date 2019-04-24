@@ -1,0 +1,354 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+<!-- Required to get CTree.Loader.CTREES_DATA -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
+
+<link rel="import" href="ctree-writer-behavior.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  CTree.ElementWriterMixin = (superClass) => class extends superClass {
+
+    static get properties() {
+      return {
+        /**
+         * Element to load data for.  Events will be fired for this element as
+         * data is loaded into it.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     type: ElementType,
+         *     typeId: [String],
+         *     title: String,
+         *     parents: [Strings],
+         *     children: [Strings],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: String,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: String,
+         *         type: SegmentType,
+         *         typeId: [String],
+         *         variations: [{
+         *           id: String,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }
+         */
+        element: Object,
+
+        elementId: String,
+      };
+    }
+
+    /**
+     * @param {Function([{ElementData}])} onComplete (Optional) Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Object} element (Optional) Element to add.  If not provided, the value from the element property will be used.
+     * @param {String} id (Optional) ID of element.  If not provided and the element isn't specified, the elementId property will be used.  If the value is still null the element object's ID will be used if it's not null, otherwise a new UUID will be generated.
+     */
+    addElement(onComplete, element, id) {
+      if (!this.element && !element) {
+        console.error('No element set for writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      if (!element) {
+        element = this.element;
+        if (!id) {
+          id = this.elementId
+        }
+      }
+      if (!id) {
+        id = element.id
+        if (!id) {
+          id = CTree.Writer.getUuid();
+        }
+      }
+
+      var ctreeKey = this.ctreeKey;
+      this._addElement((elementData) => {
+        var id = null;
+        if (elementData) {
+          id = elementData.id;
+          elementData.typeId = elementData.type;
+          var ctreeData = CTree.Loader.CTREES_DATA[ctreeKey];
+          if (ctreeData) {
+            elementData.type = ctreeData.types[elementData.typeId];
+            if (!ctreeData.elements[id]) {
+              ctreeData.elements[id] = elementData;
+            }
+            // TODO: may want to check to see if the element already exists (if so, remove it before adding it again)
+            ctreeData.lists.history.items.unshift(elementData);
+          } else {
+            elementData.type = null;
+          }
+        }
+
+        if (onComplete) onComplete.bind(this)(elementData);
+      }, element, id, ctreeKey);
+    }
+
+    /**
+     * @param {Function([{ElementData}])} onComplete Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Object} element  Element to add
+     * @param {String} id       ID of element
+     * @param {String} ctreeKey Key for cTree to write element to
+     */
+    _addElement(onComplete, element, id, ctreeKey) {
+      // TODO: override to implement writing
+    }
+
+    /**
+     * @param {String} id ID of description to add
+     * @param {Function([{DescriptionData}])} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
+     */
+    addDescriptionVariationWithId(id, onComplete) {
+      if (!this.element) {
+        console.error('No element set for writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      var descriptionVariation = CTree.Loader.getFromArrayWithId(this.element.description, id, false);
+      if (!descriptionVariation) {
+        console.error('No description variation set for writer with ID ' + id);
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+
+      this.addDescriptionVariation(descriptionVariation, this.element.id, onComplete, id);
+    }
+
+    /**
+     * @param {Object} descriptionVariation   Object containing description variation data to be written to database
+     * @param {String} elementId              ID of element this description is associated with
+     * @param {Function([{DescriptionData}])} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
+     * @param {String} descriptionVariationId (Optional) ID of description.  If not provided, a new UUID will be generated.
+     */
+    addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey = this.ctreeKey) {
+      if (!descriptionVariation) {
+        console.error('No description variation passed to writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      if (!elementId) {
+        console.error('No element ID passed to writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      if (!descriptionVariationId) {
+        descriptionVariationId = descriptionVariation.id;
+        if (!descriptionVariationId) {
+          descriptionVariationId = CTree.Writer.getUuid();
+        }
+      }
+
+      this._addDescriptionVariation(descriptionVariation, elementId, (descriptionData) => {
+        if (descriptionData) {
+          var ctreeData = CTree.Loader.CTREES_DATA[ctreeKey];
+          if (ctreeData) {
+            var element = ctreeData.elements[elementId]
+            if (element) {
+              // check if already exists
+              var descriptionVariation = CTree.Loader.getFromArrayWithId(element.description, descriptionVariationId, false);
+              if (!descriptionVariation) {
+                // add as first description variation
+                element.description.unshift(descriptionData);
+              }
+            }
+          }
+        }
+
+        if (onComplete) onComplete.bind(this)(descriptionData);
+      }, descriptionVariationId, ctreeKey);
+    }
+
+    /**
+     * @param {Object} descriptionVariation   Object containing description variation data to be written to database
+     * @param {String} elementId              ID of element this description is associated with
+     * @param {Function([{DescriptionData}])} onComplete Function called when completed, with the description's written data if successful, otherwise null
+     * @param {String} descriptionVariationId ID of description
+     * @param {String} ctreeKey               Key for cTree to write description variation to
+     */
+    _addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey) {
+      // TODO: override to implement writing
+    }
+
+    /**
+     * @param {String} elementId      ID of element the segment is associated with
+     * @param {String} descriptionId  ID of description the segment is associated with
+     * @param {String} segmentId      ID of segment this variation is associated with
+     * @param {Function([{SegmentVariationData}])} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {String} variationId    (Optional) ID of variation.  If not provided, a new UUID will be generated.
+     */
+    addSegmentVariationWithId(elementId, descriptionId, segmentId, onComplete, variationId) {
+      if (!this.element) {
+        console.error('No element set for writer');
+        return;
+      }
+      var description = CTree.Loader.getFromArrayWithId(this.element.description, descriptionId, false);
+      if (!description) {
+        console.error('No description with ID: ' + descriptionId);
+        return;
+      }
+      var segment = CTree.Loader.getFromArrayWithId(description.segments, segmentId, false);
+      if (!segment) {
+        console.error('No segment with ID: ' + segmentId);
+        return;
+      }
+      var variation = CTree.Loader.getFromArrayWithId(segment.variations, variationId, false);
+      if (!variation) {
+        console.error('No segment variation with ID: ' + variationId);
+        return;
+      }
+
+      var typeId = segment.type;
+      if (typeof typeId !== 'string') {
+        typeId = segment.typeId;
+      }
+      this.addSegmentVariation(variation, elementId, descriptionId, segmentId, typeId, onComplete, variationId);
+    }
+
+    /**
+     * @param {Object} variation     Object containing variation data to be written to database
+     * @param {String} elementId     ID of element the segment is associated with
+     * @param {String} descriptionId ID of description the segment is associated with
+     * @param {String} segmentId     ID of segment this variation is associated with
+     * @param {String} typeId        ID of the segment type
+     * @param {Function([{SegmentVariationData}])} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {String} variationId   (Optional) ID of variation.  If not provided, a new UUID will be generated.
+     */
+    addSegmentVariation(variation, elementId, descriptionId, segmentId, typeId, onComplete, variationId, ctreeKey = this.ctreeKey) {
+      if (!variation) {
+        console.error('No variation passed to writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      if (!segmentId) {
+        console.error('No segment ID passed to writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      if (!typeId) {
+        if (typeof variation.type === 'string') {
+          typeId = variation.type;
+        } else if (typeof variation.typeId === 'string') {
+          typeId = variation.typeId;
+        } else {
+          console.error('No type ID passed to writer');
+          if (onComplete) onComplete.bind(this)();
+          return;
+        }
+      }
+      if (!variationId) {
+        variationId = CTree.Writer.getUuid();
+      }
+
+      var data = {
+        data: variation.data,
+        rating: 0,
+        type: typeId
+      };
+
+      this._addSegmentVariation(data, elementId, descriptionId, segmentId, (segmentVariationData) => {
+        if (segmentVariationData) {
+          var typeId = segmentVariationData.type;
+          segmentVariationData.typeId = typeId;
+          var ctreeData = CTree.Loader.CTREES_DATA[ctreeKey];
+          if (ctreeData) {
+            var type = ctreeData.segmentTypes[typeId];
+            segmentVariationData.type = type;
+            var element = ctreeData.elements[elementId]
+            if (element) {
+              var descriptionVariation = CTree.Loader.getFromArrayWithId(element.description, descriptionId, false);
+              if (descriptionVariation) {
+                var segment = CTree.Loader.getFromArrayWithId(descriptionVariation.segments, segmentId, false);
+                if (segment) {
+                  var segmentVariation = CTree.Loader.getFromArrayWithId(segment.variations, variationId, false);
+                  if (!segmentVariation) {
+                    segment.variations.unshift({
+                      id: segmentId,
+                      type: type,
+                      typeId: typeId,
+                      variations: [segmentVariationData]
+                    });
+                  }
+                }
+              }
+            }
+          } else {
+            segmentVariationData.type = null;
+          }
+        }
+
+        if (onComplete) onComplete.bind(this)(segmentVariationData);
+      }, variationId, ctreeKey);
+    }
+
+    /**
+     * @param {Object} variation     Object containing variation data to be written to database
+     * @param {String} elementId     ID of element the segment is associated with
+     * @param {String} descriptionId ID of description the segment is associated with
+     * @param {String} segmentId     ID of segment this variation is associated with
+     * @param {Function([{SegmentVariationData}])} onComplete Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {String} variationId   ID of variation
+     * @param {String} ctreeKey      Key for cTree to write segment variation to
+     */
+    _addSegmentVariation(variation, elementId, descriptionId, segmentId, onComplete, variationId, ctreeKey) {
+      // TODO: override to implement writing
+    }
+  }
+
+  var ctreeImport = document.createElement('ctree-import');
+  if (CTree.firebaseConfig) {
+    ctreeImport.href = '/src/ctree-writer/ctree-element-writer-firebase.html';
+  } else {
+    ctreeImport.href = '/src/ctree-writer/ctree-element-writer-test.html';
+  }
+  ctreeImport.load();
+
+})();
+
+</script>

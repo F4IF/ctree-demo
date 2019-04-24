@@ -1,33 +1,144 @@
 {
   "rules": {
-    ".read": "auth != null",
     "ctrees": {
-    	".write": "auth != null",
     	"$ctree": {
-        "description": {
+        ".write": "auth != null && !data.exists() && newData.child('name').val().length > 0 && newData.child('segmentTypes').hasChildren()",
+        "descriptions": {
           "$forType": {
+            ".write": "auth != null && !data.exists() && ($forType === 'forElement')",
           	"$typeId": {
-              ".indexOn": "rating"
+              ".read": "auth != null",
+              ".write": "auth != null && !data.exists() && $typeId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/)",
+              ".indexOn": "rating",
+              "$descriptionId": {
+                ".write": "auth != null && !data.exists() && $descriptionId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/) && (!newData.hasChild('rating') || newData.child('rating').isNumber()) && newData.child('segments').child('0').val().matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/)",
+                "rating": {
+                  ".write": "auth != null && newData.isNumber()"
+                },
+                "segments": {
+                  ".write": "false"
+                }
+              }
           	}
           }
         },
         "elements": {
+          ".read": "auth != null",
           ".indexOn": ["childCount", "createdDate", "feedbackCount", "interactionCount", "lastInteractionDate", "rating"],
+          "$elementId": {
+            ".write": "auth != null && !data.exists() && $elementId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/) && (!newData.hasChild('rating') || newData.child('rating').isNumber()) && newData.child('title').isString() && (!newData.hasChild('childCount') || newData.child('childCount').val() === 0) && (!newData.hasChild('feedbackCount') || newData.child('feedbackCount').val() === 0) && (!newData.hasChild('interactionCount') || newData.child('interactionCount').val() === 0) && (!newData.hasChild('lastInteractionDate') || newData.child('lastInteractionDate').val() === newData.child('createdDate').val()) && newData.child('createdDate').val() <= now + 60000 && newData.child('createdDate').val() > 0 && newData.child('type').val().matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/)",
+            "childCount": {
+              ".write": "auth != null && newData.val() >= 0"
+            },
+            "createdDate": {
+              ".write": "false"
+            },
+            "feedbackCount": {
+              ".write": "auth != null && newData.val() >= 0"
+            },
+            "interactionCount": {
+              ".write": "auth != null && newData.val() >= 0"
+            },
+            "lastInteractionDate": {
+              ".write": "auth != null && newData.val() >= 0"
+            },
+            "rating": {
+              ".write": "auth != null && newData.isNumber()"
+            },
+            "title": {
+              ".write": "false"
+            },
+            "type": {
+              ".write": "false"
+            },
+          }
         },
         "feedback": {
           "$forType": {
+            ".write": "auth != null && !data.exists() && ($forType === 'forDescription' || $forType === 'forSegmentVariation' || $forType === 'forFeedback')",
             "$typeId": {
-              ".indexOn": "rating"
+              ".read": "auth != null",
+              ".write": "auth != null && !data.exists() && $typeId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/)",
+              ".indexOn": "rating",
+              "$feedbackId": {
+                ".write": "auth != null && !data.exists() && $feedbackId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/) && (!newData.hasChild('rating') || newData.child('rating').isNumber()) && newData.child('text').val().length > 0",
+                "rating": {
+                  ".write": "auth != null && newData.isNumber()"
+                },
+                "text": {
+                  ".write": "false"
+                }
+              }
+            }
+          }
+        },
+        "name": {
+          ".read": "auth != null",
+          ".write": "false",
+        },
+        "segmentTypes": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists()",
+          "$segmentTypeId": {
+          	".write": "auth != null && !data.exists() && (!newData.hasChild('canBeThumbnail') || newData.child('canBeThumbnail').isBoolean()) && newData.child('componentName').val().length > 0",
+            "canBeThumbnail": {
+              ".write": "auth != null && newData.isBoolean()"
+            },
+            "componentName": {
+              ".write": "false"
             }
           }
         },
         "segmentVariations": {
           "$forType": {
+            ".write": "auth != null && !data.exists() && ($forType === 'forSegment')",
             "$typeId": {
-              ".indexOn": "rating"
+              ".read": "auth != null",
+              ".write": "auth != null && !data.exists() && $typeId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/)",
+              ".indexOn": "rating",
+              "$variationId": {
+                ".write": "auth != null && !data.exists() && $variationId.matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/) && (!newData.hasChild('rating') || newData.child('rating').isNumber()) && newData.child('type').val().matches(/^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$/) && newData.hasChild('data')",
+                "data": {
+                  ".write": "false"
+                },
+                "rating": {
+                  ".write": "auth != null && newData.isNumber()"
+                },
+                "type": {
+                  ".write": "false"
+                },
+              }
             }
           }
-        }
+        },
+        "types": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists()",
+          "$typeId": {
+          	".write": "auth != null && !data.exists() && newData.child('color').val().matches(/^#[0-9a-f]{6}$/) && newData.child('description').val().length > 0 && newData.child('iconUrl').val().length > 0 && newData.child('name').val().length > 0 && newData.child('parentsMax').val() >= 0 && (!newData.hasChild('parentsRequired') || newData.child('parentsRequired').isBoolean()) && newData.child('prompt').val().length > 0",
+            "color": {
+              ".write": "false"
+            },
+            "description": {
+              ".write": "false"
+            },
+            "iconUrl": {
+              ".write": "false"
+            },
+            "name": {
+              ".write": "false"
+            },
+            "parentsMax": {
+              ".write": "false"
+            },
+            "parentsRequired": {
+              ".write": "false"
+            },
+            "prompt": {
+              ".write": "false"
+            }
+          }
+        },
       }
     }
   }

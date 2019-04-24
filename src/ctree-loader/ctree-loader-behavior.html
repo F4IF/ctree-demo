@@ -28,7 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
@@ -260,8 +259,8 @@ this license.
             key: cTreeKey,
             name: "",
             url: this.url,
-            types: [],
-            segmentTypes: [],
+            types: {},
+            segmentTypes: {},
             elements: [],
             users: [],
             lists: {
@@ -320,7 +319,7 @@ this license.
             }
           });
         }
-        if (cTreeData.types.length == 0) {
+        if (Object.keys(cTreeData.types).length == 0) {
           this._getData('types', (data) => {
             if (data) {
               if (Array.isArray(data)) {
@@ -336,7 +335,7 @@ this license.
             }
           });
         }
-        if (cTreeData.segmentTypes.length == 0) {
+        if (Object.keys(cTreeData.segmentTypes).length == 0) {
           this._getData('segmentTypes', (data) => {
             if (data) {
               if (Array.isArray(data)) {
@@ -409,41 +408,42 @@ this license.
        * @return null
        */
       _getData(path, handleData, orderBy, ascending = true, value, count) {
+        if (!this.ctreeKey) return; // TODO: we should probably handle error cases immediately instead of leaving it to the caller to timeout
+
         var loader;
         if (value == null) {
           loader = document.createElement('firebase-document');
         } else {
           loader = document.createElement('firebase-query');
-        }
-        loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
-        if (value != null) {
+
           loader.orderByChild = orderBy;
           if (!count || count <= 0) {
             loader.equalTo = value;
           } else if (ascending) {
-            if (value) {
+            if (value || value === 0) {
               loader.startAt = value;
             }
             loader.limitToFirst = count;
           } else {
-            if (value) {
+            if (value || value === 0) {
               loader.endAt = value;
             }
             loader.limitToLast = count;
           }
         }
+        loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
         var processed = false;
         var listener = function() {
           // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
-          if (processed) {
-            return;
-          }
+          if (processed) return;
 
           var data = loader.data;
           if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
             processed = true;
             loader.removeEventListener('data-changed', listener);
             loader.remove();
+            // TODO: if we never get valid data we never remove the node, which should be fixed, probably by adding a timeout
+            if (loader.parentNode) loader.parentNode.removeChild(loader);
             var mapFunction = function(key) {
               var object = {}
               var value = data[key]
@@ -501,7 +501,7 @@ this license.
        * its ID.
        */
       _dataArrayToIndexedItems(dataArray) {
-        var items = [];
+        var items = {};
         for (var key in dataArray) {
           var item = this._dataToItem(dataArray[key]);
           items[item.id] = item;
@@ -588,7 +588,7 @@ this license.
           }
           return;
         }
-        if (!dataContainer.startAt) {
+        if (!dataContainer.startAt && dataContainer.startAt !== 0) {
           if (dataContainer.ascending) {
             dataContainer.startAt = Number.MIN_VALUE;
           } else {
@@ -604,7 +604,7 @@ this license.
             var called = false;
             var callbacks = dataContainer.callbacks;
             var index = callbacks.length;
-            callbacks.push(function() {
+            callbacks.push(dataContainer => {
               if (!called) {
                 called = true;
                 onComplete.bind(this)(dataContainer);
@@ -633,7 +633,11 @@ this license.
             dataContainer.cachedItems = data;
             // TODO: add/update elements in cTreeData
             dataContainer.loading = false;
-            this.__processCallbacks(dataContainer);
+            if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) {
+              this.__processCallbacks(dataContainer);
+            } else {
+              this._loadDataListItems(dataContainer);
+            }
           }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
         } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
           // get next value
@@ -927,6 +931,39 @@ this license.
 
     // Initialize object to hold shared static constants and functions
     CTree.Loader = {};
+
+    /**
+     * Object containing all cached cTree data, with the cTreeKey as the key for each cTree data.
+     *
+     * Structure:
+     *   url: String,
+     *   name: String
+     *   types: {Types},
+     *   segmentTypes: {SegmentTypes},
+     *   elements: {Elements},
+     *   users: {Users},
+     *   lists: {
+     *     suggested: {
+     *       items: [SuggestedItems],
+     *       loading: Boolean,
+     *       hasMore: Boolean,
+     *       offset: String,			// test: Number
+     *     },
+     *     bookmarked: {
+     *       items: [BookmarkedItems],
+     *       loading: Boolean,
+     *       hasMore: Boolean,
+     *       offset: String,			// test: Number
+     *     },
+     *     history: {
+     *       items: [HistoryItems],
+     *       loading: Boolean,
+     *       hasMore: Boolean,
+     *       offset: String,			// test: Number
+     *     },
+     *   },
+     */
+    CTree.Loader.CTREES_DATA = cTreesData;
 
     // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
     // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER

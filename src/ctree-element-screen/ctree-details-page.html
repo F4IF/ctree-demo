@@ -110,7 +110,7 @@ this license.
         <template is="dom-repeat" items="[[childTypes]]" as="type">
           <paper-button raised style$="background: [[type.color]]" on-tap="_addChildClicked" type="[[type]]">[[type.prompt]]</paper-button>
         </template>
-       <ctree-feedback-bar rating="{{rating}}" element-id="[[element.id]]"></ctree-feedback-bar>
+        <ctree-feedback-bar rating="{{rating}}" element-id="[[element.id]]"></ctree-feedback-bar>
       </div>
       <div class="commentContainer" hidden$="[[_commentSubmitted]]">
         <div class="divider"></div>
