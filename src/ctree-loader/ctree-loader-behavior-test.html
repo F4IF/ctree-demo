@@ -88,7 +88,7 @@ this license.
       if (type) {
         elementTypeCount[key] = 0;
         // add this type as child for each parent type
-        for (var j = 0; j < type.parentTypes.length; j++) {
+        for (var j = 0; j < Object.keys(type.parentTypes).length; j++) {
           var parentTypeId = type.parentTypes[j];
           var childTypesForParent = childTypes[parentTypeId];
           if (!childTypesForParent) {
@@ -144,7 +144,7 @@ this license.
         var guaranteeChild = true;
         if (childTypesForId) {
           var maxChildCount = Test.MAX_CHILDREN;
-          if (levelsDeep > types.length * 2) {
+          if (levelsDeep > Object.keys(types).length * 2) {
             // tree is twice as deep as the number of types so cut chance of having a child down to 30%
             maxChildCount = 1;
             guaranteeChild = false;
@@ -360,14 +360,14 @@ this license.
           this.notifySplices('types', [{
             index: 1,
             removed: [],
-            addedCount: cTreeData.types.length,
+            addedCount: Object.keys(cTreeData.types).length,
             object: cTreeData.types,
             type: 'splice',
           }]);
           this.notifySplices('segmentTypes', [{
             index: 1,
             removed: [],
-            addedCount: cTreeData.segmentTypes.length,
+            addedCount: Object.keys(cTreeData.segmentTypes).length,
             object: cTreeData.segmentTypes,
             type: 'splice',
           }]);
