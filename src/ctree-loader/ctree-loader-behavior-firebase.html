@@ -28,7 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
@@ -284,41 +283,42 @@ this license.
      * @return null
      */
     _getData(path, handleData, orderBy, ascending = true, value, count) {
+      if (!this.ctreeKey) return; // TODO: we should probably handle error cases immediately instead of leaving it to the caller to timeout
+
       var loader;
       if (value == null) {
         loader = document.createElement('firebase-document');
       } else {
         loader = document.createElement('firebase-query');
-      }
-      loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
-      if (value != null) {
+
         loader.orderByChild = orderBy;
         if (!count || count <= 0) {
           loader.equalTo = value;
         } else if (ascending) {
-          if (value) {
+          if (value || value === 0) {
             loader.startAt = value;
           }
           loader.limitToFirst = count;
         } else {
-          if (value) {
+          if (value || value === 0) {
             loader.endAt = value;
           }
           loader.limitToLast = count;
         }
       }
+      loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
       var processed = false;
       var listener = function() {
         // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
-        if (processed) {
-          return;
-        }
+        if (processed) return;
 
         var data = loader.data;
         if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
           processed = true;
           loader.removeEventListener('data-changed', listener);
           loader.remove();
+          // TODO: if we never get valid data we never remove the node, which should be fixed, probably by adding a timeout
+          if (loader.parentNode) loader.parentNode.removeChild(loader);
           var mapFunction = function(key) {
             var object = {}
             var value = data[key]
@@ -376,7 +376,7 @@ this license.
      * its ID.
      */
     _dataArrayToIndexedItems(dataArray) {
-      var items = [];
+      var items = {};
       for (var key in dataArray) {
         var item = this._dataToItem(dataArray[key]);
         items[item.id] = item;
@@ -463,7 +463,7 @@ this license.
         }
         return;
       }
-      if (!dataContainer.startAt) {
+      if (!dataContainer.startAt && dataContainer.startAt !== 0) {
         if (dataContainer.ascending) {
           dataContainer.startAt = Number.MIN_VALUE;
         } else {
@@ -479,7 +479,7 @@ this license.
           var called = false;
           var callbacks = dataContainer.callbacks;
           var index = callbacks.length;
-          callbacks.push(function() {
+          callbacks.push(dataContainer => {
             if (!called) {
               called = true;
               onComplete.bind(this)(dataContainer);
@@ -508,7 +508,11 @@ this license.
           dataContainer.cachedItems = data;
           // TODO: add/update elements in cTreeData
           dataContainer.loading = false;
-          this.__processCallbacks(dataContainer);
+          if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) {
+            this.__processCallbacks(dataContainer);
+          } else {
+            this._loadDataListItems(dataContainer);
+          }
         }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
       } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
         // get next value

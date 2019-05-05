@@ -38,6 +38,7 @@ this license.
 <link rel="import" href="../ctree-segments/ctree-segment-text.html">
 <link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-behavior.html">
 <link rel="import" href="../ctree-toolbar-behavior/ctree-toolbar-shared-styles.html">
+<link rel="import" href="../ctree-writer/ctree-element-writer.html">
 
 <dom-module id="ctree-new-element-screen">
   <template>
@@ -65,6 +66,7 @@ this license.
         --paper-input-container-input: {
           color: white;
         }
+        color: white;
       }
       .type-description {
         width: 180px;
@@ -96,13 +98,16 @@ this license.
     </style>
 
     <!--<ctree-import id="importPage" href="/src/ctree-new-element-screen/ctree-[[page]]-page.html" loading="{{_importingPage}}"></ctree-import>-->
-    <ctree-element-loader ctree-key="[[ctreeKey]]" types="{{_types}}"></ctree-element-loader>
+    <ctree-element-loader ctree-key="[[ctreeKey]]" types="{{_types}}" segment-types="{{_segmentTypes}}"></ctree-element-loader>
+    <ctree-element-writer id="writer" ctree-key="[[ctreeKey]]"></ctree-element-loader>
+    <ctree-element-dialog-accessor id="dialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
 
     <div id="container">
       <paper-toolbar class="toolbar" style="background-color: [[_calculateHeaderColor(typeId, types)]];">
         <!-- TODO: get icon from type for new element -->
         <iron-icon slot="top" id="typeIcon" src="[[_type.iconUrl]]"></iron-icon>
-        <paper-input slot="top" id="title" class="title" on-value-changed="_titleChanged" no-label-float label="Title"></paper-input>
+        <paper-input slot="top" class="title" value="{{_title}}" no-label-float label="Title" hidden$=[[_submitting]]></paper-input>
+        <div slot="top" class="title" hidden$=[[!_submitting]]>[[_title]]</div>
         <paper-icon-button slot="top" id="close" icon="close" alt="close" on-tap="_closeClicked" hidden$="[[noclose]]"></paper-icon-button>
         <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
         <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[_type.name]]: [[_type.description]]</paper-tooltip>
@@ -110,9 +115,10 @@ this license.
 
       <div id="content">
         <!-- TODO: don't set height percentage, let full image size be visible -->
-        <ctree-segment-image id="image" data="{{imageData}}" prompt="Image URL (Optional)" height-percent="56.25%" valid-change-made="{{validImage}}" editing></ctree-segment-image>
-        <ctree-segment-text id="description" data="{{textData}}" prompt="Description" valid-change-made="{{validDescription}}" editing></ctree-segment-text>
-        <div id="submitContainer"><paper-button id="submit" raised disabled on-tap="_submit">Submit</paper-button></div>
+        <ctree-segment-image id="image" data="{{_imageData}}" prompt="Image URL (Optional)" height-percent="56.25%" valid-change-made="{{_validImage}}" editing="[[!_submitting]]"></ctree-segment-image>
+        <ctree-segment-text id="description" data="{{_textData}}" prompt="Description" valid-change-made="{{_validDescription}}" editing="[[!_submitting]]"></ctree-segment-text>
+        <!-- TODO: we may want to replace the button text with a spinner while submitting is true -->
+        <div id="submitContainer"><paper-button id="submit" raised disabled="[[_submitting]]" on-tap="_submit">Submit</paper-button></div>
 
         <!-- TODO: divider line and grid of similar suggestions -->
       </div>
@@ -148,33 +154,101 @@ this license.
             computed: '_calculateHeaderColor(_type)',
           },
 
-          title: String,
+          _title: String,
 
           _types: Array,
+
+          _segmentTypes: Array,
 
           _type: {
             type: Object,
             computed: '_calculateType(_types, typeId)',
+          },
+
+          _title: String,
+          _imageData: String,
+          _validImage: Boolean,
+          _textData: String,
+          _validDescription: Boolean,
+
+          _submitting: {
+            type: Boolean,
+            value: false,
           },
         };
       }
 
       static get observers() {
         return [
-          '_dataChanged(title, validImage, validDescription)',
+          '_dataChanged(_title, _validImage, _validDescription)',
         ];
-      }
-
-      _titleChanged() {
-        this.title = this.$.title.value;
       }
 
       _dataChanged(title, validImage, validDescription) {
         this.$.submit.disabled = !title || title.trim().length <= 0 || !validDescription;
       }
 
+      __getSegmentTypeId(componentName) {
+        var types = this._segmentTypes;
+        for (var key in types) {
+          var type = types[key];
+          if (type.componentName === componentName) {
+            return type.id;
+          }
+        }
+        return null;
+      }
+
       _submit() {
-        // TODO: save element
+        if (this._submitting) return;
+
+        this._submitting = true;
+        var segments = [];
+        if (this._validImage && this._imageData) {
+          segments.push({
+            type: this.__getSegmentTypeId('ctree-segment-image'),
+            variations: [{
+              data: this._imageData
+            }]
+          });
+        }
+        if (this._textData) {
+          segments.push({
+            type: this.__getSegmentTypeId('ctree-segment-text'),
+            variations: [{
+              data: this._textData
+            }]
+          });
+        }
+        var element = {
+          description: [{
+            segments: segments
+          }],
+          title: this._title,
+          type: this.typeId
+        };
+        if (this.parentId) {
+          element.parents = [this.parentId];
+        }
+        this.$.writer.addElement((elementData) => {
+          if (elementData) {
+            this._closeClicked();
+            this.$.dialog.element = elementData;
+            this.$.dialog.open();
+          } else {
+            // TODO: show toast/snackbar message indicating success or failure instead of an alert on failure
+            alert('Unable to submit, please try again.')
+          }
+        }, element);
+      }
+
+      _closeClicked() {
+        this._title = "";
+        this._imageData = "";
+        this._textData = "";
+        this._submitting = false;
+
+        super._closeClicked();
       }
 
       _calculateHeaderColor(type) {
