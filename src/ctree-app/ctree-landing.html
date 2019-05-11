@@ -63,7 +63,7 @@ this license.
       * {
         box-sizing: border-box;
       }
-      .row::after {
+      .table-row::after {
         content: "";
         clear: both;
         display: table;
@@ -148,7 +148,7 @@ this license.
       #social-media-icon-bar ul {
         list-style: none;
         margin: 0;
-        padding: 19px 19px 8px 19px;
+        padding: 19px 0px 8px 19px;
         text-align: left;
       }
 
@@ -159,12 +159,33 @@ this license.
 
       /* ctree blub text formatting */
       #ctree-blurb p {
-        display: block;
+        display: inline-block;
         margin-top: 0;
         margin-bottom: 25px;
         padding-left: 25px;
-        margin-right: 0;
-        width: 75%;
+        padding-right: -10px;
+        width: 85%;
+      }
+
+      .flex-grid {
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        /* flex-flow: row wrap; */
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        flex: 1;
+        margin: 10px;
+      }
+      .flex-column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        flex-basis: 20%;
       }
 
       #copyright {
@@ -269,12 +290,33 @@ this license.
         }
         /* ctree blub text formatting */
         #ctree-blurb p {
+          tex-align: center;
+          display: inline-block;
+          margin-top: 0;
+          margin-bottom: 0;
+          padding-left: 0;
+          margin-right: 0;
+          width: 75%;
+        }
+        .flex-row {
+          margin-bottom: 0;
+          margin-top: 0;
+          margin-left: 100px;
+          margin-right: 100px;
+        }
+        .flex-column {
+          flex: 1;
+          flex-basis: 40%;
+          margin: 5px;
+        }
+        #copyright {
           display: block;
           margin-top: 0;
-          margin-bottom: 25px;
+          margin-bottom: 0;
           padding-left: 25px;
           margin-right: 0;
-          width: 95%;
+          padding-right: 25px;
+          width: 100%;
         }
         #footer-mobile-horizontal-line {
           margin-top: -15px;
@@ -463,7 +505,7 @@ this license.
             </div>
         </div>
         <div id="footer" class="section-styling">
-          <div class="row">
+          <div class="table-row">
             <div class="col-5 table-cell line">
               <div class="inner-row-1">
                 <div id="social-media-icon-bar">
@@ -474,17 +516,33 @@ this license.
                     </ul>
                 </div>
               </div>
-              <div class="inner-row-2" id="ctree-blurb">
-                <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+              <div class="inner-row-2">
+                <div id="ctree-blurb">
+                  <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                </div>
               </div>
               <hr id="footer-mobile-horizontal-line"/>
             </div>
             <div class="col-7 table-cell">
+              <div class="flex-grid">
+                <div class="flex-row">
+                  <div class="flex-column">TEST1</div>
+                  <div class="flex-column">TEST2</div>
+                  <div class="flex-column">TEST3</div>
+                  <div class="flex-column">TEST4</div>
+                </div>
+                <div class="flex-row">
+                  <div class="flex-column">TEST5</div>
+                  <div class="flex-column">TEST6</div>
+                  <div class="flex-column">TEST7</div>
+                  <div class="flex-column">TEST8</div>
+                </div>
+              </div>
               <div id="copyright">
                 <p>
-                  Nulla facilisi. Donec felis ligula, feugiat nec imperdiet vitae, gravida quis felis. Aliquam ultrices ultrices eros, sit amet tristique dui ultrices quis. Vivamus semper mauris eget mauris lacinia, sit amet interdum neque mollis. Suspendisse potenti. Phasellus ut eros tempus, cursus nulla id, accumsan diam. Phasellus rhoncus metus sit amet mattis mollis. Donec elementum in magna ut vehicula. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  &copy Foundation For an Innovative Future.
                 </p>
-                </div>
+              </div>
             </div>
           </div>
         </div>
