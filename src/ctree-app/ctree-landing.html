@@ -47,6 +47,7 @@ this license.
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 
+
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
@@ -64,14 +65,17 @@ this license.
       :host {
         display: block;
         --app-primary-color: #5F9F00;
-        --app-secondary-color: black;
+        --app-secondary-color: black;     
+        /* overflow-x: hidden; */
+        /* box-sizing: border-box;  */
       }
       #mainLayout app-toolbar {
         padding: 0 8px 0 0;
+        overflow-y: auto;
       }
       #content {
-        @apply --layout-fit;
-        overflow-y: auto;
+        @apply --layout-fit;   
+        /* overflow-x: hidden; */
         -webkit-overflow-scrolling: touch;
       }
       #headerTitle, #menuButton {
@@ -79,9 +83,11 @@ this license.
       }
       app-drawer ul {
         text-align: left !important;
+        position: sticky;
       }
       app-header-layout {
         height: 100vh;
+       
       }
       app-header {
         background-color: #4F7F00;
@@ -119,9 +125,7 @@ this license.
         display: flex; 
         justify-content: center; 
         align-items: center; 
-        /* height: 100vh;  */
-        min-height: 100vh; 
-        width: 100vw; 
+        /* padding: 30px 0; */
         background-color: #f0f0f0
       }
       @media (max-width: 500px) {
@@ -130,6 +134,9 @@ this license.
         }
         #headerTitle, #menuButton {
           display: inline-block;
+        }
+        #feedback {
+          padding: 0;
         }
       }
     </style>
@@ -181,13 +188,11 @@ this license.
       </app-header>
 
       <div id="content">
-        <div id="overview" style="height: 100vh; width: 100vw; background-color: #FF0000"> -->
-        </div><div id="feedback">
-              <ctree-testimonials>
-                   
-              </ctree-testimonials>
-
-        </div><!--#feedback--><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
+        <div id="overview" style="height: 100%; width: 100%; background-color: #FF0000"> 
+        </div> 
+        <div id="feedback">
+              <ctree-testimonials> </ctree-testimonials>
+        </div><!--#feedback--><div id="features" style="display: inline-block; width: 100%; background-color: #0000FF">
           <p>W</p>
           <p>W</p>
           <p>W</p>
@@ -205,10 +210,7 @@ this license.
           <p>W</p>
           <p>W</p>
           <p>W</p>
-        </div><div id="ctree" style="display: inline-block; width: 100vw; background-color: #FF00FF">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
+        </div><div id="ctree" style="display: inline-block; width: 100%; background-color: #FF00FF">
           <p>W</p>
           <p>W</p>
           <p>W</p>
@@ -227,7 +229,10 @@ this license.
           <p>W</p>
           <p>W</p>
           <p>W</p>
-        </div><div id="participate" style="display: inline-block; width: 100vw; background-color: #FFFF00">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div><div id="participate" style="display: inline-block; width: 100%; background-color: #FFFF00">
           <p>W</p>
           <p>W</p>
           <p>W</p>

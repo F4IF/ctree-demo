@@ -28,6 +28,8 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+
 <link rel="import" href="./ctree-testimony.html">
 
 
@@ -36,57 +38,64 @@ this license.
   <template>
     <style>
       :host {
-        display: block
+        display: block;
+        justify-content: center;
+        align-items: center;
+        display: flex;
       }
       #ctree-testimonials-display {
           background-color: #fff;
-          width: 70vw;
-          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+          width: 70%;
           padding: 30px;
-          flex: 1;
+          margin: 3em 1em;
           text-align: center;
           color:#186848;
       }
       #ctree-testimonials-info {
-        margin-bottom: 2em;
-        padding-left: 15%;
-        padding-right: 15%;
+        margin: 1em 0;
+        padding: 0 15%;
       }
       #ctree-testimonies-container {
         flex: 1;
         display: flex;
         justify-content: space-between;
       }
-      @media screen and (max-width: 700px) {
+
+     
+      @media screen and (max-width: 750px) {
+        #ctree-testimonials-display  {
+          width: 95%;
+        }
+      }
+      @media screen and (max-width: 500px) {
         #ctree-testimonies-container {
           flex-direction: column;
         }
-        .ctree-testimony {
-          margin-top: 2em;
+        #ctree-testimonials-display  {
+          margin: 0;
+          padding: 0;
         }
       }
     </style>
 
-    <div id="ctree-testimonials-display">
+    <paper-card id="ctree-testimonials-display">
       <h1> FEEDBACK </h1>
       <div id="ctree-testimonials-info">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus. 
       </div>
-      
-      <div id="ctree-testimonies-container">
-        <ctree-indiv-testimony></ctree-indiv-testimony>
-        <ctree-indiv-testimony></ctree-indiv-testimony>
-        <ctree-indiv-testimony></ctree-indiv-testimony>
+      <div id="ctree-testimonies-container"> 
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
       </div>
-    </div>
+    </paper-card>
+
   </template>
       
   <script>
     class CTreeTestimonials extends Polymer.Element {
       static get is() { return  'ctree-testimonials' }
     }
-
-    
     customElements.define(CTreeTestimonials.is, CTreeTestimonials);
   </script>
 
