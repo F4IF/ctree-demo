@@ -29,6 +29,8 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+
 
 <link rel="import" href="./ctree-testimony.html">
 
@@ -46,19 +48,24 @@ this license.
       #ctree-testimonials-display {
           background-color: #fff;
           width: 70%;
+          height: 100%;
           padding: 30px;
           margin: 3em 1em;
           text-align: center;
           color:#186848;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
       }
       #ctree-testimonials-info {
-        margin: 1em 0;
-        padding: 0 15%;
+        padding: 0 2em;
       }
-      #ctree-testimonies-container {
+      #ctree-testimonials-list {
         flex: 1;
         display: flex;
         justify-content: space-between;
+        height: 100%;
       }
 
      
@@ -83,11 +90,21 @@ this license.
       <div id="ctree-testimonials-info">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus. 
       </div>
-      <div id="ctree-testimonies-container"> 
+
+      <!-- This works with hard coded data-->
+      <div id="ctree-testimonials-list"> 
         <ctree-testimonial></ctree-testimonial>
         <ctree-testimonial></ctree-testimonial>
         <ctree-testimonial></ctree-testimonial>
       </div>
+
+      <!-- Not sure how to do this... -->
+      <!-- <iron-list id="ctree-testimonials-list" items=[[this.testimonies]] as="item" grid>
+          <template>
+            <ctree-testimonial testimony-key=[[testimony]] list-item=[[item]] hidden$="[[!item]]"></ctree-testimonial>
+          <template>
+      </iron-list> -->
+          
     </paper-card>
 
   </template>
@@ -95,6 +112,39 @@ this license.
   <script>
     class CTreeTestimonials extends Polymer.Element {
       static get is() { return  'ctree-testimonials' }
+
+      // Not sure how to do this....
+      static get properties() {
+        return {
+          testimonies: {
+            type: Array
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this.testimonies = [
+          {
+            id: "0",
+            image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",
+            handle: "@ecojess",
+            quote: "Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper."
+          },
+          {
+            id: "1",
+            image: "https://www.mills.edu/uniquely-mills/students-faculty/student-profiles/images/student-profile-veronica-mills-college.jpg",
+            handle: "@brakee",
+            quote: "Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt."
+          },
+          {
+            id: "2",
+            image: "https://www.elitesingles.com/sites/www.elitesingles.com/files/2b_en_ta_tip_widows2.jpg",
+            handle: "@melbel",
+            quote: "Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa."
+          }
+        ]
+      }
     }
     customElements.define(CTreeTestimonials.is, CTreeTestimonials);
   </script>
