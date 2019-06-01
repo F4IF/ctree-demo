@@ -68,6 +68,8 @@ this license.
               () => this._addDialogInternal(/*loadEvent*/),
               null,
               true /* true for async */);
+			  // TODO: load user data properly
+			  // 'loadEvent' causes initial user popup to not open
         } else {
           if (dialogs.length > 1) {
             console.warn('Multiple ctree-dialogs tags found. Using first occurrence.');
