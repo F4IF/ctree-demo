@@ -65,7 +65,7 @@ this license.
         var dialogs = document.getElementsByTagName('ctree-dialogs');
         if (dialogs.length < 1) {
           Polymer.importHref(this.resolveUrl(document.createElement('iron-meta').byKey('rootPath') + '/src/ctree-dialogs/ctree-dialogs.html'),
-              () => this._addDialogInternal(loadEvent),
+              () => this._addDialogInternal(/*loadEvent*/),
               null,
               true /* true for async */);
         } else {
