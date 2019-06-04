@@ -61,7 +61,7 @@ this license.
       #ctree-testimonials-info {
         padding: 0 2em;
       }
-      #ctree-testimonials-list {
+      #ctree-testimonials-list, #ctree-testimonials-list2 {
         flex: 1;
         display: flex;
         justify-content: space-between;
@@ -89,40 +89,63 @@ this license.
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus. 
       </div>
 
-      <!-- This works with hard coded data-->
+      <!-- This works with hard coded data -->
       <div id="ctree-testimonials-list"> 
         <ctree-testimonial></ctree-testimonial>
         <ctree-testimonial></ctree-testimonial>
         <ctree-testimonial></ctree-testimonial>
       </div>
 
-      <!-- Not sure how to do this... -->
-      <!-- <iron-list id="ctree-testimonials-list" items=[[this.testimonies]] as="item" grid>
-          <template>
-            <ctree-testimonial testimony-key=[[testimony]] list-item=[[item]] hidden$="[[!item]]"></ctree-testimonial>
-          <template>
-      </iron-list> -->
-          
+      something here  
     </paper-card>
 
+    <iron-list id="ctree-testimonials-list2" items=[[testimonies]] as="testimony" grid>
+        <template>
+          <ctree-testimonial ctree-key=[[ctreeKey]] testimony=[[testimony]] image=[[testimony.image]] handle=[[testimony.handle]] quote=[[testimony.quote]] hidden$="[[!testimony]]"></ctree-testimonial>
+        <template>
+    </iron-list>
   </template>
       
   <script>
     class CTreeTestimonials extends Polymer.Element {
       static get is() { return  'ctree-testimonials' }
 
-      // Not sure how to do this....
-      // static get properties() {
-      //   return {
-      //     testimonies: {
-      //       type: Array
-      //     }
-      //   }
-      // }
+      static get properties() {
+        return {
+          ctreeKey: String,
+          testimonies: {
+            type: Array, 
+            value: [
+              {
+                id: "1",
+                // ctreeKey: "",
+                image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",
+                handle: "@ecojess",
+                quote: "Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper.",
+                ctreeKey: ""
+              },
+              {
+                id: "2",
+                // ctreeKey: "",
+                image: "https://www.mills.edu/uniquely-mills/students-faculty/student-profiles/images/student-profile-veronica-mills-college.jpg",
+                handle: "@brakee",
+                quote: "Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt."
+              },
+              {
+                id: "3",
+                // ctreeKey: "",
+                image: "https://www.elitesingles.com/sites/www.elitesingles.com/files/2b_en_ta_tip_widows2.jpg",
+                handle: "@melbel",
+                quote: "Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa."
+              }
+            ]
+          }
+        }
+      }
 
       // ready() {
       //   super.ready();
-      //   this.testimonies = [
+      //   testimonies = [
       //     {
       //       id: "0",
       //       image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",

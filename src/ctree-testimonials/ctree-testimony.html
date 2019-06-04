@@ -86,12 +86,12 @@ this license.
     </paper-card>
     
 <!-- not sure how to use data properties-->
-<!-- 
-    <paper-card>
-        <iron-image sizing="cover" preload alt="user profile image" src=[[item.image]]></iron-image>
-        <p class="ctree-testimony-handle">[[item.handle]]</p>
+    <!-- <paper-card>
+        <iron-image sizing="cover" preload alt="user profile image" src="[[testimony.image]]"></iron-image>
+        <p class="ctree-testimony-handle">[[testimony.handle]]</p>
+        [[testimony.handle]]
         <hr>
-        <p class="ctree-testimony-quote">[[item.quote]]</p>
+        <p class="ctree-testimony-quote">[[testimony.quote]]</p>
         <paper-button>View cTree</paper-button>
       </div>
     </paper-card> -->
@@ -102,12 +102,26 @@ this license.
     class CTreeTestimonial extends Polymer.Element {
       static get is() { return  'ctree-testimonial' }
 
-      // not sure how to work with data....
-      // static get properties() {
-      //   return {
-      //     listItem: { type: Object }
-      //   }
-      // }
+      static get properties() {
+        return {
+          image: {
+            type: String,
+            value: [[image]]
+          },
+          handle: {
+            type: String,
+            value: [[handle]]
+          } ,
+          quote: {
+            type: String,
+            value: [[quote]]
+          },
+          image: {
+            type: String,
+            value: [[image]]
+          }      
+        }
+      }
     }
     customElements.define(CTreeTestimonial.is, CTreeTestimonial);
   </script>
