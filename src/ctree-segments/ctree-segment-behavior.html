@@ -30,6 +30,7 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
 
+
 <script>
 'use strict';
 
@@ -98,6 +99,10 @@ CTree.SegmentBehavior = class extends Polymer.Element {
         value: 800,
       },
 
+      properExit:{
+        type: Boolean,
+        value: true,
+      },
       __editUpdateHandle: Number,
     };
   }
@@ -123,6 +128,28 @@ CTree.SegmentBehavior = class extends Polymer.Element {
     Polymer.Async.microTask.cancel(this.__editUpdateHandle);
   }
 
+  _properExit(editing){
+    if(!editing && this.validChangeMade){
+      return this.properExit;
+    }
+    return true;
+  }
+
+  _closure(){
+    this.properExit=true;
+    this.editing= false;
+  }
+
+  _saveChangesPopUp(){
+    var r= false;
+    if(!this._properExit()){
+      r=confirm("Changes could be lost, would you like to save?");
+    }
+    else{
+      this._closure();
+    }
+    return r;
+  }
   _editUpdate() {
     // TODO: override to add custom logic when edit update timer elapsed
   }

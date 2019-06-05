@@ -187,13 +187,15 @@ this license.
 
       previous() {
         if (this._variationIndex <= 0) return;
-
+        var component = this.shadowRoot.querySelector('#component');
+        component.editing= false;
         this._variationIndex--;
       }
 
       next() {
         if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
-
+        var component = this.shadowRoot.querySelector('#component');
+        component.editing= false;
         this._variationIndex++;
       }
 
