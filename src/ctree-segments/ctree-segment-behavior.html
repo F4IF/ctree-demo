@@ -145,9 +145,7 @@ CTree.SegmentBehavior = class extends Polymer.Element {
     if(!this._properExit()){
       r=confirm("Changes could be lost, would you like to save?");
     }
-    else{
-      this._closure();
-    }
+    this._closure();
     return r;
   }
   _editUpdate() {
