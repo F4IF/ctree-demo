@@ -59,6 +59,20 @@ this license.
 <dom-module id="ctree-landing">
   <template>
     <style>
+      /* all elements use box-sizing property */
+      * {
+        box-sizing: border-box;
+      }
+      .table-row::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+      [class*="col-"] {
+        float: left;
+        padding: 15px;
+      }
+
       :host {
         display: block;
         --app-primary-color: #5F9F00;
@@ -82,7 +96,7 @@ this license.
         height: 100vh;
       }
       app-header {
-        background-color: #4F7F00;
+        background-color: #FFFFFF;
         color: #fff;
       }
       app-header paper-icon-button {
@@ -94,7 +108,7 @@ this license.
       paper-tab[link] a {
         @apply --layout-horizontal;
         @apply --layout-center-center;
-        color: #fff;
+        color: #196948;
         text-decoration: none;
       }
       paper-tab iron-icon {
@@ -112,26 +126,242 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
-      h2 {
-       font-size: 30px;
+
+      .center-div {
+        margin: auto;
+        width: 55%;
       }
-      section {
-        margin: 5rem auto;
-        width: 50%;
-        color: #fff;
-        font-size: 18px;
-        font-weight: 300;
+
+      .bold-text {
+        font-weight: bold;
       }
-      .bold {
-        font-weight: 500;
+
+      h1 {
+        font-size: 4em;
       }
+
+      #features-horizontal-line {
+        margin-top: -35px;
+      }
+
+      /* social media icon bar stuff */
+      #social-media-icon-bar ul {
+        list-style: none;
+        margin: 0;
+        padding: 19px 0px 8px 19px;
+        text-align: left;
+      }
+
+      #social-media-icon-bar li {
+        display: inline-block;
+        padding: 6px;
+      }
+
+      /* ctree blub text formatting */
+      #ctree-blurb p {
+        display: inline-block;
+        margin-top: 0;
+        margin-bottom: 25px;
+        padding-left: 25px;
+        padding-right: -10px;
+        width: 85%;
+      }
+
+      .flex-grid {
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        /* flex-flow: row wrap; */
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        flex: 1;
+        margin: 10px;
+      }
+      .flex-column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        flex-basis: 20%;
+      }
+
+      #copyright p {
+        display: inline-block;
+        float: right;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-right: 0;
+        padding-right: 75px;
+      }
+
+      /* Desktop Grid-View 12 column scaling */
+      /* columns */
+      .col-1 {width: 8.33%;}
+      .col-2 {width: 16.66%;}
+      .col-3 {width: 25%;}
+      .col-4 {width: 33.33%;}
+      .col-5 {width: 41.66%;}
+      .col-6 {width: 50%;}
+      .col-7 {width: 58.33%;}
+      .col-8 {width: 66.66%;}
+      .col-9 {width: 75%;}
+      .col-10 {width: 83.33%;}
+      .col-11 {width: 91.66%;}
+      .col-12 {width: 100%;}
+
+      /* rows inside columns */
+      .inner-row-1 {height: 33.33%;}
+      .inner-row-2 {height: 33.33%;}
+      .inner-row-3 {height: 33.33%;}
+
+      /* add table-cell as element of column */
+      .table-cell {
+        display: table-cell;
+      }
+
+      /* separator line */
+      .line {
+          padding-right: 21px; /* 20+1 */
+          position: relative;
+      }
+      .line:after {
+          content: '';
+          position: absolute;
+          right: 0;
+          border-right: 1px solid #B4B4B4;
+          top: 10%;
+          bottom: 10%;
+      }
+
+      /* create horizontal line only for mobile */
+      @media (min-width: 500px) {
+        #footer-mobile-horizontal-line {
+          display: none;
+        }
+      }
+
+      /* Mobile Phones */
       @media (max-width: 500px) {
+        [class*="col-"] {
+          width: 100%;
+        }
         paper-tabs {
           display: none;
         }
         #headerTitle, #menuButton {
           display: inline-block;
         }
+        h1 {
+          font-size: 4em;
+          text-align: center;
+        }
+        #feedback {
+          font-size: .75em;
+          text-align: center;
+        }
+        #features {
+          font-size: .75em;
+          text-align: center;
+        }
+        #features-horizontal-line {
+          margin-top: -15px;
+        }
+        #ctree {
+          font-size: .75em;
+          text-align: center;
+        }
+        #participate {
+          font-size: .9em;
+          text-align: center;
+          padding: 4px 0 8px 0;
+        }
+        #footer {
+          text-align: center;
+        }
+        /* social media icon bar stuff */
+        #social-media-icon-bar ul {
+          list-style: none;
+          margin: 0;
+          padding: 19px 19px 8px 19px;
+          text-align: center;
+        }
+        /* ctree blub text formatting */
+        #ctree-blurb p {
+          tex-align: center;
+          display: inline-block;
+          margin-top: 0;
+          margin-bottom: 0;
+          padding-left: 0;
+          margin-right: 0;
+          width: 75%;
+        }
+        .flex-row {
+          margin-bottom: 0;
+          margin-top: 0;
+          margin-left: 100px;
+          margin-right: 100px;
+        }
+        .flex-column {
+          flex: 1;
+          flex-basis: 40%;
+          margin: 5px;
+        }
+        #copyright p {
+          display: inline-block;
+          margin-top: 0;
+          margin-bottom: 0;
+          padding-left: 25px;
+          margin-right: 0;
+          padding-right: 25px;
+          padding-top: 16px;
+          width: 100%;
+        }
+        #footer-mobile-horizontal-line {
+          margin-top: -15px;
+          width: 75%;
+          display: inline-block;
+          color: #B4B4B4;
+          height: 1px;
+          opacity: .50;
+        }
+        .center-div {
+          margin: auto;
+          width: 75%;
+        }
+      }
+
+      /* Section CSS Styling */
+      .section-styling {
+        display: inline-block;
+        width: 100%;
+      }
+      #overview.section-styling {
+        height: 100vh;
+        background-color: #BFBFBF;
+      }
+      #feedback.section-styling {
+        background-color: #F8F8F8;
+        color: #196848;
+      }
+      #features.section-styling {
+        background-color: #FFFFFF;
+        color: #196848;
+      }
+      #ctree.section-styling {
+        background-color: #196848;
+        color: #FFFFFF;
+      }
+      #participate.section-styling {
+        background-color: #F8F8F8;
+        color: #196848;
+        padding: 36px 0 64px 0;
+      }
+      #footer.section-styling {
+        background-color: #2B2B2B;
+        color: #B4B4B4;
       }
     </style>
 
@@ -146,6 +376,7 @@ this license.
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
     <app-header-layout id="mainLayout" has-scrolling-region>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <app-header slot="header" reveals effects="waterfall">
         <app-toolbar>
           <ctree-app-icon></ctree-app-icon>
@@ -182,95 +413,143 @@ this license.
       </app-header>
 
       <div id="content">
-        <div id="overview" style="height: 100vh; background-color: #FF0000">
-        </div><div id="feedback" style="display: inline-block; width: 100vw; background-color: #00FF00">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="features" style="display: inline-block; width: 100vw; background-color: #0000FF">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="ctree" style="display: inline-block; width: 100vw; background-color: #FF00FF">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div><div id="participate" style="display: inline-block; width: 100vw; background-color: #FFFF00">
-          <section class="join">
-            <h2>Participate</h2>
-            <p>
-              <span class="bold">Join the open source project</span>
-              <br />
-              Get course credit or professional grade experience working on a
-              large scale open source project. Be part of a team, working
-              closely with other programmers and designers to complete a part of
-              a project. All regular contributors can add the project to their
-              LinkedIn resume and request a recommendation based on their
-              completed work. Go to
-              <span class="bold">dev.ctree.org</span> to get started.
-            </p>
-            <p>
-              <span class="bold">Test the project</span>
-              <br />
-              As the project develops we need real world examples of how it can
-              be used. If you want to use it with your nonprofit, online
-              community, or other organization please email
-              <span class="bold">contact@innovativeFuture</span>.
-            </p>
-          </section>
+        <div id="overview" class="section-styling">
         </div>
-      </div>
+        <div id="feedback" class="section-styling">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+        <div id="features" class="section-styling">
+          <div class= "center-div">
+            <h1 align="center">Features</h1>
+            <hr id="features-horizontal-line"/>
+            <!-- grid layout to be added here with icons and descriptions. -->
+          </div>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+        <div id="ctree" class="section-styling">
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+          <p>W</p>
+        </div>
+        <div id="participate" class="section-styling">
+            <div class="center-div">
+              <h1 align="left">Participate</h1>
+                <p>
+                  <div class="bold-text">Join the open source project</div>
+                  Get course credit or professional grade experience working on a large open source
+                  project.  Be part of a project team, working closely with our programmers and
+                  designers to complete a part of the project.  All regular contributors can add the
+                  project to their LinkedIn resume and request a recommendation based on their comleted
+                  work.  Go to <a href="dev.ctree.org">dev.ctree.org</a> to get started.
+                </p>
+                <p>
+                  <div class="bold-text">Test the project</div>
+                  As the project develops we need real world examples of how it can be used.  If you
+                  want to use it with your nonprofit, online community, or other organization Please
+                  email <a href = "mailto: contact@innovativeFuture.org">contact@innovativeFuture.org</a>
+                </p>
+            </div>
+        </div>
+        <div id="footer" class="section-styling">
+          <div class="table-row">
+            <div class="col-5 table-cell line">
+              <div class="inner-row-1">
+                <div id="social-media-icon-bar">
+                  <ul>
+                    <li><a href="https://twitter.com/"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
+                    <li><a href="https://www.facebook.com/"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
+                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
+                    </ul>
+                </div>
+              </div>
+              <div class="inner-row-2">
+                <div id="ctree-blurb">
+                  <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                </div>
+              </div>
+              <hr id="footer-mobile-horizontal-line"/>
+            </div>
+            <div class="col-7 table-cell">
+              <div class="flex-grid">
+                <div class="flex-row">
+                  <div class="flex-column">TEST1</div>
+                  <div class="flex-column">TEST2</div>
+                  <div class="flex-column">TEST3</div>
+                  <div class="flex-column">TEST4</div>
+                </div>
+                <div class="flex-row">
+                  <div class="flex-column">TEST5</div>
+                  <div class="flex-column">TEST6</div>
+                  <div class="flex-column">TEST7</div>
+                  <div class="flex-column">TEST8</div>
+                </div>
+              </div>
+              <div id="copyright">
+                <p>&copy Foundation For an Innovative Future.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
     </app-header-layout>
 
     <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
