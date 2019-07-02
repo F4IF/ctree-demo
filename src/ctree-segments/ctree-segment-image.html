@@ -111,13 +111,12 @@ this license.
       }
 
       _editingChanged(editing) {
+        if (this._saveChangesPopUp(editing)) {
+          this._editSaveClicked();
+        }
         if (editing) {
-          this.properExit= false;
           this.$.url.focus();
         } else {
-          if(super._saveChangesPopUp()){
-              this._editSaveClicked();
-          }
           this._dataChanged(this.data);
         }
       }
@@ -166,11 +165,11 @@ this license.
 
       _editSaveClicked() {
         super._addSegmentVariation(this.$.image.src);
-        super._closure();
+        this._closure();
       }
 
       _editCancelClicked() {
-        super._closure();
+        this._closure();
       }
 
       __updateValidChangeMade(changed, loading, error) {
