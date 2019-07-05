@@ -25,14 +25,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Please email contact@innovativeFuture.org for inquiries related to
 this license.
+
+
+Quotes, Height of Iron List, template close tag
 -->
+
+
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/iron-list/iron-list.html">
 
 
-<link rel="import" href="./ctree-testimony.html">
+<link rel="import" href="./ctree-testimonial.html">
 
 
 <dom-module id="ctree-testimonials">
@@ -61,17 +66,25 @@ this license.
       #ctree-testimonials-info {
         padding: 0 2em;
       }
-      #ctree-testimonials-list, #ctree-testimonials-list2 {
+      #ctree-testimonials-list {
         flex: 1;
         display: flex;
         justify-content: space-between;
         height: 100%;
+      }
+
+      iron-list {
+        height:  50vh;
+        background-color: red;
+        width: 80%;
+        overflow: none;
       }
       @media screen and (max-width: 750px) {
         #ctree-testimonials-display  {
           width: 95%;
         }
       }
+
       @media screen and (max-width: 500px) {
         #ctree-testimonies-container {
           flex-direction: column;
@@ -86,24 +99,24 @@ this license.
     <paper-card id="ctree-testimonials-display">
       <h1> FEEDBACK </h1>
       <div id="ctree-testimonials-info">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus.
       </div>
 
-      <!-- This works with hard coded data -->
-      <div id="ctree-testimonials-list"> 
-        <ctree-testimonial></ctree-testimonial>
-        <ctree-testimonial></ctree-testimonial>
-        <ctree-testimonial></ctree-testimonial>
-      </div>
+      <iron-list id="ctree-testimonials-list" items="[[testimonies]]" as="testimony">
+          <template>
+            <!-- <div>[[testimony.handle]]</div> -->
+            <div style="background-color: blue; width: 100%;">
 
-      something here  
+              inside div
+            <ctree-testimonial ctree-key="[[ctreeKey]]" image="[[testimony.image]]" handle="[[testimony.handle]]" quote="[[testimony.quote]]" hidden$="[[!testimony]]"></ctree-testimonial>
+
+            </div>
+          </template>
+      </iron-list> 
+
     </paper-card>
-
-    <iron-list id="ctree-testimonials-list2" items=[[testimonies]] as="testimony" grid>
-        <template>
-          <ctree-testimonial ctree-key=[[ctreeKey]] testimony=[[testimony]] image=[[testimony.image]] handle=[[testimony.handle]] quote=[[testimony.quote]] hidden$="[[!testimony]]"></ctree-testimonial>
-        <template>
-    </iron-list>
+ 
+    
   </template>
       
   <script>
@@ -122,7 +135,6 @@ this license.
                 image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",
                 handle: "@ecojess",
                 quote: "Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper.",
-                ctreeKey: ""
               },
               {
                 id: "2",
@@ -142,30 +154,6 @@ this license.
           }
         }
       }
-
-      // ready() {
-      //   super.ready();
-      //   testimonies = [
-      //     {
-      //       id: "0",
-      //       image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",
-      //       handle: "@ecojess",
-      //       quote: "Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper."
-      //     },
-      //     {
-      //       id: "1",
-      //       image: "https://www.mills.edu/uniquely-mills/students-faculty/student-profiles/images/student-profile-veronica-mills-college.jpg",
-      //       handle: "@brakee",
-      //       quote: "Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt."
-      //     },
-      //     {
-      //       id: "2",
-      //       image: "https://www.elitesingles.com/sites/www.elitesingles.com/files/2b_en_ta_tip_widows2.jpg",
-      //       handle: "@melbel",
-      //       quote: "Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa."
-      //     }
-      //   ]
-      // }
     }
     customElements.define(CTreeTestimonials.is, CTreeTestimonials);
   </script>
