@@ -187,19 +187,20 @@ this license.
 
       previous() {
         if (this._variationIndex <= 0) return;
-        (this.getComponent()).editing = false;
+        this.$.component.editing = false;
         this._variationIndex--;
       }
 
       next() {
         if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
-        (this.getComponent()).editing = false;
+        this.$.component.editing = false;
         this._variationIndex++;
       }
 
-      getComponent(){
+      getComponent() {
         return this.shadowRoot.querySelector("#component");
       }
+
       _segmentChanged(segment) {
         // validate component type
         var type = segment.type;
@@ -215,6 +216,7 @@ this license.
             parent.removeChild(child);
           }
           if (type) {
+            this.$.component = this.getComponent();
             component = document.createElement(type.componentName);
             component.id = 'component';
             component.removeEventListener('editing-changed', e => __editingComponentChanged(e));
@@ -226,7 +228,6 @@ this license.
 
       _contentClicked() {
         if (this.editing) return;
-
         this.editing = true;
       }
 
@@ -297,6 +298,7 @@ this license.
           component.set('data', variation.data);
           // TODO: don't set height percentage, let full image size be visible
           component.set('heightPercent', '56.25%');
+          this.$.component = this.getComponent();
         }
 
         if (!this.__updatingVariation) {
