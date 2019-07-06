@@ -244,14 +244,13 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       <app-header-layout id="mainLayout" has-scrolling-region>
         <app-header slot="header" fixed effects="waterfall">
           <app-toolbar>
-            <label for="menu">menu</label>
-            <paper-icon-button icon="menu" id="menu" drawer-toggle></paper-icon-button>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div main-title>cTree.org</div>
-            <paper-icon-button icon="search" aria-label="show search"
- on-tap="showSearch"></paper-icon-button>
-            <paper-icon-button icon="account-circle" aria-label="show account dialog" on-tap="showAccountDialog"></paper-icon-button>
-            <paper-icon-button icon="account-stats" aria-label="show account statts" on-tap="showAccountStats"></paper-icon-button>
-            <paper-icon-button aria-label="notifications" icon="notifications-none" on-tap="showNotifications"></paper-icon-button>
+            <paper-icon-button icon="search" label="search" on-tap="showSearch"></paper-icon-button>
+            <paper-icon-button icon="account-circle" label="account-circle" on-tap="showAccountDialog"></paper-icon-button>
+            <paper-icon-button icon="account-stats" label="account-stats" on-tap="showAccountStats"></paper-icon-button>
+            <label for id="notification"></label>
+            <paper-icon-button id="notifications" icon="notifications-none" on-tap="showNotifications"></paper-icon-button>
             <paper-badge for="notifications"></paper-badge>
           </app-toolbar><app-toolbar style="height: 36px;">
             <paper-tabs selected="{{subpage}}" attr-for-selected="name" fallback-selection="suggested" bottom-item>
