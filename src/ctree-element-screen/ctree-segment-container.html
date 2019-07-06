@@ -187,23 +187,18 @@ this license.
 
       previous() {
         if (this._variationIndex <= 0) return;
-        this._componentOff(-1);
+        (this.getComponent()).editing = false;
+        this._variationIndex--;
       }
 
       next() {
         if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
-        this._componentOff(1);
+        (this.getComponent()).editing = false;
+        this._variationIndex++;
       }
 
-      _componentOff(incDec){
-        var component = this.shadowRoot.querySelector("#component");
-        component.editing = false;
-        if (incDec == 1) {
-          this._variationIndex++;
-        }
-        else {
-          this._variationIndex--;
-        }
+      getComponent(){
+        return this.shadowRoot.querySelector("#component");
       }
       _segmentChanged(segment) {
         // validate component type
