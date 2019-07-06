@@ -78,7 +78,7 @@ this license.
 <link rel="import" href="icons.html">
 
 <script>
-  // TODO: create a loder for tree types or add to ctree-loader
+  // TODO: create a loader for tree types or add to ctree-loader
   var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
       	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
       	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
@@ -262,7 +262,7 @@ this license.
                     [[item.data.label]]
                   </paper-button>
                 </a>
-                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Boockmarked" title-checked="Bookmarked"></ctree-toggle-button>
+                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Bookmarked" title-checked="Bookmarked"></ctree-toggle-button>
               </div>
             </template>
           </iron-selector>
