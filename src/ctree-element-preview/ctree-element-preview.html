@@ -220,7 +220,7 @@ this license.
         for (var i = 0; i < segments.length; i++) {
           var segment = segments[i];
           var type = segment.type;
-          if (type.canBeThumbnail) {
+          if (type && type.canBeThumbnail) {
             thumbnailIndex = i;
             var component = document.createElement(type.componentName);
             var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
@@ -239,11 +239,13 @@ this license.
           if (i !== thumbnailIndex) {
             var segment = segments[i];
             var type = segment.type;
-            var component = document.createElement(type.componentName);
-            var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
-            component.data = variation.data;
-            component.scale = '80%';
-            segmentsElement.appendChild(component);
+            if (type) {
+              var component = document.createElement(type.componentName);
+              var variation = super._getFromArrayWithId(segment.variations, descriptionSegments ? descriptionSegments[i] : undefined);
+              component.data = variation.data;
+              component.scale = '80%';
+              segmentsElement.appendChild(component);
+            }
           }
         }
         // TODO: set designer info from element

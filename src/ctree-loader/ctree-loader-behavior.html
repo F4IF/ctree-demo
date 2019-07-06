@@ -253,13 +253,13 @@ this license.
       this.name = cTreeData.name;
 
       if (cTreeData.name.length == 0) {
-        this._loadName();
+        this._loadName(cTreeData);
       }
       if (Object.keys(cTreeData.types).length == 0) {
-        this._loadTypes();
+        this._loadTypes(cTreeData);
       }
       if (Object.keys(cTreeData.segmentTypes).length == 0) {
-        this._loadSegmentTypes();
+        this._loadSegmentTypes(cTreeData);
       }
     }
 
@@ -276,21 +276,21 @@ this license.
     /**
      * Load the human readable name associated with the cTree
      */
-    _loadName() {
+    _loadName(cTreeData) {
       // TODO: override in implementation
     }
 
     /**
      * Load the element types name associated with the cTree
      */
-    _loadTypes() {
+    _loadTypes(cTreeData) {
       // TODO: override in implementation
     }
 
     /**
      * Load the segment types associated with the cTree
      */
-    _loadSegmentTypes() {
+    _loadSegmentTypes(cTreeData) {
       // TODO: override in implementation
     }
 

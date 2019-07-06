@@ -175,7 +175,8 @@ this license.
     /**
      * Load the human readable name associated with the cTree
      */
-    _loadName() {
+    _loadName(cTreeData) {
+      if (!cTreeData) this._cTreeData;
       this._getData('name', (data) => {
         if (data) {
           cTreeData.name = data;
@@ -191,7 +192,8 @@ this license.
     /**
      * Load the element types name associated with the cTree
      */
-    _loadTypes() {
+    _loadTypes(cTreeData) {
+      if (!cTreeData) this._cTreeData;
       this._getData('types', (data) => {
         if (data) {
           if (Array.isArray(data)) {
@@ -211,7 +213,8 @@ this license.
     /**
      * Load the segment types associated with the cTree
      */
-    _loadSegmentTypes() {
+    _loadSegmentTypes(cTreeData) {
+      if (!cTreeData) this._cTreeData;
       this._getData('segmentTypes', (data) => {
         if (data) {
           if (Array.isArray(data)) {
@@ -598,7 +601,7 @@ this license.
       var onServerResponse = this._startTimeoutCountdown();
       onServerResponse.bind(this);
 
-      var cTreeData = this.cTreeData;
+      var cTreeData = this._cTreeData;
       var elements = cTreeData.elements;
       if (!elements) {
         elements = [];
