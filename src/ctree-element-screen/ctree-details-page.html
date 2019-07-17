@@ -26,13 +26,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
-
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-element/ctree-element-header.html">
 <link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
+<link rel="import" href="../ctree-feedback-item/ctree-feedback-item.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 <link rel="import" href="ctree-description.html">
 
@@ -124,6 +127,19 @@ this license.
           <ctree-feedback-bar rating="{{item.rating}}" element-id="[[element.id]]" comment-id="[[item.text]]"></ctree-feedback-bar>
         </div>
       </template>
+      <iron-list id="commentList" items="{{feedback}}" as="item">
+        <template>
+            <ctree-feedback-item item="[[item]]" depth="[[item.depth]]" sentiment="[[item.sentiment]]" comment="[[item.comment]]" on-iron-resize="_onItemResized"></ctree-feedback-item>
+        </template>
+      </iron-list>
+      <div id="loadingIndicator" hidden$="[[!loading]]">
+          <paper-spinner active$="[[loading]]"></paper-spinner> Loading more
+      </div>
+      <iron-scroll-threshold id="scrollThreshold"
+        lower-threshold="500"
+        scroll-target="commentList"
+        on-lower-threshold="loadMoreComments">
+      </iron-scroll-threshold>
     </div>
     <!--<ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>-->
   </template>
@@ -185,6 +201,22 @@ this license.
             observer: '__segmentsChanged',
           },
 
+          loading: {
+            type: Boolean,
+            value: false,
+          },
+
+          feedback: {
+            type: Array,
+            value: [
+              {depth: 0, sentiment: 1, comment: "Test comment 1"},
+              {depth: 1, sentiment: 0, comment: "Test response"},
+              {depth: 2, sentiment: -1, comment: "Test sub-response"},
+              {depth: 3, sentiment: 0, comment: "Test deep-response"},
+              {depth: 0, sentiment: 0, comment: "Test comment 2"}
+            ],
+          },
+
           childTypes: Array,
 
           _comment: {
@@ -196,6 +228,12 @@ this license.
 
           __tempSegments: Array,
         };
+      }
+
+      static get observers() {
+        return [
+          '_loadingListItemsChanged(loading)',
+        ];
       }
 
       _descriptionChanged(description, descriptionSegments) {
@@ -217,6 +255,19 @@ this license.
         super.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
       }
 
+      loadMoreComments() {
+        feedback = [
+              {depth: 0, sentiment: 1, comment: "what 1"},
+              {depth: 1, sentiment: 0, comment: "Test hello"},
+              {depth: 2, sentiment: -1, comment: "Test sub-response"},
+              {depth: 3, sentiment: 0, comment: "Test naruto-response"},
+              {depth: 0, sentiment: 0, comment: "Test comment 2"}
+            ];
+      }
+
+      _loadingListItemsChanged(loading) {
+        this.$.scrollThreshold.clearTriggers();
+      }
       __segmentsChanged(e) {
         if (this.segments) {
           this.__tempSegments = this.segments.slice();
