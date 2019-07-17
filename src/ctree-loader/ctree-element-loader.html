@@ -31,380 +31,379 @@ this license.
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
-<link rel="import" href="ctree-loader-behavior.html">
-
 <script>
 (function() {
 
   'use strict';
 
-  if (CTree.firebaseConfig) {
-    class CTreeElementLoader extends CTree.LoaderBehavior {
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
 
-      static get is() { return 'ctree-element-loader'; }
+  CTree.ElementLoaderMixin = (superClass) => class extends superClass {
 
-      static get properties() {
-        return {
-          /**
-           * List item to load data for.
-           *
-           * Structure:
-           *   {
-           *     element: Element,
-           *     feedback: Feedback,
-           *     descriptionConfig: String,
-           *     descriptionSegments: [String],
-           *     commentCode: Number,
-           *     commentData: Object,	// type depends on commentCode
-           *   }
-           */
-          listItem: {
-            type: Object,
-            observer: '_listItemChanged',
-          },
+    static get properties() {
+      return {
+        /**
+         * List item to load data for.
+         *
+         * Structure:
+         *   {
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: String,
+         *     descriptionSegments: [String],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }
+         */
+        listItem: {
+          type: Object,
+          observer: '_listItemChanged',
+        },
 
-          maxCommentLength: {
-            type: Number,
-            value: 100,
-          },
+        maxCommentLength: {
+          type: Number,
+          value: 100,
+        },
 
-          /**
-           * Comment generated from list item data.  Some additonal content may need
-           * to be loaded before the comment can be generated.
-           */
-          itemComment: {
-            type: String,
-            notify: true,
-          },
+        /**
+         * Comment generated from list item data.  Some additonal content may need
+         * to be loaded before the comment can be generated.
+         */
+        itemComment: {
+          type: String,
+          notify: true,
+        },
 
-          /**
-           * Name of icon or URL of image to accompany item comment.
-           */
-          itemCommentIcon: {
-            type: String,
-            notify: true,
-          },
+        /**
+         * Name of icon or URL of image to accompany item comment.
+         */
+        itemCommentIcon: {
+          type: String,
+          notify: true,
+        },
 
-          /**
-           * Element to load data for.  Events will be fired for this element as
-           * data is loaded into it.
-           *
-           * Structure:
-           *   {
-           *     id: String,
-           *     type: ElementType,
-           *     title: String,
-           *     parents: [Strings],
-           *     children: [Strings],
-           *     childrenSearchComplete: Boolean,
-           *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-           *     description: [{
-           *       id: String,
-           *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-           *       segments: [{
-           *         id: String,
-           *         type: SegmentType,
-           *         variations: [{
-           *           id: String,
-           *           data: dynamic,	// data type depends on segment type
-           *         }, ...],
-           *       }, ...],
-           *     }, ...],
-           *     feedback: [{
-           *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-           *       text: String,
-           *     }, ...],
-           *     bookmarked: Boolean,
-           *   }
-           */
-          element: {
-            type: Object,
-            notify: true,
-            observer: '_elementChanged',
-          },
+        /**
+         * Element to load data for.  Events will be fired for this element as
+         * data is loaded into it.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Strings],
+         *     children: [Strings],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: String,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: String,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: String,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }
+         */
+        element: {
+          type: Object,
+          notify: true,
+          observer: '_elementChanged',
+        },
 
-          elementId: {
-            type: String,
-            observer: '_elementIdChanged',
-          },
+        elementId: {
+          type: String,
+          observer: '_elementIdChanged',
+        },
 
-          descriptionConfigId: {
-            type: String,
-            observer: '_descriptionConfigIdChanged',
-          },
+        descriptionConfigId: {
+          type: String,
+          observer: '_descriptionConfigIdChanged',
+        },
 
-          descriptionSegmentIds: {
-            type: Array,
-            observer: '_descriptionSegmentIdsChanged',
-          },
-        };
-      }
+        descriptionSegmentIds: {
+          type: Array,
+          observer: '_descriptionSegmentIdsChanged',
+        },
+      };
+    }
 
-      _keyChanged(cTreeKey, previousKey) {
-        super._keyChanged(cTreeKey, previousKey);
-        if (cTreeKey != previousKey && this._cTreeData && this.elementId && (!this.element || this.elementId != this.element.id)) {
-          // reload element from new tree
-          this._elementIdChanged(this.elementId);
-        }
-      }
-
-      _listItemChanged(listItem) {
-        if (!listItem) return;
-
-        this.element = listItem.element;
-        this.itemComment = undefined;
-        this.itemCommentIcon = undefined;
-        this._updateComment();
-      }
-
-      _elementChanged(element) {
-        if (!element) return;
-
-        if (this.listItem && this.listItem.element !== element) {
-          this.listItem = undefined;
-        }
-        this.elementId = element.id;
-      }
-
-      _elementIdChanged(elementId) {
-        if (!elementId || (this.element && elementId == this.element.id) || !this._cTreeData) return;
-
-        var cTreeData = this._cTreeData;
-        this._loadElement(elementId, (element) => {
-          if ((this.element && elementId == this.element.id) || !this._cTreeData || this._cTreeData !== cTreeData) return;
-
-          this.element = element;
-        }, this.descriptionId, this.segmentVariations);
-      }
-
-      _descriptionConfigIdChanged(descriptionConfigId) {
-        if (!this.elementId) return;
-
-        // TODO: load new description config for element, if needed
-      }
-
-      _descriptionSegmentIdsChanged(descriptionSegmentIds) {
-        if (!this.elementId) return;
-
-        // TODO: load new description segments for element, if needed
-      }
-
-      _updateComment() {
-        var item = this.listItem;
-        if (!item.commentCode) return;
-
-        var SUBJECT = CTree.Loader.COMMENT_SUBJECT;
-        var CATEGORY = CTree.Loader.COMMENT_CATEGORY;
-        var subjectCode = item.commentCode % 100;
-        var categoryCode = item.commentCode - subjectCode;
-        var subjectData;
-        if (categoryCode <= CATEGORY.NEEDS_FEEDBACK_FOR) {
-          // use subject name
-          switch (subjectCode) {
-            case SUBJECT.ELEMENT:     subjectData = 'element';      break;
-            case SUBJECT.TYPE:        subjectData = 'type';         break;
-            case SUBJECT.TITLE:       subjectData = 'title';        break;
-            case SUBJECT.DESCRIPTION: subjectData = 'description';  break;
-            case SUBJECT.TRANSLATION: subjectData = 'translation';  break;
-            case SUBJECT.FEEDBACK:    subjectData = 'feedback';     break;
-            case SUBJECT.CATEGORY:    subjectData = 'category';     break;
-            case SUBJECT.GROUP:       subjectData = 'group';        break;
-            case SUBJECT.USER:        subjectData = 'designer';     break;  // TODO: do we need more subjects for different types of users?  this assumes it referss to the designer when we don't get the user name from the comment data (ex. updated)
-            case SUBJECT.PARENT:      subjectData = 'parent';       break;
-            case SUBJECT.CHILD:       subjectData = 'child';        break;
-            case SUBJECT.SIBLING:     subjectData = 'sibling';      break;
-          }
-          if (categoryCode <= CATEGORY.TRANSLATED && typeof item.commentData === 'number') {
-            // add time delta string
-            var date = new Date();
-            var timeSince = (date.getTime() - item.commentData) / 1000;
-            if (timeSince > 0) {
-              var timeValue;
-              var timeUnit;
-              if (timeSince < 60) {
-                timeValue = timeSince;
-                timeUnit = 'second';
-              } else if (timeSince < 3600) {
-                timeValue = Math.floor(timeSince / 60);
-                timeUnit = 'minute';
-              } else if (timeSince < 86400) {
-                timeValue = Math.floor(timeSince / 3600);
-                timeUnit = 'hour';
-              } else if (timeSince < 604800) {
-                timeValue = Math.floor(timeSince / 86400);
-                timeUnit = 'day';
-              } else if (timeSince < 4838400) {
-                timeValue = Math.floor(timeSince / 604800);
-                timeUnit = 'week';
-              }
-              if (timeValue) {
-                subjectData += ' ' + timeValue + ' ' + timeUnit + (timeValue === 1 ? ' ago' : 's ago');
-              } else {
-                date.setTime(item.commentData);
-                subjectData += ' ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-              }
-            }
-          }
-        } else {
-          // look up subject value
-          if (typeof item.commentData === 'number') {
-            var popular = (categoryCode == CATEGORY.POPULAR_FROM || categoryCode == CATEGORY.POPULAR_WITH);
-            switch (subjectCode) {
-              case SUBJECT.ELEMENT:
-              case SUBJECT.PARENT:
-              case SUBJECT.CHILD:
-              case SUBJECT.SIBLING:
-                var element = this._cTreeData.elements[item.commentData];
-                if (element) {
-                  subjectData = element.title;
-                } else {
-                  // TODO: load element at ID in item.commentData
-                  subjectData = 'element';
-                }
-                break;
-              case SUBJECT.TYPE:
-                var type = this._cTreeData.type[item.commentData];
-                if (type) {
-                  subjectData = type.name;
-                } else {
-                  subjectData = 'type';
-                }
-                break;
-              case SUBJECT.TITLE:
-                if (popular) {
-                  subjectData = 'title';
-                } else {
-                  // TODO: get title segment with ID in item.commentData
-                  this.element.title;
-                }
-                break;
-              case SUBJECT.DESCRIPTION:
-                if (popular) {
-                  subjectData = 'description';
-                } else {
-                  var description = CTree.Loader.getFromArrayWithId(this.element.description, item.commentData, false);
-                  if (description && description.segments.length > 0) {
-                    var segments = description.segments;
-                    subjectData = '';
-                    for (var i = 0; i < segments.length; i++) {
-                      var segment = segments[i];
-                      var variations = segment.variations;
-                      if (!variations || variations.length == 0 || !variations[0]) {
-                        // TODO: load description
-                        break;
-                      }
-                      if (!CTreeSegments || !CTreeSegments[segment.type]) {
-                        // TODO: load segment type
-                        break;
-                      }
-                      var type = CTreeSegments[segment.type];
-                      if (type && type.getText) {
-                        subjectData += type.getText(variations[0]);
-                        if (subjectData.length >= this.maxCommentLength) {
-                          subjectData = subjectData.substring(0, this.maxCommentLength);
-                          break;
-                        }
-                      }
-                    }
-                  } else {
-                    // TODO: load description
-                    subjectData = 'description';
-                  }
-                }
-                break;
-              case SUBJECT.TRANSLATION:
-                if (popular) {
-                  subjectData = 'translation';
-                } else {
-                  // TODO: get description translation with ID
-                  subjectData = 'translation';
-                }
-                break;
-              case SUBJECT.FEEDBACK:
-                if (popular) {
-                  subjectData = 'feedback';
-                } else {
-                  var feedback = CTree.Loader.getFromArrayWithId(this.element.feedback, item.commentData, false);
-                  if (feedback) {
-                    var feedback = allFeedback[item.commentData];
-                    // TODO: if no text we should try to get text from content (using segment type's getText)
-                    subjectData = feedback.text;
-                  } else {
-                    // TODO: Load feedback with ID item.commentData
-                  }
-                }
-                break;
-              case SUBJECT.CATEGORY:
-                // TODO: get category from ID in item.commentData
-                subjectData = 'category';
-                break;
-              case SUBJECT.GROUP:
-                // TODO: get group from ID in item.commentData
-                subjectData = 'group';
-                break;
-              case SUBJECT.USER:
-                // TODO: get user from ID in item.commentData
-                subjectData = 'user';
-                break;
-            }
-            if (subjectData) {
-              item.commentData = subjectData;
-            }
-          }
-        }
-        if (!subjectData) {
-          // TODO: could wait until subject data is loaded (i.e. don't update comment yet)
-          subjectData = '';
-        }
-        switch (categoryCode) {
-          case CATEGORY.NEW: this.itemComment = 'Added new ' + subjectData; break;
-          case CATEGORY.UPDATED: this.itemComment = 'Updated ' + subjectData; break;
-          case CATEGORY.TRANSLATED: this.itemComment = 'Translated ' + subjectData; break;
-          case CATEGORY.NEEDS: this.itemComment = 'Needs ' + subjectData; break;
-          case CATEGORY.NEEDS_FEEDBACK_FOR: this.itemComment = 'Needs feedback for ' + subjectData; break;
-          case CATEGORY.POPULAR_FROM:
-          case CATEGORY.POPULAR_WITH:
-            var text = 'Popular ';
-            if (subjectCode >= SUBJECT.CATEGORY) {
-              switch (subjectCode) {
-                case SUBJECT.PARENT:  text += 'child of ';    break;
-                case SUBJECT.CHILD:   text += 'parent of ';   break;
-                case SUBJECT.SIBLING: text += 'sibling of ';  break;
-                default: text += (categoryCode == CATEGORY.POPULAR_FROM ? 'from ' : 'with '); break;
-              }
-            }
-            this.itemComment = text + subjectData;
-            this.itemCommentIcon = 'popular';
-            break;
-          case CATEGORY.SIMILAR_TO: this.itemComment = 'Similar to ' + subjectData; break;
-          case CATEGORY.OPPOSING: this.itemComment = 'Opposing ' + subjectData; break;
-        }
-      }
-
-      _urlChanged(url) {
-        // TODO: support loading elements from a cTree at a different URL
-      }
-
-      _cTreeDataChanged(cTreeData) {
-        this.cTreeData = cTreeData;
-        // TODO: set/clear data as needed
-      }
-
-      _userChanged(user) {
-        // TODO: update as needed based on user (primarily to impact access rights)
+    _keyChanged(cTreeKey, previousKey) {
+      super._keyChanged(cTreeKey, previousKey);
+      if (cTreeKey != previousKey && this._cTreeData && this.elementId && (!this.element || this.elementId != this.element.id)) {
+        // reload element from new tree
+        this._elementIdChanged(this.elementId);
       }
     }
-    CTree.ElementLoader = CTreeElementLoader;
 
-    // Register custom element definition using standard platform API
-    customElements.define(CTreeElementLoader.is, CTreeElementLoader);
+    _listItemChanged(listItem) {
+      if (!listItem) return;
 
-  } else {
-    // fallback to test loader
-    var ctreeImport = document.createElement('ctree-import');
-    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-test.html';
-    ctreeImport.load();
+      this.element = listItem.element;
+      this.itemComment = undefined;
+      this.itemCommentIcon = undefined;
+      this._updateComment();
+    }
+
+    _elementChanged(element) {
+      if (!element) return;
+
+      if (this.listItem && this.listItem.element !== element) {
+        this.listItem = undefined;
+      }
+      this.elementId = element.id;
+    }
+
+    _elementIdChanged(elementId) {
+      if (!elementId || (this.element && elementId == this.element.id) || !this._cTreeData) return;
+
+      var cTreeData = this._cTreeData;
+      this._loadElement(elementId, (element) => {
+        if ((this.element && elementId == this.element.id) || !this._cTreeData || this._cTreeData !== cTreeData) return;
+
+        this.element = element;
+      }, this.descriptionId, this.segmentVariations);
+    }
+
+    _descriptionConfigIdChanged(descriptionConfigId) {
+      if (!this.elementId) return;
+
+      // TODO: load new description config for element, if needed
+    }
+
+    _descriptionSegmentIdsChanged(descriptionSegmentIds) {
+      if (!this.elementId) return;
+
+      // TODO: load new description segments for element, if needed
+    }
+
+    _updateComment() {
+      var item = this.listItem;
+      if (!item.commentCode) return;
+
+      var SUBJECT = CTree.Loader.COMMENT_SUBJECT;
+      var CATEGORY = CTree.Loader.COMMENT_CATEGORY;
+      var subjectCode = item.commentCode % 100;
+      var categoryCode = item.commentCode - subjectCode;
+      var subjectData;
+      if (categoryCode <= CATEGORY.NEEDS_FEEDBACK_FOR) {
+        // use subject name
+        switch (subjectCode) {
+          case SUBJECT.ELEMENT:     subjectData = 'element';      break;
+          case SUBJECT.TYPE:        subjectData = 'type';         break;
+          case SUBJECT.TITLE:       subjectData = 'title';        break;
+          case SUBJECT.DESCRIPTION: subjectData = 'description';  break;
+          case SUBJECT.TRANSLATION: subjectData = 'translation';  break;
+          case SUBJECT.FEEDBACK:    subjectData = 'feedback';     break;
+          case SUBJECT.CATEGORY:    subjectData = 'category';     break;
+          case SUBJECT.GROUP:       subjectData = 'group';        break;
+          case SUBJECT.USER:        subjectData = 'designer';     break;  // TODO: do we need more subjects for different types of users?  this assumes it referss to the designer when we don't get the user name from the comment data (ex. updated)
+          case SUBJECT.PARENT:      subjectData = 'parent';       break;
+          case SUBJECT.CHILD:       subjectData = 'child';        break;
+          case SUBJECT.SIBLING:     subjectData = 'sibling';      break;
+        }
+        if (categoryCode <= CATEGORY.TRANSLATED && typeof item.commentData === 'number') {
+          // add time delta string
+          var date = new Date();
+          var timeSince = (date.getTime() - item.commentData) / 1000;
+          if (timeSince > 0) {
+            var timeValue;
+            var timeUnit;
+            if (timeSince < 60) {
+              timeValue = timeSince;
+              timeUnit = 'second';
+            } else if (timeSince < 3600) {
+              timeValue = Math.floor(timeSince / 60);
+              timeUnit = 'minute';
+            } else if (timeSince < 86400) {
+              timeValue = Math.floor(timeSince / 3600);
+              timeUnit = 'hour';
+            } else if (timeSince < 604800) {
+              timeValue = Math.floor(timeSince / 86400);
+              timeUnit = 'day';
+            } else if (timeSince < 4838400) {
+              timeValue = Math.floor(timeSince / 604800);
+              timeUnit = 'week';
+            }
+            if (timeValue) {
+              subjectData += ' ' + timeValue + ' ' + timeUnit + (timeValue === 1 ? ' ago' : 's ago');
+            } else {
+              date.setTime(item.commentData);
+              subjectData += ' ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+            }
+          }
+        }
+      } else {
+        // look up subject value
+        if (typeof item.commentData === 'number') {
+          var popular = (categoryCode == CATEGORY.POPULAR_FROM || categoryCode == CATEGORY.POPULAR_WITH);
+          switch (subjectCode) {
+            case SUBJECT.ELEMENT:
+            case SUBJECT.PARENT:
+            case SUBJECT.CHILD:
+            case SUBJECT.SIBLING:
+              var element = this._cTreeData.elements[item.commentData];
+              if (element) {
+                subjectData = element.title;
+              } else {
+                // TODO: load element at ID in item.commentData
+                subjectData = 'element';
+              }
+              break;
+            case SUBJECT.TYPE:
+              var type = this._cTreeData.type[item.commentData];
+              if (type) {
+                subjectData = type.name;
+              } else {
+                subjectData = 'type';
+              }
+              break;
+            case SUBJECT.TITLE:
+              if (popular) {
+                subjectData = 'title';
+              } else {
+                // TODO: get title segment with ID in item.commentData
+                this.element.title;
+              }
+              break;
+            case SUBJECT.DESCRIPTION:
+              if (popular) {
+                subjectData = 'description';
+              } else {
+                var description = CTree.Loader.getFromArrayWithId(this.element.description, item.commentData, false);
+                if (description && description.segments.length > 0) {
+                  var segments = description.segments;
+                  subjectData = '';
+                  for (var i = 0; i < segments.length; i++) {
+                    var segment = segments[i];
+                    var variations = segment.variations;
+                    if (!variations || variations.length == 0 || !variations[0]) {
+                      // TODO: load description
+                      break;
+                    }
+                    if (!CTreeSegments || !CTreeSegments[segment.type]) {
+                      // TODO: load segment type
+                      break;
+                    }
+                    var type = CTreeSegments[segment.type];
+                    if (type && type.getText) {
+                      subjectData += type.getText(variations[0]);
+                      if (subjectData.length >= this.maxCommentLength) {
+                        subjectData = subjectData.substring(0, this.maxCommentLength);
+                        break;
+                      }
+                    }
+                  }
+                } else {
+                  // TODO: load description
+                  subjectData = 'description';
+                }
+              }
+              break;
+            case SUBJECT.TRANSLATION:
+              if (popular) {
+                subjectData = 'translation';
+              } else {
+                // TODO: get description translation with ID
+                subjectData = 'translation';
+              }
+              break;
+            case SUBJECT.FEEDBACK:
+              if (popular) {
+                subjectData = 'feedback';
+              } else {
+                var feedback = CTree.Loader.getFromArrayWithId(this.element.feedback, item.commentData, false);
+                if (feedback) {
+                  var feedback = allFeedback[item.commentData];
+                  // TODO: if no text we should try to get text from content (using segment type's getText)
+                  subjectData = feedback.text;
+                } else {
+                  // TODO: Load feedback with ID item.commentData
+                }
+              }
+              break;
+            case SUBJECT.CATEGORY:
+              // TODO: get category from ID in item.commentData
+              subjectData = 'category';
+              break;
+            case SUBJECT.GROUP:
+              // TODO: get group from ID in item.commentData
+              subjectData = 'group';
+              break;
+            case SUBJECT.USER:
+              // TODO: get user from ID in item.commentData
+              subjectData = 'user';
+              break;
+          }
+          if (subjectData) {
+            item.commentData = subjectData;
+          }
+        }
+      }
+      if (!subjectData) {
+        // TODO: could wait until subject data is loaded (i.e. don't update comment yet)
+        subjectData = '';
+      }
+      switch (categoryCode) {
+        case CATEGORY.NEW: this.itemComment = 'Added new ' + subjectData; break;
+        case CATEGORY.UPDATED: this.itemComment = 'Updated ' + subjectData; break;
+        case CATEGORY.TRANSLATED: this.itemComment = 'Translated ' + subjectData; break;
+        case CATEGORY.NEEDS: this.itemComment = 'Needs ' + subjectData; break;
+        case CATEGORY.NEEDS_FEEDBACK_FOR: this.itemComment = 'Needs feedback for ' + subjectData; break;
+        case CATEGORY.POPULAR_FROM:
+        case CATEGORY.POPULAR_WITH:
+          var text = 'Popular ';
+          if (subjectCode >= SUBJECT.CATEGORY) {
+            switch (subjectCode) {
+              case SUBJECT.PARENT:  text += 'child of ';    break;
+              case SUBJECT.CHILD:   text += 'parent of ';   break;
+              case SUBJECT.SIBLING: text += 'sibling of ';  break;
+              default: text += (categoryCode == CATEGORY.POPULAR_FROM ? 'from ' : 'with '); break;
+            }
+          }
+          this.itemComment = text + subjectData;
+          this.itemCommentIcon = 'popular';
+          break;
+        case CATEGORY.SIMILAR_TO: this.itemComment = 'Similar to ' + subjectData; break;
+        case CATEGORY.OPPOSING: this.itemComment = 'Opposing ' + subjectData; break;
+      }
+    }
+
+    _urlChanged(url) {
+      // TODO: support loading elements from a cTree at a different URL
+    }
+
+    _cTreeDataChanged(cTreeData) {
+      this.cTreeData = cTreeData;
+      // TODO: set/clear data as needed
+    }
+
+    _userChanged(user) {
+      // TODO: update as needed based on user (primarily to impact access rights)
+    }
   }
+
+  var ctreeImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-firebase.html';
+  } else {
+    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-test.html';
+  }
+  ctreeImport.load();
 
 })();
 

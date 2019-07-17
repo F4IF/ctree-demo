@@ -28,22 +28,53 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
-<link rel="import" href="ctree-loader-behavior-test.html">
+<link rel="import" href="ctree-loader-behavior-xapi.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  class CTreeUserLoader extends CTree.UserLoaderMixin(CTree.LoaderBehavior) {
+  class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
 
-    static get is() { return 'ctree-user-loader'; }
+    static get is() { return 'ctree-list-loader'; }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadSuggestedItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadBookmarkedItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
+     * @param  {Object} listData  The listData the items will be added to
+     */
+    _loadHistoryItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
   }
-  CTree.UserLoader = CTreeUserLoader;
+  CTree.ListLoader = CTreeListLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeUserLoader.is, CTreeUserLoader);
+  customElements.define(CTreeListLoader.is, CTreeListLoader);
 
 })();
 

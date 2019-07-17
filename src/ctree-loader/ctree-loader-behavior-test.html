@@ -30,6 +30,7 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
+<link rel="import" href="ctree-loader-behavior.html">
 <link rel="import" href="lorem.html">
 
 <script>
@@ -38,7 +39,6 @@ this license.
   'use strict';
 
   // monostate data
-  var cTreesData = {};
   var globalUsersData = {};
   var nextVariationId = 1;
 
@@ -88,7 +88,7 @@ this license.
       if (type) {
         elementTypeCount[key] = 0;
         // add this type as child for each parent type
-        for (var j = 0; j < type.parentTypes.length; j++) {
+        for (var j = 0; j < Object.keys(type.parentTypes).length; j++) {
           var parentTypeId = type.parentTypes[j];
           var childTypesForParent = childTypes[parentTypeId];
           if (!childTypesForParent) {
@@ -144,7 +144,7 @@ this license.
         var guaranteeChild = true;
         if (childTypesForId) {
           var maxChildCount = Test.MAX_CHILDREN;
-          if (levelsDeep > types.length * 2) {
+          if (levelsDeep > Object.keys(types).length * 2) {
             // tree is twice as deep as the number of types so cut chance of having a child down to 30%
             maxChildCount = 1;
             guaranteeChild = false;
@@ -291,77 +291,11 @@ this license.
     cTreeData.testHistory = getTestElementSubset(testElementsKeys.length / 5);
   };
 
-  // Create my namespace, if it doesn't exist
-  if (!window.CTree) {
-    window.CTree = {};
-  }
-
-  CTree.LoaderBehavior = class extends Polymer.Element {
+  CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
     static get properties() {
       return {
         /**
-         * Alternate url where cTree is hosted.  The default is the root domain
-         * where the page holding this element is being hosted.
-         */
-        url: {
-          type: String,
-          notify: true,
-          observer: '_urlChanged',
-        },
-
-        /**
-         * The unique key identifying a cTree.  If the site only has one cTree
-         * this doesn't need to be set.
-         */
-        ctreeKey: {
-          type: String,
-          observer: '_keyChanged',
-        },
-
-        /**
-         * All types for current cTree, indexed by ID.
-         *
-         * Structure:
-         *   [{
-         *     id: String,
-         *     name: String,
-         *     description: String,
-         *     prompt: String,
-         *     iconUrl: String,
-         *     color: String,
-         *     parentsRequired: Boolean,
-         *     parentsMax: Number,
-         *     parentTypes: [Strings],
-         *     elements: [Elements],
-         *   }, ...]
-         */
-        types: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        /**
-         * All segment types supported by current cTree, indexed by ID.
-         *
-         * Structure:
-         *   [{
-         *     id: String,
-         *     componentName: String,
-         *     canBeThumbnail: Boolean,
-         *   }, ...]
-         */
-        segmentTypes: {
-          type: Array,
-          readOnly: true,
-          notify: true,
-        },
-
-        /**
-         * Object holding all values for current cTrees.  All item lists will be
-         * cleared for all cTrees when the user value changes.
-         *
-         * Structure:
+         * _cTreeData Structure:
          *   url: String,
          *   types: [Types],
          *   segmentTypes: [SegmentTypes],
@@ -392,219 +326,82 @@ this license.
          *   testSuggested: [Strings],
          *   testBookmarks: [Strings],
          *   testHistory: [Strings],
-         *
-         * Elements Structure:
-         *   [{
-         *     id: String,
-         *     type: ElementType,
-         *     title: String,
-         *     parents: [Strings],
-         *     children: [Strings],
-         *     childrenSearchComplete: Boolean,
-         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-         *     description: [{
-         *       id: String,
-         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-         *       segments: [{
-         *         id: String,
-         *         type: SegmentType,
-         *         variations: [{
-         *           id: String,
-         *           data: dynamic,	// data type depends on segment type
-         *         }, ...],
-         *       }, ...],
-         *     }, ...],
-         *     feedback: [{
-         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-         *       text: String,
-         *     }, ...],
-         *     bookmarked: Boolean,
-         *   }, ...]
-         *
-         * Users Structure:
-         *   [{
-         *     id: String,
-         *     name: String,
-         *     avatar: String,
-         *     // TODO: add more public data
-         *   }, ...]
          */
-        _cTreeData: {
-          type: Object,
-          observer: '_cTreeDataChanged',
-        },
       };
     }
 
-    _urlChanged(url) {
-      // do nothing for test loader
+    /**
+     * New cTreeData was created.  Override this to add additional data to the new cTreeData.
+     *
+     * @param  {String} cTreeKey  The key for the cTree
+     * @param  {Object} cTreeData The new cTreeData created
+     */
+    _createdCTreeData(cTreeKey, cTreeData) {
+      setTimeout(() => {
+        // TODO: enable async (wait to load items until done loading types)
+        // types (can replace/alter to test other type configurations)
+        var rootPath = document.createElement('iron-meta').byKey('rootPath');
+        var types = ElementTypes[0];
+        for (var key in types) {
+          var type = types[key];
+          if (!type.iconUrl.startsWith(rootPath)) {
+            type.iconUrl = rootPath + type.iconUrl;
+          }
+          cTreeData.types[type.id] = type;
+        }
+        for (var key in SegmentTypes) {
+          var type = SegmentTypes[key];
+          cTreeData.segmentTypes[type.id] = type;
+        }
+
+        populateCTreeTestData(cTreeData);
+
+        if (this.ctreeKey == cTreeKey) {
+          this.notifySplices('types', [{
+            index: 1,
+            removed: [],
+            addedCount: Object.keys(cTreeData.types).length,
+            object: cTreeData.types,
+            type: 'splice',
+          }]);
+          this.notifySplices('segmentTypes', [{
+            index: 1,
+            removed: [],
+            addedCount: Object.keys(cTreeData.segmentTypes).length,
+            object: cTreeData.segmentTypes,
+            type: 'splice',
+          }]);
+        }
+      }, Test.LOAD_DELAY);
     }
 
-    _keyChanged(cTreeKey, previousKey) {
-      var cTreeData = cTreesData[cTreeKey];
-      var createCTree = !cTreeData;
-      if (createCTree) {
-        cTreeData = {
-          url: this.url,
-          types: [],
-          segmentTypes: [],
-          elements: [],
-          users: [],
-          lists: {
-            suggested:  {items: [], loading: false, hasMore: true},
-            bookmarked: {items: [], loading: false, hasMore: true},
-            history:    {items: [], loading: false, hasMore: true},
-          },
-        };
-        cTreesData[cTreeKey] = cTreeData;
-      }
+    /**
+     * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
+     * called with the final, fully loaded item.
+     *
+     * @param  {String} elementId           ID of the element to load data for.
+     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     */
+    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+      // TODO: support descriptionId and segmentVariations
+      this.element = cTreeData.elements[elementId];
 
-      this._cTreeData = cTreeData;
-      this._setTypes(cTreeData.types);
-      this._setSegmentTypes(cTreeData.segmentTypes);
-
-      if (createCTree) {
+      if (!this.element) {
         setTimeout(() => {
-          // TODO: enable async (wait to load items until done loading types)
-          // types (can replace/alter to test other type configurations)
-          var rootPath = document.createElement('iron-meta').byKey('rootPath');
-          var types = ElementTypes[0];
-          for (var key in types) {
-            var type = types[key];
-            if (!type.iconUrl.startsWith(rootPath)) {
-              type.iconUrl = rootPath + type.iconUrl;
-            }
-            cTreeData.types[type.id] = type;
-          }
-          for (var key in SegmentTypes) {
-            var type = SegmentTypes[key];
-            cTreeData.segmentTypes[type.id] = type;
-          }
+          if (this.element || this.elementId != elementId) return; // element or elementId updated
 
-          populateCTreeTestData(cTreeData);
+          // TODO: this should simulate reality better by only returning the pieces of the element needed for suggestedItem (id, type, name, description config, description segments)
+          var element = cTreeData.testElements[elementId];
+          cTreeData.elements[elementId] = element;
 
-          if (this.ctreeKey == cTreeKey) {
-            this.notifySplices('types', [{
-              index: 1,
-              removed: [],
-              addedCount: cTreeData.types.length,
-              object: cTreeData.types,
-              type: 'splice',
-            }]);
-            this.notifySplices('segmentTypes', [{
-              index: 1,
-              removed: [],
-              addedCount: cTreeData.segmentTypes.length,
-              object: cTreeData.segmentTypes,
-              type: 'splice',
-            }]);
+          if (this._cTreeData == cTreeData) {
+            onLoadingComplete(element);
           }
         }, Test.LOAD_DELAY);
       }
     }
-
-    _cTreeDataChanged(cTreeData, previousCTreeData) {
-      // Implement when include behavior to initialize additional fields when cTreeData changes
-    }
-  };
-
-  // Initialize object to hold shared static constants and functions
-  CTree.Loader = {};
-
-  /**
-   * Object containing all cached cTree data, with the cTreeKey as the key for each cTree data.
-   *
-   * Structure:
-   *   url: String,
-   *   name: String
-   *   types: [Types],
-   *   segmentTypes: [SegmentTypes],
-   *   elements: [Elements],
-   *   users: [Users],
-   *   lists: {
-   *     suggested: {
-   *       items: [SuggestedItems],
-   *       loading: Boolean,
-   *       hasMore: Boolean,
-   *       offset: String,			// test: Number
-   *     },
-   *     bookmarked: {
-   *       items: [BookmarkedItems],
-   *       loading: Boolean,
-   *       hasMore: Boolean,
-   *       offset: String,			// test: Number
-   *     },
-   *     history: {
-   *       items: [HistoryItems],
-   *       loading: Boolean,
-   *       hasMore: Boolean,
-   *       offset: String,			// test: Number
-   *     },
-   *   },
-   */
-  CTree.Loader.CTREES_DATA = cTreesData;
-
-  // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
-  // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
-  CTree.Loader.COMMENT_CATEGORY = {
-    // Never look up values
-    NEW: 100,
-    UPDATED: 200,
-    TRANSLATED: 300,
-    NEEDS: 400,
-    NEEDS_FEEDBACK_FOR: 500,
-
-    // Look up some values
-    POPULAR_FROM: 600,
-    POPULAR_WITH: 700,
-    SIMILAR_TO: 800,
-    OPPOSING: 900,
-  };
-
-  CTree.Loader.COMMENT_SUBJECT = {
-    // popular: no from/with
-    ELEMENT: 0,
-    TYPE: 1,
-
-    // popular: don't look up, no from/with
-    TITLE: 10,
-    DESCRIPTION: 11,
-    TRANSLATION: 12,
-    FEEDBACK: 13,
-
-    CATEGORY: 20,
-    GROUP: 21,
-    USER: 22,
-
-    // popular: child of
-    PARENT: 30,
-    // popular: parent of
-    CHILD: 31,
-    // popular: sibling of
-    SIBLING: 32,
-  };
-
-  /**
-   * Gets the first object from the array with the id property equal to the id
-   * parameter passed to this function.  If defaultToFirst is true this will
-   * return the first item from the array if no matching item is found, else
-   * will return undefined.
-   *
-   * @param {Array} array
-   * @param {String} id
-   * @param {Boolean} [defaultToFirst=true]
-   */
-  CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
-    if (!array) return undefined;
-
-    if (id) {
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].id == id) {
-          return array[i];
-        }
-      }
-    }
-    return defaultToFirst ? array[0] : undefined;
   };
 
 })();

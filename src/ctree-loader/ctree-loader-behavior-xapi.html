@@ -1,0 +1,96 @@
+<!--
+@license
+Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<link rel="import" href="ctree-loader-behavior.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
+    static get properties() {
+      return {
+      };
+    }
+
+    /**
+     * Called when the url property changes.
+     *
+     * @param  {String} url New value for url
+     */
+    _urlChanged(url) {
+      // TODO: implement once support redirecting cTrees to different URLs
+    }
+
+    /**
+     * Load the human readable name associated with the cTree
+     */
+    _loadName(cTreeData) {
+      // TODO: implement
+    }
+
+    /**
+     * Load the element types name associated with the cTree
+     */
+    _loadTypes(cTreeData) {
+      // TODO: implement
+    }
+
+    /**
+     * Load the segment types associated with the cTree
+     */
+    _loadSegmentTypes(cTreeData) {
+      // TODO: implement
+    }
+
+    /**
+     * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
+     * called with the final, fully loaded item.
+     *
+     * @param  {String} elementId           ID of the element to load data for.
+     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     */
+    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+      // TODO: implement
+    }
+  };
+
+})();
+
+</script>
