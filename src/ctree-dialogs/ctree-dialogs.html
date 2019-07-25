@@ -209,8 +209,19 @@ this license.
       }
 
       openNewElementDialog(accessor) {
-        this._accessor = accessor
-        this._setNewElement(true);
+    	  this._accessor = accessor
+          
+          // The address bar should track the parent element ID "e"
+          // this.queryParams.e
+          // this.elementId
+          
+          // Type ID as "t"
+          // this.queryParams.t
+          
+          // The "d" parameter should be set to "new"
+          this._setDialog('new');
+          
+          this._setNewElement(true);
       }
 
       openUserDialog(accessor) {
@@ -240,7 +251,8 @@ this license.
 
       _newElementDialogClosed() {
         if (this.newElement) {
-          this._setNewElement(false);
+        	this._setDialog(undefined);
+          	this._setNewElement(false);
         }
       }
 
@@ -252,9 +264,15 @@ this license.
 
       _dialogChanged(dialog, previousDialog) {
         if (dialog === previousDialog) return;
-
+	
+        var isNewElement = (dialog === 'new');
         var isElement = (dialog === 'element');
         var isUser = (dialog === 'user');
+        
+        if (isNewElement){
+        	this.set('queryParams.d', 'new')
+        	return;
+        } 
 
         // TODO: don't set query params directly, update
         if ((isElement || isUser) && dialog) {
@@ -360,8 +378,11 @@ this license.
           } else {
             this.descriptionSegmentIds = [];
           }
-
-        } else if (dialog === 'user') {
+         }
+        else if (dialog === 'new'){
+          	this.elementId = 'new'
+        }
+        else if (dialog === 'user') {
           this.page = this.queryParams.p;
         }
 
@@ -470,7 +491,15 @@ this license.
             this.$.params.paramsObjectChanged();
           }
         }
-        // TODO:
+     	// TODO: 
+        //  If Dialog is a New Post
+        else if (this.queryParams && this.queryParams.d === 'new' && this.queryParams.e !== elementId) {
+			if (elementId){
+				
+			}else if (this.queryParams.hasOwnProperty('e')) {
+				
+			}
+		}
       }
 
       _descriptionConfigIdChanged(descriptionConfigId) {
@@ -484,7 +513,15 @@ this license.
             this.$.params.paramsObjectChanged();
           }
         }
-        // TODO:
+     	// TODO:
+        // If Dialog is a New Post
+        else if (this.queryParams.d === 'new' && this.queryParams.c !== descriptionConfigId) {
+          if (descriptionConfigId) {
+            
+          } else if (this.queryParams.hasOwnProperty('c')) {
+            
+          }
+        }
       }
 
       _descriptionSegmentIdsChanged(descriptionSegmentIds) {
