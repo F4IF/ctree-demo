@@ -76,7 +76,6 @@ this license.
         display: none !important;
       }
     </style>
-
     <div id="container">
       <iron-image preload fade id="image" sizing="cover" loading="{{loading}}" error="{{error}}"></iron-image>
       <paper-spinner id="loadingIndicator" active$="[[loadingChangeMade]]" hidden$="[[!loadingChangeMade]]"></paper-spinner>
@@ -112,6 +111,9 @@ this license.
       }
 
       _editingChanged(editing) {
+        if (this._saveChangesPopUp(editing)) {
+          this._editSaveClicked();
+        }
         if (editing) {
           this.$.url.focus();
         } else {
@@ -163,10 +165,11 @@ this license.
 
       _editSaveClicked() {
         super._addSegmentVariation(this.$.image.src);
+        this._closure();
       }
 
       _editCancelClicked() {
-        this.editing = false;
+        this._closure();
       }
 
       __updateValidChangeMade(changed, loading, error) {
