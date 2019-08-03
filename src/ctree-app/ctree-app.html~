@@ -244,8 +244,7 @@ var ctreeSavedPages = ["all", "future", "recipes", "newCTrees", "lyrics"];
       <app-header-layout id="mainLayout" has-scrolling-region>
         <app-header slot="header" fixed effects="waterfall">
           <app-toolbar>
-            <!-- HACK: Aria-label not accessible to screen readers when used with drawer-toggle attribute, label element used instead --
->
+            //HACK: Aria-label not accessible to screen readers when used with drawer-toggle attribute, label element used instead
 <label for ="menu">menu</label>
             <paper-icon-button icon="menu" id="menu" drawer-toggle></paper-icon-button>
             <div main-title>cTree.org</div>
