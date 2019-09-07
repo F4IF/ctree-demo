@@ -163,14 +163,13 @@ this license.
         font: 'Roboto';
         font-size: 18px;
         margin-top: 0;
-        margin-bottom: 25px;
         padding-left: 25px;
         padding-right: -10px;
         width: 85%;
       }
 
       .flex-grid {
-        text-align: center;
+        text-align: left;
         align-items: center;
         justify-content: center;
       }
@@ -181,7 +180,6 @@ this license.
         flex-wrap: wrap;
         justify-content: space-evenly;
         flex: 1;
-        margin: 10px;
       }
       .flex-column {
         display: flex;
@@ -197,6 +195,7 @@ this license.
         margin-bottom: 0;
         margin-right: 0;
         padding-right: 75px;
+        padding-top: 20px;
       }
 
       /* Desktop Grid-View 12 column scaling */
@@ -513,26 +512,32 @@ this license.
         </div>
         <div id="footer" class="section-styling">
           <div class="table-row">
-            <div class="col-5 table-cell">
+            <div class="col-12 table-cell">
               <div class="inner-row-1">
                 <div id="social-media-icon-bar">
                   <ul>
-                    <li><a href="https://twitter.com/"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
-                    <li><a href="https://www.facebook.com/"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
-                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
+                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github.png"></a></li>
+                    <li><a href="https://www.slack.com"><i class="slack"</i><img src="[[rootPath]]/images/slack.png"></a></li>
+                    <li><a href="https://www.facebook.com"><i class="facebook"</i><img src="[[rootPath]]/images/facebook.png"></a></li>
+                    <li><a href="https://twitter.com"><i class="twitter"></i><img src="[[rootPath]]/images/twitter.png"></a></li>
                   </ul>
                 </div>
               </div>
               <div class="inner-row-2">
                 <div class="flex-grid">
-
-                </div>
-                <div id="ctree-blurb">
-                  <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
-                </div>
-                <div id="copyright">
-                  <p>&copy Foundation For an Innovative Future.</p>
-                </div>
+                  <div class="flex-grid">
+                    <div class="flex-row">
+                      <div class="flex-column">
+                        <div id="ctree-blurb">
+                          <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                        </div>
+                      </div>
+                      <div class="flex-column">
+                        <div id="copyright">
+                          <p>&copy Foundation For an Innovative Future.</p>
+                        </div>
+                     </div>
+                   </div>
               </div>
               <hr id="footer-mobile-horizontal-line"/>
             </div>
