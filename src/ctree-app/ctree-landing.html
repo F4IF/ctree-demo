@@ -160,6 +160,8 @@ this license.
       /* ctree blub text formatting */
       #ctree-blurb p {
         display: inline-block;
+        font: 'Roboto';
+        font-size: 18px;
         margin-top: 0;
         margin-bottom: 25px;
         padding-left: 25px;
@@ -360,8 +362,8 @@ this license.
         padding: 36px 0 64px 0;
       }
       #footer.section-styling {
-        background-color: #2B2B2B;
-        color: #B4B4B4;
+        background-color: #FFFFFF;``
+        color: #000000;
       }
     </style>
 
@@ -511,45 +513,34 @@ this license.
         </div>
         <div id="footer" class="section-styling">
           <div class="table-row">
-            <div class="col-5 table-cell line">
+            <div class="col-5 table-cell">
               <div class="inner-row-1">
                 <div id="social-media-icon-bar">
                   <ul>
                     <li><a href="https://twitter.com/"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
                     <li><a href="https://www.facebook.com/"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
                     <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
-                    </ul>
+                  </ul>
                 </div>
               </div>
               <div class="inner-row-2">
+                <div class="flex-grid">
+
+                </div>
                 <div id="ctree-blurb">
                   <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                </div>
+                <div id="copyright">
+                  <p>&copy Foundation For an Innovative Future.</p>
                 </div>
               </div>
               <hr id="footer-mobile-horizontal-line"/>
             </div>
             <div class="col-7 table-cell">
-              <div class="flex-grid">
-                <div class="flex-row">
-                  <div class="flex-column">TEST1</div>
-                  <div class="flex-column">TEST2</div>
-                  <div class="flex-column">TEST3</div>
-                  <div class="flex-column">TEST4</div>
-                </div>
-                <div class="flex-row">
-                  <div class="flex-column">TEST5</div>
-                  <div class="flex-column">TEST6</div>
-                  <div class="flex-column">TEST7</div>
-                  <div class="flex-column">TEST8</div>
-                </div>
-              </div>
-              <div id="copyright">
-                <p>&copy Foundation For an Innovative Future.</p>
-              </div>
+
             </div>
           </div>
         </div>
-    </div>
     </app-header-layout>
 
     <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
