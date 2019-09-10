@@ -79,44 +79,64 @@ this license.
         --app-secondary-color: black;
       }
       #mainLayout app-toolbar {
-        padding: 0 8px 0 0;
+        padding: 15px 10px 10px 15px;
+        @apply --layout-horizontal;
+        @apply --layout-end-justified;
+        background-color: rgba(255, 255, 255, 0.95);
+
       }
       #content {
         @apply --layout-fit;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
-      #headerTitle, #menuButton {
-        display: none;
+      #headerTitle {
+        color: #63A375;
+        font-size: 23px;
+
+      }
+      #menuButton{
+        color: black;
+        float: right;
       }
       app-drawer ul {
         text-align: left !important;
       }
       app-header-layout {
-        height: 100vh;
+        height: 200vh;
       }
       app-header {
         background-color: #FFFFFF;
         color: #fff;
       }
       app-header paper-icon-button {
-        --paper-icon-button-ink-color: white;
+        --paper-icon-button-ink-color: red;
+      }
+      paper-tabs{
+
       }
       paper-tab {
-        width: 0;
+        width: 100;
+
       }
       paper-tab[link] a {
         @apply --layout-horizontal;
         @apply --layout-center-center;
-        color: #196948;
+        color: #63A375;
         text-decoration: none;
+        font-size: 12px;
+
       }
+      paper-tabs[noink][nobar] paper-tab.core-selected {
+            color: #db352c;
+
       paper-tab iron-icon {
         padding-right: 2px;
       }
       .tabTooltip {
         visibility: hidden;
       }
+
       paper-button {
         text-transform: none;
       }
@@ -250,6 +270,10 @@ this license.
         }
         paper-tabs {
           display: none;
+          float: right;
+
+
+
         }
         #headerTitle, #menuButton {
           display: inline-block;
@@ -375,45 +399,63 @@ this license.
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
-    <app-header-layout id="mainLayout" has-scrolling-region>
+
+
+    <app-header-layout id="mainLayout" has-scrolling-region effects>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <app-header slot="header" reveals effects="waterfall">
-        <app-toolbar>
+
+      <app-header reveals effects="waterfall" slot="header">
+        <app-toolbar class="toolbar">
           <ctree-app-icon></ctree-app-icon>
-          <div id="headerTitle" main-title>Collaboration Trees</div>
-          <paper-icon-button id="menuButton" icon="menu" on-tap="_toggleDrawer"></paper-icon-button>
-          <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px">
-            <paper-tab id="overviewTab" name="overview" link>
-              <a href="[[rootPath]]?section=overview" tabindex="-1">
-                Overview
-              </a>
-            </paper-tab>
-            <paper-tab id="feedbackTab" name="feedback" link>
-              <a href="[[rootPath]]?section=feedback" tabindex="-1">
-                Feedback
-              </a>
-            </paper-tab>
-            <paper-tab id="featuresTab" name="features" link>
-              <a href="[[rootPath]]?section=features" tabindex="-1">
-                Features
-              </a>
-            </paper-tab>
-            <paper-tab id="ctreeTab" name="ctree" link>
-              <a href="[[rootPath]]?section=ctree" tabindex="-1">
-                cTree
-              </a>
-            </paper-tab>
-            <paper-tab id="participateTab" name="participate" link>
-              <a href="[[rootPath]]?section=participate" tabindex="-1">
-                Participate
-              </a>
-            </paper-tab>
-          </paper-tabs>
+          <div id="headerTitle" main-title> Collaboration Tree</div>
+
+
+          <div id="paperTabsWidth" style="width:60%">
+            <paper-icon-button id="menuButton" icon="menu" drawer-toggle >Collaboration Trees</paper-icon-button>
+            <!--custom style to change color of a pressed paper-tab -->
+            <custom-style>
+              <style is="custom-style">
+                paper-tabs[no-bar] paper-tab.iron-selected {
+                  color: #ffff8d;
+                }
+              </style>
+            </custom-style>
+
+
+            <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px" style="width:50px" no-bar noink>
+              <paper-tab id="overviewTab" name="overview" link>
+                <a href="[[rootPath]]?section=overview" tabindex="-1">
+                  Overview
+                </a>
+              </paper-tab>
+              <paper-tab id="feedbackTab" name="feedback" link>
+                <a href="[[rootPath]]?section=feedback" tabindex="-1">
+                  Feedback
+                </a>
+              </paper-tab>
+              <paper-tab id="featuresTab" name="features" link>
+                <a href="[[rootPath]]?section=features" tabindex="-1">
+                  Features
+                </a>
+              </paper-tab>
+              <paper-tab id="ctreeTab" name="ctree" link>
+                <a href="[[rootPath]]?section=ctree" tabindex="-1">
+                  cTree
+                </a>
+              </paper-tab>
+              <paper-tab id="participateTab" name="participate" link>
+                <a href="[[rootPath]]?section=participate" tabindex="-1">
+                  Participate
+                </a>
+              </paper-tab>
+            </paper-tabs>
+          </div>
         </app-toolbar>
       </app-header>
 
       <div id="content">
         <div id="overview" class="section-styling">
+
         </div>
         <div id="feedback" class="section-styling">
           <p>W</p>
