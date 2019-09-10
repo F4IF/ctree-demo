@@ -160,15 +160,16 @@ this license.
       /* ctree blub text formatting */
       #ctree-blurb p {
         display: inline-block;
+        font: 'Roboto';
+        font-size: 18px;
         margin-top: 0;
-        margin-bottom: 25px;
         padding-left: 25px;
         padding-right: -10px;
         width: 85%;
       }
 
       .flex-grid {
-        text-align: center;
+        text-align: left;
         align-items: center;
         justify-content: center;
       }
@@ -179,7 +180,6 @@ this license.
         flex-wrap: wrap;
         justify-content: space-evenly;
         flex: 1;
-        margin: 10px;
       }
       .flex-column {
         display: flex;
@@ -195,6 +195,7 @@ this license.
         margin-bottom: 0;
         margin-right: 0;
         padding-right: 75px;
+        padding-top: 20px;
       }
 
       /* Desktop Grid-View 12 column scaling */
@@ -333,6 +334,42 @@ this license.
         }
       }
 
+      .feedback-container {
+        width: 85%;
+        text-align: center;
+        justify-content: center;
+        background-color: #FFFFFF;
+        margin-top: 5%;
+        margin-bottom: 5%;
+        padding-top: 2%;
+        padding-bottom: 2%;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 2px 2px;
+
+      }
+      .feedback-cards {
+        padding-top: 5%;
+        padding-bottom: 5%;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .feedback-card {
+        margin-left: 3%;
+        margin-right: 3%;
+        flex-basis: 0;
+        flex-grow: 1;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        transition: 0.3s;
+      }
+      .feedback-avatar {
+        border-radius: 50%;
+        width: 90px;
+        height: 85px;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+      }
+
       /* Section CSS Styling */
       .section-styling {
         display: inline-block;
@@ -343,8 +380,8 @@ this license.
         background-color: #BFBFBF;
       }
       #feedback.section-styling {
-        background-color: #F8F8F8;
-        color: #196848;
+        background-color: #DBE8DE;
+        color: #63A375;
       }
       #features.section-styling {
         background-color: #FFFFFF;
@@ -360,8 +397,8 @@ this license.
         padding: 36px 0 64px 0;
       }
       #footer.section-styling {
-        background-color: #2B2B2B;
-        color: #B4B4B4;
+        background-color: #FFFFFF;``
+        color: #000000;
       }
     </style>
 
@@ -416,28 +453,20 @@ this license.
         <div id="overview" class="section-styling">
         </div>
         <div id="feedback" class="section-styling">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
+          <div class="feedback-container">
+            <h1>Feedback</h1>
+            <div class="feedback-cards">
+              <div class=feedback-card>
+                  <img src="[[rootPath]]/images/avatar01.jpg" alt="avatar" class="feedback-avatar"/>
+              </div>
+              <div class=feedback-card>
+                 <img src="[[rootPath]]/images/avatar02.jpg" alt="avatar" class="feedback-avatar"/>
+              </div>
+              <div class=feedback-card>
+                <img src="[[rootPath]]/images/avatar03.jpg" alt="avatar" class="feedback-avatar"/>
+              </div>
+            </div
+          </div>
         </div>
         <div id="features" class="section-styling">
           <div class= "center-div">
@@ -488,7 +517,7 @@ this license.
           <p>W</p>
           <p>W</p>
           <p>W</p>
-          <p>W</p>
+          <p>L</p>
         </div>
         <div id="participate" class="section-styling">
             <div class="center-div">
@@ -511,45 +540,40 @@ this license.
         </div>
         <div id="footer" class="section-styling">
           <div class="table-row">
-            <div class="col-5 table-cell line">
+            <div class="col-12 table-cell">
               <div class="inner-row-1">
                 <div id="social-media-icon-bar">
                   <ul>
-                    <li><a href="https://twitter.com/"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
-                    <li><a href="https://www.facebook.com/"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
-                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
-                    </ul>
+                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github.png"></a></li>
+                    <li><a href="https://www.slack.com"><i class="slack"</i><img src="[[rootPath]]/images/slack.png"></a></li>
+                    <li><a href="https://www.facebook.com"><i class="facebook"</i><img src="[[rootPath]]/images/facebook.png"></a></li>
+                    <li><a href="https://twitter.com"><i class="twitter"></i><img src="[[rootPath]]/images/twitter.png"></a></li>
+                  </ul>
                 </div>
               </div>
               <div class="inner-row-2">
-                <div id="ctree-blurb">
-                  <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
-                </div>
+                <div class="flex-grid">
+                  <div class="flex-grid">
+                    <div class="flex-row">
+                      <div class="flex-column">
+                        <div id="ctree-blurb">
+                          <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+                        </div>
+                      </div>
+                      <div class="flex-column">
+                        <div id="copyright">
+                          <p>&copy Foundation For an Innovative Future.</p>
+                        </div>
+                     </div>
+                   </div>
               </div>
               <hr id="footer-mobile-horizontal-line"/>
             </div>
             <div class="col-7 table-cell">
-              <div class="flex-grid">
-                <div class="flex-row">
-                  <div class="flex-column">TEST1</div>
-                  <div class="flex-column">TEST2</div>
-                  <div class="flex-column">TEST3</div>
-                  <div class="flex-column">TEST4</div>
-                </div>
-                <div class="flex-row">
-                  <div class="flex-column">TEST5</div>
-                  <div class="flex-column">TEST6</div>
-                  <div class="flex-column">TEST7</div>
-                  <div class="flex-column">TEST8</div>
-                </div>
-              </div>
-              <div id="copyright">
-                <p>&copy Foundation For an Innovative Future.</p>
-              </div>
+
             </div>
           </div>
         </div>
-    </div>
     </app-header-layout>
 
     <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
