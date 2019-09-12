@@ -355,9 +355,48 @@ this license.
         color: #FFFFFF;
       }
       #participate.section-styling {
-        background-color: #F8F8F8;
-        color: #196848;
-        padding: 36px 0 64px 0;
+        background-color: #DBE8DE;
+        padding: 8px 0 130px 0;
+
+      }
+      #participate .green-btn {
+        color: #FFFFFF;
+        background-color: #62A374;
+        display: table;
+        width: 160px;
+        text-align: center;
+        font-size: .9em;
+        font-weight: 500;
+        padding: 16px 36px;
+        margin: 38px auto 0 auto;
+        box-shadow: .125em .125em rgba(0, 0, 0, 0.4);
+        border-radius: .4em;
+      }
+      #participate h1 {
+        color: #62A374;
+        font-size: 2.9em;
+        letter-spacing: .03em;
+        margin-bottom: -36px;
+      }
+      #participate h2 {
+        font-weight: normal;
+        text-align: center;
+        font-size: 2.1em;
+        margin-top: 60px;
+        letter-spacing: .03em;
+      }
+      #participate p {
+        color: #2E302E;
+        font-size: 1.1em;
+        margin: 0 auto;
+        width: 90%;
+        line-height: 30px;
+      }
+      #participate p::after {
+        content: "";
+        display: block;
+        margin-top: 26px;
+        clear: both;
       }
       #footer.section-styling {
         background-color: #2B2B2B;
@@ -491,23 +530,30 @@ this license.
           <p>W</p>
         </div>
         <div id="participate" class="section-styling">
-            <div class="center-div">
-              <h1 align="left">Participate</h1>
-                <p>
-                  <div class="bold-text">Join the open source project</div>
-                  Get course credit or professional grade experience working on a large open source
-                  project.  Be part of a project team, working closely with our programmers and
-                  designers to complete a part of the project.  All regular contributors can add the
-                  project to their LinkedIn resume and request a recommendation based on their comleted
-                  work.  Go to <a href="dev.ctree.org">dev.ctree.org</a> to get started.
-                </p>
-                <p>
-                  <div class="bold-text">Test the project</div>
-                  As the project develops we need real world examples of how it can be used.  If you
-                  want to use it with your nonprofit, online community, or other organization Please
-                  email <a href = "mailto: contact@innovativeFuture.org">contact@innovativeFuture.org</a>
-                </p>
-            </div>
+          <div class="center-div">
+            <h1 align="center">Participate</h1>
+            <h2>Join the Open Source Project!</h2>
+            <p>
+              <!-- <div class="bold-text" align="center">--><!--</div> -->
+              Get course credit or professional grade experience working on a large open source
+              project.  Be part of a project team, working closely with our programmers and
+              designers to complete a part of the project.
+            </p>
+            <p>
+              All regular contributors can add the
+              project to their LinkedIn resume and request a recommendation based on their completed
+              work.
+            </p>
+            <paper-button raised class="green-btn" href="dev.ctree.org">JOIN CTREE</paper-button>
+            <h2>Test Collaboration Tree!</h2>
+            <p>
+              <!-- <div class="bold-text">Test the project</div> -->
+              As the project develops we need real world examples of how it can be used.  If you
+              want to use it with your nonprofit, online community, or other organization Please
+              email <a href = "mailto: contact@innovativeFuture.org">contact@innovativeFuture.org</a>
+            </p>
+            <paper-button raised class="green-btn" href="mailto: contact@innovativeFuture.org">TEST CTREE</paper-button>
+          </div>
         </div>
         <div id="footer" class="section-styling">
           <div class="table-row">
