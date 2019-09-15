@@ -108,23 +108,29 @@ this license.
       app-header {
         background-color: #FFFFFF;
         color: #fff;
+        height: 6%;
       }
       app-header paper-icon-button {
-        --paper-icon-button-ink-color: red;
-      }
-      paper-tabs{
 
       }
-      paper-tab {
-        width: 100;
 
-      }
+
       paper-tab[link] a {
         @apply --layout-horizontal;
         @apply --layout-center-center;
-        color: #63A375;
+        color: #000000;
         text-decoration: none;
         font-size: 12px;
+        outline: none;
+
+
+      }
+      paper-tabs{
+        --paper-tabs-selection-bar-color: blue;
+      }
+      paper-tab.iron-selected{
+        color: blue !important ;
+
 
       }
       paper-tabs[noink][nobar] paper-tab.core-selected {
@@ -155,6 +161,7 @@ this license.
       .bold-text {
         font-weight: bold;
       }
+
 
       h1 {
         font-size: 4em;
@@ -389,6 +396,8 @@ this license.
       }
     </style>
 
+
+
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
     <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
     <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
@@ -401,10 +410,10 @@ this license.
 
 
 
-    <app-header-layout id="mainLayout" has-scrolling-region effects>
+    <app-header-layout id="mainLayout" has-scrolling-region>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <app-header reveals effects="waterfall" slot="header">
+      <app-header slot="header" reveals effects="waterfall" >
         <app-toolbar class="toolbar">
           <ctree-app-icon></ctree-app-icon>
           <div id="headerTitle" main-title> Collaboration Tree</div>
@@ -412,17 +421,9 @@ this license.
 
           <div id="paperTabsWidth" style="width:60%">
             <paper-icon-button id="menuButton" icon="menu" drawer-toggle >Collaboration Trees</paper-icon-button>
-            <!--custom style to change color of a pressed paper-tab -->
-            <custom-style>
-              <style is="custom-style">
-                paper-tabs[no-bar] paper-tab.iron-selected {
-                  color: #ffff8d;
-                }
-              </style>
-            </custom-style>
 
 
-            <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px" style="width:50px" no-bar noink>
+            <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px" style="width:50px" no-bar noink autoselectDelay>
               <paper-tab id="overviewTab" name="overview" link>
                 <a href="[[rootPath]]?section=overview" tabindex="-1">
                   Overview
