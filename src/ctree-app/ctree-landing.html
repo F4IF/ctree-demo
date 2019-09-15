@@ -237,6 +237,45 @@ this license.
           bottom: 10%;
       }
 
+      /* Feedback cards styles */
+
+      .feedback-container {
+        width: 85%;
+        text-align: center;
+        justify-content: center;
+        background-color: #FFFFFF;
+        margin-top: 5%;
+        margin-bottom: 5%;
+        padding-top: 2%;
+        padding-bottom: 2%;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 2px 2px;
+
+      }
+      .feedback-cards {
+        padding-top: 5%;
+        padding-bottom: 5%;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .feedback-card {
+        margin-left: 3%;
+        margin-right: 3%;
+        flex-basis: 0;
+        flex-grow: 1;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        transition: 0.3s;
+      }
+      .feedback-avatar {
+        margin-top: -15%;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        max-width: 30%;
+        height: auto;
+      }
+
       /* create horizontal line only for mobile */
       @media (min-width: 500px) {
         #footer-mobile-horizontal-line {
@@ -332,46 +371,33 @@ this license.
           margin: auto;
           width: 75%;
         }
-      }
 
-      .feedback-container {
-        width: 85%;
-        text-align: center;
-        justify-content: center;
-        background-color: #FFFFFF;
-        margin-top: 5%;
-        margin-bottom: 5%;
-        padding-top: 2%;
-        padding-bottom: 2%;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: 2px 2px;
-
-      }
-      .feedback-cards {
-        padding-top: 5%;
-        padding-bottom: 5%;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .feedback-card {
-        margin-left: 3%;
-        margin-right: 3%;
-        flex-basis: 0;
-        flex-grow: 1;
-        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
-        transition: 0.3s;
-      }
-      .feedback-avatar {
-        border-radius: 50%;
-        width: 90px;
-        height: 85px;
-        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        /* Mobile Feee=dback card styles */
+        .feedback-cards {
+          padding-top: 5%;
+          padding-bottom: 5%;
+          display: flex;
+          flex-wrap: wrap;
+          flex-direction: column;
+        }
+        .feedback-card {
+          margin-top: 5%;
+          margin-bottom: 5%;
+          flex-basis: 0;
+          flex-grow: 1;
+          box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+          transition: 0.3s;
+        }
+        .feedback-avatar {
+          margin-top: -10%;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+          max-width: 20%;
+        }
       }
 
       /* Section CSS Styling */
-      .section-styling {
+      .section-styling
         display: inline-block;
         width: 100%;
       }
