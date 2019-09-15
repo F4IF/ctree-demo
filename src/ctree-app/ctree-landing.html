@@ -85,6 +85,8 @@ this license.
         @apply --layout-fit;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        background-color: #DBE8DE;
+        color: #63A375;
       }
       #headerTitle, #menuButton {
         display: none;
@@ -244,7 +246,7 @@ this license.
         text-align: center;
         justify-content: center;
         background-color: #FFFFFF;
-        margin-top: 5%;
+        margin-top: 15%;
         margin-bottom: 5%;
         padding-top: 2%;
         padding-bottom: 2%;
@@ -269,11 +271,40 @@ this license.
         transition: 0.3s;
       }
       .feedback-avatar {
-        margin-top: -15%;
+        margin-top: -20%;
         border-radius: 50%;
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
-        max-width: 30%;
+        max-width: 40%;
         height: auto;
+      }
+      .feedback-card-content {
+        width: 85%;
+        text-align: center;
+        justify-content: center;
+        margin: 5% auto;
+      }
+      .feedback-user {
+        font-size: 1.5em;
+        color: #000000;
+        margin-top: 15%;
+        margin-bottom: 10%;
+      }
+      .feedback-user-content {
+        font-size: 1em;
+        color: #000000;
+        text-align: left;
+      }
+      .feedback-content-quotes {
+        quotes: "\201C""\201D""\2018""\2019";
+      }
+      .feedback-card-button-view-ctree {
+          color: #FFFFFF;
+          font-family: Roboto;
+          font-size: 1.5em;
+        	border-radius: 5px;
+          background-color: #63A375;
+          box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
+          padding: 8%;
       }
 
       /* create horizontal line only for mobile */
@@ -423,7 +454,7 @@ this license.
         padding: 36px 0 64px 0;
       }
       #footer.section-styling {
-        background-color: #FFFFFF;``
+        background-color: #FFFFFF;
         color: #000000;
       }
     </style>
@@ -483,13 +514,68 @@ this license.
             <h1>Feedback</h1>
             <div class="feedback-cards">
               <div class=feedback-card>
+                <!--TODO: Need to port this template with an feedback data feed-->
                   <img src="[[rootPath]]/images/avatar01.jpg" alt="avatar" class="feedback-avatar"/>
+                  <div class="feedback-card-content">
+                    <div class="feedback-user">@ecojess</div>
+                    <hr />
+                    <div class="feedback-user-content">
+                      <blockquote>
+                        <p>
+                          <q class="feedback-content-quotes">
+                            Collaboration Tree allowed us to
+                            evolve our beach cleanups through
+                            evolving the idea with our community!
+                          </q>
+                        </p>
+                      </blockquote>
+                    </div>
+                    <div class="feedback-card-button-container">
+                      <button class="feedback-card-button-view-ctree">View CTree</button>
+                    </div>
+                  </div>
               </div>
               <div class=feedback-card>
                  <img src="[[rootPath]]/images/avatar02.jpg" alt="avatar" class="feedback-avatar"/>
+                 <div class="feedback-card-content">
+                   <div class="feedback-user">@RyanW</div>
+                   <hr />
+                   <div class="feedback-user-content">
+                     <blockquote>
+                       <p>
+                         <q class="feedback-content-quotes">
+                           CTree is great since my voice can reach
+                           people working directly on causes I’m
+                           interested in and make a difference.
+                         </q>
+                       </p>
+                     </blockquote>
+                   </div>
+                   <div class="feedback-card-button-container">
+                     <button class="feedback-card-button-view-ctree">View CTree</button>
+                   </div>
+                 </div>
               </div>
               <div class=feedback-card>
                 <img src="[[rootPath]]/images/avatar03.jpg" alt="avatar" class="feedback-avatar"/>
+                <div class="feedback-card-content">
+                  <div class="feedback-user">@hackforla</div>
+                  <hr />
+                  <div class="feedback-user-content">
+                    <blockquote>
+                      <p>
+                        <q class="feedback-content-quotes">
+                          Collaboration Tree helped us connect
+                          to our volunteers which led to better
+                          turn out at our local hack-nights!
+                        </q>
+                      </p>
+                    </blockquote>
+                  </div>
+                  <div class="feedback-card-button-container">
+                    <button class="feedback-card-button-view-ctree">View CTree</button>
+                  </div>
+                </div>
               </div>
             </div
           </div>
