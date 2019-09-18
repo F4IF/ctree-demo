@@ -57,7 +57,6 @@ this license.
         display: none !important;
       }
     </style>
-
     <div id="text" class="text" hidden$="[[editing]]"></div>
     <div id="edit" class="text" hidden$="[[!editing]]">
       <paper-textarea id="input" on-value-changed="_inputChanged" no-label-float label="test"></paper-textarea>
@@ -111,6 +110,9 @@ this license.
       }
 
       _editingChanged(editing) {
+        if (this._saveChangesPopUp(editing)) {
+          this._editSaveClicked();
+        }
         if (editing) {
           this.$.input.focus();
         } else {
@@ -148,10 +150,11 @@ this license.
 
       _editSaveClicked() {
         super._addSegmentVariation(this._updatedText);
+        this._closure();
       }
 
       _editCancelClicked() {
-        this.editing = false;
+        this._closure();
       }
     };
 
