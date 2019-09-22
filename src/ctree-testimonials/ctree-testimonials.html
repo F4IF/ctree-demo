@@ -1,0 +1,298 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="./ctree-testimony.html">
+
+
+<dom-module id="ctree-testimonials">
+
+  <template>
+    <style>
+      /* Feedback cards styles */
+      .feedback-container {
+        width: 85%;
+        text-align: center;
+        justify-content: center;
+        background-color: #FFFFFF;
+        margin-top: 15%;
+        margin-bottom: 5%;
+        padding-top: 2%;
+        padding-bottom: 2%;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 2px 2px;
+      }
+      .feedback-cards {
+        padding-top: 5%;
+        padding-bottom: 5%;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      /* .feedback-card {
+        margin-left: 3%;
+        margin-right: 3%;
+        flex-basis: 0;
+        flex-grow: 1;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        transition: 0.3s;
+      }
+      .feedback-avatar {
+        margin-top: -20%;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        max-width: 40%;
+        height: auto;
+      }
+      .feedback-card-content {
+        width: 85%;
+        text-align: center;
+        justify-content: center;
+        margin: 5% auto;
+      }
+      .feedback-user {
+        font-size: 1.5em;
+        color: #000000;
+        margin-top: 15%;
+        margin-bottom: 10%;
+      }
+      .feedback-user-content {
+        font-size: 1em;
+        color: #000000;
+        text-align: left;
+      }
+      .feedback-content-quotes {
+        quotes: "\201C""\201D""\2018""\2019";
+      }
+      .feedback-card-button-view-ctree {
+          color: #FFFFFF;
+          font-family: Roboto;
+          font-size: 1.5em;
+          border-radius: 5px;
+          background-color: #63A375;
+          box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
+          padding: 8%;
+      } */
+
+      @media (max-width: 500px) {
+        .feedback-container {
+          background-color: #DBE8DE;
+          width: 65%;
+          box-shadow: none;
+        }
+
+         .feedback-cards {
+          padding-top: 5%;
+          padding-bottom: 5%;
+          display: flex;
+          flex-wrap: wrap;
+          flex-direction: column;
+        }
+        .feedback-card {
+          margin-top: 5%;
+          margin-bottom: 10%;
+          flex-basis: 0;
+          flex-grow: 1;
+          box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+          transition: 0.3s;
+          background-color: #FFFFFF;
+        }
+        .feedback-avatar {
+          margin-top: -10%;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+          max-width: 20%;
+        }
+      }
+    </style>
+
+    <div class="feedback-container">
+      <h1>Feedback</h1>
+      <div class="feedback-cards">
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
+        <!-- <div class=feedback-card>
+            <img src="[[rootPath]]/images/avatar01.jpg" alt="avatar" class="feedback-avatar"/>
+            <div class="feedback-card-content">
+              <div class="feedback-user">@ecojess</div>
+              <hr />
+              <div class="feedback-user-content">
+                <blockquote>
+                  <p>
+                    <q class="feedback-content-quotes">
+                      Collaboration Tree allowed us to
+                      evolve our beach cleanups through
+                      evolving the idea with our community!
+                    </q>
+                  </p>
+                </blockquote>
+              </div>
+              <div class="feedback-card-button-container">
+                <button class="feedback-card-button-view-ctree">View CTree</button>
+              </div>
+            </div>
+        </div> -->
+        <!-- <div class=feedback-card>
+           <img src="[[rootPath]]/images/avatar02.jpg" alt="avatar" class="feedback-avatar"/>
+           <div class="feedback-card-content">
+             <div class="feedback-user">@RyanW</div>
+             <hr />
+             <div class="feedback-user-content">
+               <blockquote>
+                 <p>
+                   <q class="feedback-content-quotes">
+                     CTree is great since my voice can reach
+                     people working directly on causes I’m
+                     interested in and make a difference.
+                   </q>
+                 </p>
+               </blockquote>
+             </div>
+             <div class="feedback-card-button-container">
+               <button class="feedback-card-button-view-ctree">View CTree</button>
+             </div>
+           </div>
+        </div> -->
+        <!-- <div class=feedback-card>
+          <img src="[[rootPath]]/images/avatar03.jpg" alt="avatar" class="feedback-avatar"/>
+          <div class="feedback-card-content">
+            <div class="feedback-user">@hackforla</div>
+            <hr />
+            <div class="feedback-user-content">
+              <blockquote>
+                <p>
+                  <q class="feedback-content-quotes">
+                    Collaboration Tree helped us connect
+                    to our volunteers which led to better
+                    turn out at our local hack-nights!
+                  </q>
+                </p>
+              </blockquote>
+            </div>
+            <div class="feedback-card-button-container">
+              <button class="feedback-card-button-view-ctree">View CTree</button>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- <paper-card id="ctree-testimonials-display">
+      <h1> FEEDBACK </h1>
+      <div id="ctree-testimonials-info">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit bibendum odio et fringilla. Praesent varius turpis in mauris accumsan, vel placerat enim porttitor. Maecenas fermentum hendrerit luctus.
+      </div>
+      -->
+
+      <!-- This works with hard coded data -->
+      <!-- <div id="ctree-testimonials-list">
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
+        <ctree-testimonial></ctree-testimonial>
+      </div>
+
+      something here
+    </paper-card> -->
+
+    <!-- <iron-list id="ctree-testimonials-list2" items=[[testimonies]] as="testimony" grid>
+        <template>
+          <ctree-testimonial ctree-key=[[ctreeKey]] testimony=[[testimony]] image=[[testimony.image]] handle=[[testimony.handle]] quote=[[testimony.quote]] hidden$="[[!testimony]]"></ctree-testimonial>
+        <template>
+    </iron-list> -->
+  </template>
+
+  <script>
+    class CTreeTestimonials extends Polymer.Element {
+      static get is() { return  'ctree-testimonials' }
+
+      static get properties() {
+        return {
+          ctreeKey: String,
+          testimonies: {
+            type: Array,
+            value: [
+              {
+                id: "1",
+                image: "[[rootPath]]/images/avatar01.jpg",
+                handle: "@ecojess",
+                quote: "Collaboration Tree allowed us to evolve our beach cleanups through evolving the idea with our community!",
+                ctreeKey: ""
+              },
+              {
+                id: "2",
+                image: "[[rootPath]]/images/avatar02.jpg",
+                handle: "@RyanW",
+                quote: "CTree is great since my voice can reach people working directly on causes I am interested and make a difference",
+                ctreeKey: ""
+              },
+              {
+                id: "3",
+                image: "[[rootPath]]/images/avatar03.jpg",
+                handle: "@hackforla",
+                quote: "Collaboration Tree helped us connect to our volunteers which led to better turn out at our local hack-nights!",
+                ctreeKey: ""
+              }
+            ]
+          }
+        }
+      }
+
+      // ready() {
+      //   super.ready();
+      //   testimonies = [
+      //     {
+      //       id: "0",
+      //       image: "https://www.iti.org.uk/images/article-images/Profile-Interview-Photo---Fiona-Gray.jpg",
+      //       handle: "@ecojess",
+      //       quote: "Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper."
+      //     },
+      //     {
+      //       id: "1",
+      //       image: "https://www.mills.edu/uniquely-mills/students-faculty/student-profiles/images/student-profile-veronica-mills-college.jpg",
+      //       handle: "@brakee",
+      //       quote: "Eget nunc lobortis mattis aliquam faucibus purus in massa. Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt."
+      //     },
+      //     {
+      //       id: "2",
+      //       image: "https://www.elitesingles.com/sites/www.elitesingles.com/files/2b_en_ta_tip_widows2.jpg",
+      //       handle: "@melbel",
+      //       quote: "Integer enim neque volutpat ac tincidunt vitae semper. Velit laoreet id donec ultrices tincidunt. Eget nunc lobortis mattis aliquam faucibus purus in massa."
+      //     }
+      //   ]
+      // }
+    }
+    customElements.define(CTreeTestimonials.is, CTreeTestimonials);
+  </script>
+
+</dom-module>
