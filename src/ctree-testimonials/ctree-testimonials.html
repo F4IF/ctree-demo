@@ -43,7 +43,7 @@ this license.
         text-align: center;
         justify-content: center;
         background-color: #FFFFFF;
-        margin-top: 15%;
+        margin-top: 5%;
         margin-bottom: 5%;
         padding-top: 2%;
         padding-bottom: 2%;
@@ -57,16 +57,12 @@ this license.
         font-weight: bold;
       }
       .feedback-cards {
-        /* padding-top: 5%;
-        padding-bottom: 5%; */
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around;
+        width: 85%;
+        margin: 0 auto;
       }
-      iron-list {
-        flex: 1 1;
-      }
-
       @media (max-width: 500px) {
         .feedback-container {
           margin-top: 5%;
@@ -78,7 +74,7 @@ this license.
 
     <div class="feedback-container">
       <div class="feedback-cards-header">Feedback</div>
-      <div class="feedback-cards fit horizontial layout">
+      <div class="feedback-cards">
         <template is="dom-repeat" items="{{testimonies}}">
           <ctree-testimonial image={{item.image}}
                              handle={{item.handle}}
@@ -93,7 +89,6 @@ this license.
   <script>
     class CTreeTestimonials extends Polymer.Element {
       static get is() { return  'ctree-testimonials' }
-
       static get properties() {
         return {
           ctreeKey: String,

@@ -36,13 +36,13 @@ this license.
   <template>
     <style>
       :host {
-        width: 350px; /* must be a specific size for flex wrapping */
+        width: 265px; /* must be a specific size for flex wrapping */
       }
       .feedback-card {
         margin-left: 3%;
         margin-right: 3%;
-        /* flex-basis: 0;
-        flex-grow: 1; */
+        flex-basis: 0;
+        flex-grow: 1;
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
         transition: 0.3s;
         margin-bottom: 30%;
@@ -55,7 +55,7 @@ this license.
         height: auto;
       }
       .feedback-card-content {
-        width: 85%;
+        width: 100%;
         text-align: center;
         justify-content: center;
         margin: 5% auto;
@@ -66,10 +66,12 @@ this license.
         margin-top: 15%;
         margin-bottom: 10%;
       }
+      .user-horizontial-line {
+        width: 60%;
+      }
       .feedback-user-content {
-        font-size: 1em;
+        font-size: .9em;
         color: #000000;
-        text-align: left;
         min-height: 120px;
       }
       .feedback-content-quotes {
@@ -78,11 +80,16 @@ this license.
       .feedback-card-button-view-ctree {
           color: #FFFFFF;
           font-family: Roboto;
-          font-size: 1.5em;
+          font-style: italic;
+          font-size: 1.2em;
           border-radius: 5px;
           background-color: #63A375;
           box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
-          padding: 8%;
+          padding-right: 15%;
+          padding-left: 15%;
+          padding-top: 5%;
+          padding-bottom: 5%;
+          margin-bottom: 10%;
       }
       /* Mobile Styles */
       @media (max-width: 500px) {
@@ -105,7 +112,7 @@ this license.
          <img src="[[image]]" alt="avatar" class="feedback-avatar"/>
          <div class="feedback-card-content">
            <div class="feedback-user">{{handle}}</div>
-           <hr />
+           <hr class="user-horizontial-line" />
            <div class="feedback-user-content">
              <blockquote>
                <p>
@@ -125,7 +132,6 @@ this license.
   <script>
     class CTreeTestimonial extends Polymer.Element {
       static get is() { return  'ctree-testimonial' }
-
       static get properties() {
         return {
           image: String,
