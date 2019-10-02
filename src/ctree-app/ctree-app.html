@@ -480,20 +480,24 @@ this license.
         }*/
         var newNavList = [];
         var searchTextLower = this.searchText ? this.searchText.toLowerCase() : '';
-        for (var i = 0; i < ctreeSavedPages.length; i++) {
-          var name = ctreeSavedPages[i];
-          var pageData = ctreePages[name];
-          if (!pageData.icon.startsWith(this.rootPath)) {
-            pageData.icon = this.rootPath + pageData.icon;
-          }
-
-          if (this.searchText) {
-            if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
-                newNavList.push({name: name, data: pageData});
+        if (CTree.firebaseConfig) {
+          // TODO: get list of cTrees from Firebase instead of using hardcoded pages
+        } else {
+          for (var i = 0; i < ctreeSavedPages.length; i++) {
+            var name = ctreeSavedPages[i];
+            var pageData = ctreePages[name];
+            if (!pageData.icon.startsWith(this.rootPath)) {
+              pageData.icon = this.rootPath + pageData.icon;
             }
-          } else {
-            if (pageData.saved) {
-              newNavList.push({name: name, data: pageData});
+
+            if (this.searchText) {
+              if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
+                  newNavList.push({name: name, data: pageData});
+              }
+            } else {
+              if (pageData.saved) {
+                newNavList.push({name: name, data: pageData});
+              }
             }
           }
         }
@@ -516,10 +520,15 @@ this license.
         var pathSegments = fullPath.split('/');
         if (pathSegments.length > 1) {
           var page;
-          if (ctreeSavedPages.indexOf(pathSegments[1]) < 0) {
-            page = ctreeSavedPages[0];
-          } else {
+          // TODO: default to
+          if (CTree.firebaseConfig || ctreeSavedPages.indexOf(pathSegments[1]) >= 0) {
             page = pathSegments[1];
+          } else if (CTree.firebaseConfig) {
+            // TODO: default to something other than test
+            page = "test"
+          } else {
+            // default to first saved page
+            page = ctreeSavedPages[0];
           }
           var subpage;
           if (pathSegments.length > 2) {
@@ -531,7 +540,11 @@ this license.
             subpage = 'suggested';
           }
         } else {
-          page = ctreeSavedPages[0];
+          if (CTree.firebaseConfig) {
+            page = "test"
+          } else {
+            page = ctreeSavedPages[0];
+          }
           subpage = 'suggested';
         }
         var forceSubpageChanged = (this.page != page && this.subpage == subpage);
