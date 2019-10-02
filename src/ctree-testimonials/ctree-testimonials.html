@@ -49,10 +49,12 @@ this license.
         padding-bottom: 2%;
         margin-left: auto;
         margin-right: auto;
-        box-shadow: 2px 2px;
+        -webkit-box-shadow: 8px 8px 6px -6px #696969;
+	      -moz-box-shadow: 8px 8px 6px -6px #696969;
+	      box-shadow: 8px 8px 6px -6px #696969;
       }
       .feedback-cards-header {
-        font-size: 10vh;
+        font-size: 7.5vh;
         margin-bottom: 10%;
         font-weight: bold;
       }
@@ -60,7 +62,7 @@ this license.
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around;
-        width: 85%;
+        width: 80%;
         margin: 0 auto;
       }
       @media (max-width: 500px) {
@@ -68,6 +70,10 @@ this license.
           margin-top: 5%;
           background-color: #DBE8DE;
           box-shadow: none;
+        }
+        .feedback-cards-header {
+          font-size: 8vh;
+          margin-bottom: 17%;
         }
       }
     </style>
