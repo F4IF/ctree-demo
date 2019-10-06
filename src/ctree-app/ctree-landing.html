@@ -236,14 +236,38 @@ this license.
           top: 10%;
           bottom: 10%;
       }
-
-      /* create horizontal line only for mobile */
-      @media (min-width: 500px) {
-        #footer-mobile-horizontal-line {
-          display: none;
-        }
+      /* footer styles */
+      .footer-container {
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        margin-left: 9%;
+        margin-top: 4%;
+        margin-bottom: 2%;
       }
-
+      .footer-left  {
+      }
+      .footer-right {
+        margin-left: 12%;
+      }
+      .footer-desc {
+        width: 60%;
+        font-size: 1.15em;
+        font-family: Roboto;
+        margin-left: 2%;
+      }
+      #social-media-icon-bar ul {
+        list-style: none;
+        padding: 1% 0;
+        text-align: left;
+      }
+      #social-media-icon-bar ul > li {
+        margin-left: 1%;
+      }
+      #copyright p {
+        font-size: 1.15em;
+        font-family: Roboto;
+      }
       /* Mobile Phones */
       @media (max-width: 500px) {
         [class*="col-"] {
@@ -307,38 +331,28 @@ this license.
           margin: auto;
           width: 75%;
         }
-      }
-
-      /* footer styles */
-      .footer-left  {
-        float: left;
-        width: 58%;
-        margin-left: 8.5%;
-        margin-top: 3.5%;
-        margin-bottom: 3%;
-      }
-      .footer-right {
-        float: left;
-        margin-top: 10%;
-        width: 25%;
-      }
-      .footer-desc {
-        width: 45%;
-        font-size: 1.15em;
-        margin-left: 2%;
-      }
-      /* social media icon bar stuff */
-      #social-media-icon-bar ul {
-        list-style: none;
-        padding: 1% 0;
-        text-align: left;
-      }
-      #social-media-icon-bar ul > li {
-        margin-left: 1%;
-      }
-      #copyright p {
-        text-align: center;
-        font-size: 1.15em;
+        /* Footer Mobile */
+        .footer-container {
+          flex-direction: column;
+          align-items: center;
+          margin: 0;
+          margin-bottom: 10%;
+        }
+        #social-media-icon-bar ul {
+          padding: 2% 0;
+          text-align: center;
+        }
+        .footer-desc {
+          width: 70%;
+          font-size: .8em;
+          margin: 0 auto;
+        }
+        .footer-right {
+          margin: 0 auto;
+        }
+        #copyright p {
+          font-size: .8em;
+        }
       }
 
       /* Section CSS Styling */
@@ -519,25 +533,26 @@ this license.
             </div>
         </div>
         <div id="footer" class="section-styling">
-          <div class="footer-left">
-            <div id="social-media-icon-bar">
-              <ul>
-                <li><a href="https://github.com/F4IF/ctree-demo"><img src="[[rootPath]]/images/github.png"></a></li>
-                <li><a href="https://www.slack.com"><img src="[[rootPath]]/images/slack.png"></a></li>
-                <li><a href="https://www.facebook.com"><img src="[[rootPath]]/images/facebook.png"></a></li>
-                <li><a href="https://twitter.com"><img src="[[rootPath]]/images/twitter.png"></a></li>
-              </ul>
+          <div class="footer-container">
+            <div class="footer-left">
+              <div id="social-media-icon-bar">
+                <ul>
+                  <li><a href="https://github.com/F4IF/ctree-demo"><img src="[[rootPath]]/images/github.png"></a></li>
+                  <li><a href="https://www.slack.com"><img src="[[rootPath]]/images/slack.png"></a></li>
+                  <li><a href="https://www.facebook.com"><img src="[[rootPath]]/images/facebook.png"></a></li>
+                  <li><a href="https://twitter.com"><img src="[[rootPath]]/images/twitter.png"></a></li>
+                </ul>
+              </div>
+              <div class="footer-desc">
+                <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+              </div>
             </div>
-            <div class="footer-desc">
-              <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
+            <div class="footer-right">
+              <div id="copyright">
+                <p>&copyFoundation For an Innovative Future.</p>
+              </div>
             </div>
           </div>
-          <div class="footer-right">
-            <div id="copyright">
-              <p>&copyFoundation For an Innovative Future.</p>
-            </div>
-          </div>
-          <hr id="footer-mobile-horizontal-line"/>
         </div>
     </app-header-layout>
 
