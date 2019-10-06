@@ -357,7 +357,10 @@ this license.
       #participate.section-styling {
         background-color: #DBE8DE;
         padding: 8px 0 130px 0;
-
+      }
+      .participate-content {
+        margin: 0 auto;
+        max-width: 701px;
       }
       #participate .green-btn {
         color: #FFFFFF;
@@ -368,14 +371,14 @@ this license.
         font-size: .9em;
         font-weight: 500;
         padding: 16px 36px;
-        margin: 38px auto 0 auto;
+        margin: 38px auto 0;
         box-shadow: .125em .125em rgba(0, 0, 0, 0.4);
         border-radius: .4em;
       }
       #participate h1 {
         color: #62A374;
         font-size: 2.9em;
-        letter-spacing: .03em;
+        letter-spacing: .02em;
         margin-bottom: -36px;
       }
       #participate h2 {
@@ -383,20 +386,24 @@ this license.
         text-align: center;
         font-size: 2.1em;
         margin-top: 60px;
-        letter-spacing: .03em;
+        letter-spacing: .02em;
       }
       #participate p {
-        color: #2E302E;
-        font-size: 1.1em;
+        color: #222322;
+        font-size: 1.12em;
         margin: 0 auto;
         width: 90%;
-        line-height: 30px;
+        line-height: 27px;
+        letter-spacing: .027em;
       }
       #participate p::after {
         content: "";
         display: block;
         margin-top: 26px;
         clear: both;
+      }
+      #participate a {
+        text-decoration: none;
       }
       #footer.section-styling {
         background-color: #2B2B2B;
@@ -530,7 +537,7 @@ this license.
           <p>W</p>
         </div>
         <div id="participate" class="section-styling">
-          <div class="center-div">
+          <div class="participate-content">
             <h1 align="center">Participate</h1>
             <h2>Join the Open Source Project!</h2>
             <p>
@@ -540,19 +547,19 @@ this license.
               designers to complete a part of the project.
             </p>
             <p>
-              All regular contributors can add the
-              project to their LinkedIn resume and request a recommendation based on their completed
-              work.
+              Regular contributors are encouraged to add the project to their LinkedIn, and can
+              request recommendations based on the work they've completed. Go to cTree.dev to
+              get started.
             </p>
-            <paper-button raised class="green-btn" href="dev.ctree.org">JOIN CTREE</paper-button>
+            <a href="ctree.dev" tabindex="-1"><paper-button raised class="green-btn">JOIN CTREE</paper-button></a>
             <h2>Test Collaboration Tree!</h2>
             <p>
               <!-- <div class="bold-text">Test the project</div> -->
               As the project develops we need real world examples of how it can be used.  If you
               want to use it with your nonprofit, online community, or other organization Please
-              email <a href = "mailto: contact@innovativeFuture.org">contact@innovativeFuture.org</a>
+              email contact@innovativeFuture.org
             </p>
-            <paper-button raised class="green-btn" href="mailto: contact@innovativeFuture.org">TEST CTREE</paper-button>
+            <a href="mailto: contact@innovativeFuture.org" tabindex="-1"><paper-button raised class="green-btn">TEST CTREE</paper-button></a>
           </div>
         </div>
         <div id="footer" class="section-styling">
