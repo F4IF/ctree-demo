@@ -160,15 +160,16 @@ this license.
       /* ctree blub text formatting */
       #ctree-blurb p {
         display: inline-block;
+        font: 'Roboto';
+        font-size: 18px;
         margin-top: 0;
-        margin-bottom: 25px;
         padding-left: 25px;
         padding-right: -10px;
         width: 85%;
       }
 
       .flex-grid {
-        text-align: center;
+        text-align: left;
         align-items: center;
         justify-content: center;
       }
@@ -179,7 +180,6 @@ this license.
         flex-wrap: wrap;
         justify-content: space-evenly;
         flex: 1;
-        margin: 10px;
       }
       .flex-column {
         display: flex;
@@ -188,14 +188,15 @@ this license.
         flex-basis: 20%;
       }
 
-      #copyright p {
+      /* #copyright p {
         display: inline-block;
         float: right;
         margin-top: 0;
         margin-bottom: 0;
         margin-right: 0;
         padding-right: 75px;
-      }
+        padding-top: 20px;
+      } */
 
       /* Desktop Grid-View 12 column scaling */
       /* columns */
@@ -235,14 +236,38 @@ this license.
           top: 10%;
           bottom: 10%;
       }
-
-      /* create horizontal line only for mobile */
-      @media (min-width: 500px) {
-        #footer-mobile-horizontal-line {
-          display: none;
-        }
+      /* footer styles */
+      .footer-container {
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        margin-left: 9%;
+        margin-top: 4%;
+        margin-bottom: 2%;
       }
-
+      .footer-left  {
+      }
+      .footer-right {
+        margin-left: 12%;
+      }
+      .footer-desc {
+        width: 60%;
+        font-size: 1.15em;
+        font-family: Roboto;
+        margin-left: 2%;
+      }
+      #social-media-icon-bar ul {
+        list-style: none;
+        padding: 1% 0;
+        text-align: left;
+      }
+      #social-media-icon-bar ul > li {
+        margin-left: 1%;
+      }
+      #copyright p {
+        font-size: 1.15em;
+        font-family: Roboto;
+      }
       /* Mobile Phones */
       @media (max-width: 500px) {
         [class*="col-"] {
@@ -281,42 +306,17 @@ this license.
         #footer {
           text-align: center;
         }
-        /* social media icon bar stuff */
-        #social-media-icon-bar ul {
-          list-style: none;
-          margin: 0;
-          padding: 19px 19px 8px 19px;
-          text-align: center;
-        }
-        /* ctree blub text formatting */
-        #ctree-blurb p {
-          tex-align: center;
-          display: inline-block;
-          margin-top: 0;
-          margin-bottom: 0;
-          padding-left: 0;
-          margin-right: 0;
-          width: 75%;
-        }
         .flex-row {
           margin-bottom: 0;
           margin-top: 0;
           margin-left: 100px;
           margin-right: 100px;
+          flex-direction: column;
         }
         .flex-column {
           flex: 1;
           flex-basis: 40%;
           margin: 5px;
-        }
-        #copyright p {
-          display: inline-block;
-          margin-top: 0;
-          margin-bottom: 0;
-          padding-left: 25px;
-          margin-right: 0;
-          padding-right: 25px;
-          padding-top: 16px;
           width: 100%;
         }
         #footer-mobile-horizontal-line {
@@ -330,6 +330,28 @@ this license.
         .center-div {
           margin: auto;
           width: 75%;
+        }
+        /* Footer Mobile */
+        .footer-container {
+          flex-direction: column;
+          align-items: center;
+          margin: 0;
+          margin-bottom: 10%;
+        }
+        #social-media-icon-bar ul {
+          padding: 2% 0;
+          text-align: center;
+        }
+        .footer-desc {
+          width: 70%;
+          font-size: .8em;
+          margin: 0 auto;
+        }
+        .footer-right {
+          margin: 0 auto;
+        }
+        #copyright p {
+          font-size: .8em;
         }
       }
 
@@ -360,8 +382,9 @@ this license.
         padding: 36px 0 64px 0;
       }
       #footer.section-styling {
-        background-color: #2B2B2B;
-        color: #B4B4B4;
+        background-color: #FFFFFF;
+        color: #000000;
+        display: flex;
       }
     </style>
 
@@ -510,46 +533,27 @@ this license.
             </div>
         </div>
         <div id="footer" class="section-styling">
-          <div class="table-row">
-            <div class="col-5 table-cell line">
-              <div class="inner-row-1">
-                <div id="social-media-icon-bar">
-                  <ul>
-                    <li><a href="https://twitter.com/"><i class="twitter"></i><img src="[[rootPath]]/images/twitter-icon-32.png"></a></li>
-                    <li><a href="https://www.facebook.com/"><i class="facebook"</i><img src="[[rootPath]]/images/facebook-icon-32.png"></a></li>
-                    <li><a href="https://github.com/F4IF/ctree-demo"><i class="github"></i><img src="[[rootPath]]/images/github-icon-32.png"></a></li>
-                    </ul>
-                </div>
+          <div class="footer-container">
+            <div class="footer-left">
+              <div id="social-media-icon-bar">
+                <ul>
+                  <li><a href="https://github.ctree.org"><img src="[[rootPath]]/images/github.png"></a></li>
+                  <li><a href="https://slack.ctree.org"><img src="[[rootPath]]/images/slack.png"></a></li>
+                  <li><a href="https://facebook.ctree.org"><img src="[[rootPath]]/images/facebook.png"></a></li>
+                  <li><a href="https://twitter.ctree.org"><img src="[[rootPath]]/images/twitter.png"></a></li>
+                </ul>
               </div>
-              <div class="inner-row-2">
-                <div id="ctree-blurb">
-                  <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
-                </div>
+              <div class="footer-desc">
+                <p>The Collaboration Tree is a project of the Foundation For an Innovative Future</p>
               </div>
-              <hr id="footer-mobile-horizontal-line"/>
             </div>
-            <div class="col-7 table-cell">
-              <div class="flex-grid">
-                <div class="flex-row">
-                  <div class="flex-column">TEST1</div>
-                  <div class="flex-column">TEST2</div>
-                  <div class="flex-column">TEST3</div>
-                  <div class="flex-column">TEST4</div>
-                </div>
-                <div class="flex-row">
-                  <div class="flex-column">TEST5</div>
-                  <div class="flex-column">TEST6</div>
-                  <div class="flex-column">TEST7</div>
-                  <div class="flex-column">TEST8</div>
-                </div>
-              </div>
+            <div class="footer-right">
               <div id="copyright">
-                <p>&copy Foundation For an Innovative Future.</p>
+                <p>&copyFoundation For an Innovative Future.</p>
               </div>
             </div>
           </div>
         </div>
-    </div>
     </app-header-layout>
 
     <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
