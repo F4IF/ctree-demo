@@ -341,6 +341,32 @@ this license.
     }
 
     /**
+     * Converts the data array returned by an API call to an object containing
+     * each item indexed by its ID.
+     */
+    _dataArrayToIndexedItems(dataArray) {
+      var items = {};
+      for (var key in dataArray) {
+        var item = this._dataToItem(dataArray[key]);
+        items[item.id] = item;
+      }
+      return items;
+    }
+
+    /**
+     * Adds the key for each item in the collection as an ID value for the item.
+     */
+    _addIdsToItems(items) {
+      var updatedItems = {};
+      for (var key in items) {
+        var item = items[key];
+        item.id = key;
+        updatedItems[key] = item;
+      }
+      return updatedItems;
+    }
+
+    /**
      * Called when the cTreeData property changes.  This can be used to initialize
      * additional fields.
      *

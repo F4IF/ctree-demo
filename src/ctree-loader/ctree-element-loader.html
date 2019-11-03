@@ -133,9 +133,31 @@ this license.
           observer: '_descriptionConfigIdChanged',
         },
 
+        descriptionConfigVariationMinCount: {
+          type: Number,
+          observer: '_descriptionConfigVariationMinCountChanged',
+        },
+
+        descriptionConfigHasMoreVariations: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+
         descriptionSegmentIds: {
           type: Array,
           observer: '_descriptionSegmentIdsChanged',
+        },
+
+        descriptionSegmentsVariationMinCount: {
+          type: Number,
+          observer: '_descriptionSegmentsVariationMinCountChanged',
+        },
+
+        descriptionSegmentsHasMoreVariations: {
+          type: Array,
+          notify: true,
+          readOnly: true,
         },
       };
     }
@@ -164,6 +186,32 @@ this license.
         this.listItem = undefined;
       }
       this.elementId = element.id;
+      this._setDescriptionConfigHasMoreVariations(true);
+      this.__resetDescriptionSegmentsHasMoreVariations();
+    }
+
+    __getCurrentDescriptionConfig() {
+      if (!this.element) return;
+
+      var description = null;
+      if (!!this.descriptionConfigId) {
+        description = CTree.Loader.getFromArrayWithId(this.element.description, this.descriptionConfigId, false);
+      } else if (this.element.description.length == 1) {
+        description = this.element.description[0];
+      }
+      return description
+    }
+
+    __resetDescriptionSegmentsHasMoreVariations() {
+      var currentDescriptionConfig = this.__getCurrentDescriptionConfig();
+      if (!currentDescriptionConfig) return;
+
+      var segmentsCount = currentDescriptionConfig.segments.length;
+      var hasMoreArray = [];
+      for (var i = 0; i < segmentsCount; i++) {
+        hasMoreArray[i] = true;
+      }
+      this._setDescriptionSegmentsHasMoreVariations(hasMoreArray);
     }
 
     _elementIdChanged(elementId) {
@@ -181,12 +229,35 @@ this license.
       if (!this.elementId) return;
 
       // TODO: load new description config for element, if needed
+      // TODO: call this.__resetDescriptionSegmentsHasMoreVariations() once description config loaded
+    }
+
+    _descriptionConfigVariationMinCountChanged(minVariationCount) {
+      var currentDescriptionConfig = this.__getCurrentDescriptionConfig();
+      if (!currentDescriptionConfig) return;
+
+      // TODO: ensure that the current element has at least the specified number
+      // of description variations loaded.  If not, load more variations until
+      // reach minVariationCount.  If no more variations exist, set
+      // descriptionConfigHasMoreVariations to false and stop attempting to load.
     }
 
     _descriptionSegmentIdsChanged(descriptionSegmentIds) {
       if (!this.elementId) return;
 
       // TODO: load new description segments for element, if needed
+    }
+
+    _descriptionSegmentsVariationMinCountChanged(minVariationCount) {
+      if (!this.elementId || !this.element || (!this.descriptionConfigId && this.element.description.length != 1)) return;
+
+      // TODO: ensure that each segment for the current description config in
+      // the element has the specified number of variations loaded.  If not,
+      // load more variations for each segment where
+      // descriptionSegmentsHasMoreVariations[index] is true until reach
+      // minVariationCount.  If a segment has no more variations its
+      // descriptionSegmentsHasMoreVariations[index] should be set to false and
+      // we should stop attempting to load more.
     }
 
     _updateComment() {
