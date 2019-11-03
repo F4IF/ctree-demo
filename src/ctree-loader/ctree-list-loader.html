@@ -41,6 +41,30 @@ this license.
     window.CTree = {};
   }
 
+  /**
+   * Base class for all list loader implementations.  This is done as a Mixin so
+   * the behavior class corresponding to the implementation can be used as the
+   * super class.
+   *
+   * CTreeData Structure:
+   *   url: String,
+   *   name: String,
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: ListData,
+   *     bookmarked: ListData,
+   *     history: ListData,
+   *   },
+   *
+   * ListData Structure:
+   *   items: [Elements],
+   *   loading: Boolean,
+   *   hasMore: Boolean,
+   *   offset: String,			// test: Number
+   */
   CTree.ListLoaderMixin = (superClass) => class extends superClass {
 
     static get is() { return 'ctree-list-loader'; }
@@ -230,8 +254,8 @@ this license.
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadSuggestedItems(cTreeData, listData) {
       // TODO: override to implement loading
@@ -240,8 +264,8 @@ this license.
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadBookmarkedItems(cTreeData, listData) {
       // TODO: override to implement loading
@@ -250,8 +274,8 @@ this license.
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadHistoryItems(cTreeData, listData) {
       // TODO: override to implement loading

@@ -37,6 +37,28 @@ this license.
 
   'use strict';
 
+  /**
+   * Implementation of list loader using xAPI.
+   *
+   * CTreeData Structure:
+   *   url: String,
+   *   name: String,
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: ListData,
+   *     bookmarked: ListData,
+   *     history: ListData,
+   *   },
+   *
+   * ListData Structure:
+   *   items: [Elements],
+   *   loading: Boolean,
+   *   hasMore: Boolean,
+   *   offset: String,			// test: Number
+   */
   class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
 
     static get is() { return 'ctree-list-loader'; }
@@ -44,31 +66,55 @@ this license.
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadSuggestedItems(cTreeData, listData) {
-      // TODO: override to implement loading
+      /**
+       * TODO: Load next page of suggested items via xAPI for the cTree with the
+       * key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
     }
 
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadBookmarkedItems(cTreeData, listData) {
-      // TODO: override to implement loading
+      /**
+       * TODO: Load next page of bookmarked items via xAPI for the cTree with
+       * the key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
     }
 
     /**
      * Load the next page of suggested items.
      *
-     * @param  {Object} cTreeData The cTreeData the loaded items should be associated with
-     * @param  {Object} listData  The listData the items will be added to
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadHistoryItems(cTreeData, listData) {
-      // TODO: override to implement loading
+      /**
+       * TODO: Load next page of history items via xAPI for the cTree with the
+       * key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
     }
   }
   CTree.ListLoader = CTreeListLoader;

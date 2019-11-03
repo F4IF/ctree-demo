@@ -99,20 +99,22 @@ this license.
          * All types for current cTree, indexed by ID.
          *
          * Structure:
-         *   [{
-         *     id: String,
-         *     name: String,
-         *     description: String,
-         *     iconUrl: String,
-         *     color: String,
-         *     parentsRequired: Boolean,
-         *     parentsMax: Number,
-         *     parentTypes: [Strings],
-         *     elements: [Elements],
-         *   }, ...]
+         *   {
+         *     id: {
+         *       id: String,
+         *       name: String,
+         *       description: String,
+         *       iconUrl: String,
+         *       color: String,
+         *       parentsRequired: Boolean,
+         *       parentsMax: Number,
+         *       parentTypes: [Strings],
+         *     },
+         *     ...
+         *   }
          */
         types: {
-          type: Array,
+          type: Object,
           readOnly: true,
           notify: true,
         },
@@ -121,14 +123,17 @@ this license.
          * All segment types supported by current cTree, indexed by ID.
          *
          * Structure:
-         *   [{
-         *     id: String,
-         *     componentName: String,
-         *     canBeThumbnail: Boolean,
-         *   }, ...]
+         *   {
+         *     id: {
+         *       id: String,
+         *       componentName: String,
+         *       canBeThumbnail: Boolean,
+         *     },
+         *     ...
+         *   }
          */
         segmentTypes: {
-          type: Array,
+          type: Object,
           readOnly: true,
           notify: true,
         },
@@ -140,28 +145,28 @@ this license.
          * Base Structure:
          *   url: String,
          *   name: String,
-         *   types: [Types],
-         *   segmentTypes: [SegmentTypes],
-         *   elements: [Elements],
-         *   users: [Users],
+         *   types: TypesById,
+         *   segmentTypes: SegmentTypesById,
+         *   elements: ElementsById,
+         *   users: UsersById,
          *   lists: {
          *     suggested: {
          *       items: [SuggestedItems],
          *       loading: Boolean,
          *       hasMore: Boolean,
-         *       offset: String,
+         *       offset: String,			// test: Number
          *     },
          *     bookmarked: {
          *       items: [BookmarkedItems],
          *       loading: Boolean,
          *       hasMore: Boolean,
-         *       offset: String,
+         *       offset: String,			// test: Number
          *     },
          *     history: {
          *       items: [HistoryItems],
          *       loading: Boolean,
          *       hasMore: Boolean,
-         *       offset: String,
+         *       offset: String,			// test: Number
          *     },
          *   },
          *
@@ -211,7 +216,7 @@ this license.
     /**
      * Called when the url property changes.
      *
-     * @param  {String} url New value for url
+     * @param {String} url New value for url
      */
     _urlChanged(url) {
       // TODO: override in implementation
@@ -220,8 +225,8 @@ this license.
     /**
      * Called when the ctreeKey property changes.
      *
-     * @param  {String} cTreeKey    New value for cTreeKey
-     * @param  {String} previousKey Previous value for cTreeKey
+     * @param {String} cTreeKey    New value for cTreeKey
+     * @param {String} previousKey Previous value for cTreeKey
      */
     _keyChanged(cTreeKey, previousKey) {
       if (cTreeKey == previousKey) return;
@@ -235,8 +240,8 @@ this license.
           url: this.url,
           types: {},
           segmentTypes: {},
-          elements: [],
-          users: [],
+          elements: {},
+          users: {},
           lists: {
             suggested:  {items: [], loading: false, hasMore: true},
             bookmarked: {items: [], loading: false, hasMore: true},
@@ -253,21 +258,53 @@ this license.
       this.name = cTreeData.name;
 
       if (cTreeData.name.length == 0) {
-        this._loadName(cTreeData);
+        this._loadName(cTreeData.key, (name) => {
+          if (!name) name = "";
+          cTreeData.name = name;
+          if (this.ctreeKey === cTreeData.key) {
+            this.name = name;
+          }
+        });
       }
       if (Object.keys(cTreeData.types).length == 0) {
-        this._loadTypes(cTreeData);
+        this._loadTypes(cTreeData.key, (types) => {
+          if (types) {
+            if (Array.isArray(types)) {
+              cTreeData.types = this._dataArrayToIndexedItems(types);
+            } else {
+              cTreeData.types = this._addIdsToItems(types);
+            }
+          } else {
+            cTreeData.types = {};
+          }
+          if (this.ctreeKey === cTreeData.key) {
+            this._setTypes(cTreeData.types);
+          }
+        });
       }
       if (Object.keys(cTreeData.segmentTypes).length == 0) {
-        this._loadSegmentTypes(cTreeData);
+        this._loadSegmentTypes(cTreeData.key, (segmentTypes) => {
+          if (segmentTypes) {
+            if (Array.isArray(segmentTypes)) {
+              cTreeData.segmentTypes = this._dataArrayToIndexedItems(segmentTypes);
+            } else {
+              cTreeData.segmentTypes = this._addIdsToItems(segmentTypes);
+            }
+          } else {
+            cTreeData.segmentTypes = {};
+          }
+          if (this.ctreeKey === cTreeData.key) {
+            this._setSegmentTypes(cTreeData.segmentTypes);
+          }
+        });
       }
     }
 
     /**
      * New cTreeData was created.  Override this to add additional data to the new cTreeData.
      *
-     * @param  {String} cTreeKey  The key for the cTree
-     * @param  {Object} cTreeData The new cTreeData created
+     * @param {String} cTreeKey  The key for the cTree
+     * @param {Object} cTreeData The new cTreeData created
      */
     _createdCTreeData(cTreeKey, cTreeData) {
       // TODO: override in implementation
@@ -275,22 +312,31 @@ this license.
 
     /**
      * Load the human readable name associated with the cTree
+     *
+     * @param {String} ctreeKey Key for cTree to load name for
+     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
-    _loadName(cTreeData) {
+    _loadName(cTreeKey, onComplete) {
       // TODO: override in implementation
     }
 
     /**
-     * Load the element types name associated with the cTree
+     * Load the element types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load element types for
+     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
-    _loadTypes(cTreeData) {
+    _loadTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
     }
 
     /**
      * Load the segment types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load segment types for
+     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
-    _loadSegmentTypes(cTreeData) {
+    _loadSegmentTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
     }
 
@@ -298,8 +344,8 @@ this license.
      * Called when the cTreeData property changes.  This can be used to initialize
      * additional fields.
      *
-     * @param  {Object} cTreeData         New cTreeData value
-     * @param  {Object} previousCTreeData Previous cTreeData value
+     * @param {Object} cTreeData         New cTreeData value
+     * @param {Object} previousCTreeData Previous cTreeData value
      */
     _cTreeDataChanged(cTreeData, previousCTreeData) {
       // TODO: override to initialize additional fields when cTreeData changes
@@ -309,12 +355,12 @@ this license.
      * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
      * called with the final, fully loaded item.
      *
-     * @param  {String} elementId           ID of the element to load data for.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * @param {String} elementId           ID of the element to load data for.
+     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */
-    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
       // TODO: override in implementation
     }
   };
@@ -328,10 +374,10 @@ this license.
    * Structure:
    *   url: String,
    *   name: String
-   *   types: {Types},
-   *   segmentTypes: {SegmentTypes},
-   *   elements: {Elements},
-   *   users: {Users},
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
    *   lists: {
    *     suggested: {
    *       items: [SuggestedItems],
