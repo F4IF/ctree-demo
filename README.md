@@ -263,9 +263,9 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 ##### Checkout branch (optional)
 
-	git checkout <BRANCH_NAME>
+	git checkout -b <BRANCH_NAME>
 
-##### Insall 3rd party dependencies
+##### Install 3rd party dependencies
 
 	bower install
 
