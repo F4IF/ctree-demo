@@ -377,6 +377,27 @@ this license.
         #copyright p {
           font-size: .8em;
         }
+        div .features-content {
+          margin: 0 45px;
+        }
+        div .collaboration-search-col, div .share-review-col {
+          margin: auto;
+          width: 90%;
+        }
+        div #features h3 {
+          font-size: 1.25em;
+        }
+        div #features p {
+          font-size: 1.12em;
+        }
+        div .collaboration-section, div .search-section,
+        div .share-section, div .review-section, div .features-content {
+          display: block;
+        }
+        div .image {
+          margin-right: 0;
+        }
+
       }
 
       /* Section CSS Styling */
@@ -395,6 +416,13 @@ this license.
       #features.section-styling {
         background-color: #FFFFFF;
         color: #196848;
+        padding-top: 65px;
+        margin-top: -65px; /* app-header fix */
+      }
+      #features h1 {
+        color: #62A374;
+        font-size: 2.9em;
+        letter-spacing: .02em;
       }
       #ctree.section-styling {
         background-color: #196848;
@@ -456,6 +484,39 @@ this license.
         color: #000000;
         display: flex;
       }
+      iron-icon {
+        --iron-icon-fill-color: #62A374;
+        --iron-icon-width: 80px;
+        --iron-icon-height: 80px;
+      }
+      #features h3 {
+        color: #62A374;
+        margin-top: 0;
+      }
+      #features p {
+        color: #222322;
+        font-size: 0.75em;
+        letter-spacing: .027em;
+        padding-top: 10px;
+      }
+      .collaboration-search-col, .share-review-col {
+        width: 350px;
+      }
+      .features-content {
+        display: flex;
+        justify-content: space-evenly;
+      }
+      .collaboration-section, .search-section, .share-section, .review-section {
+        display: flex;
+        margin-bottom: 50px;
+      }
+      .image {
+        margin-right: 50px;
+      }
+      .review {
+        transform: rotate(40deg);
+      }
+
     </style>
 
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
@@ -533,33 +594,59 @@ this license.
           <p>W</p>
         </div>
         <div id="features" class="section-styling">
-          <div class= "center-div">
-            <h1 align="center">Features</h1>
-            <hr id="features-horizontal-line"/>
-            <!-- grid layout to be added here with icons and descriptions. -->
-          </div>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div>
+          <h1 align="center">Features</h1>         
+          <!-- grid layout to be added here with icons and descriptions. -->
+          <div class="features-content">
+            <div class="collaboration-search-col">
+              <div class="collaboration-section">
+                <div class="image">
+                  <iron-icon icon="collaboration"></iron-icon>
+                </div>
+                <div class="collaboration-text">
+                  <h3>Collaboration</h3>
+                  <p>
+                    Connect with like-minded passionate individuals to solve problems for a cause.
+                  </p>
+                </div>
+              </div> <!-- end of collaboration section -->
+              <div class="search-section">
+                <div class="image">
+                  <iron-icon icon="search"></iron-icon>
+                </div>
+                <div class="search-text">
+                  <h3>Search</h3>
+                  <p>
+                    Discover non-profits and other causes doing good for the world!
+                  </p>
+                </div>
+              </div> <!-- end of search section -->
+            </div> <!-- end of collaboration-search column -->
+            <div class="share-review-col">
+              <div class="share-section">
+                <div class="image">
+                  <iron-icon icon="share"></iron-icon>
+                </div>
+                <div class="share-text">
+                  <h3>Share</h3>
+                  <p>
+                    Promote other helpful thoughts and discussions to avoid seeing the same answers over and over again
+                  </p>
+                </div>
+              </div> <!-- end of share section -->
+              <div class="review-section">
+                <div class="image">
+                  <iron-icon class="review" icon="review"></iron-icon>
+                </div>
+                <div class="review-text">
+                  <h3>Review</h3>
+                  <p>
+                    Edit and Vote for the most helpful version of ideas and solutions
+                  </p>
+                </div>
+              </div> <!-- end of review section -->
+            </div><!-- end of share-review column -->
+          </div> <!-- end of features-content -->
+        </div> <!-- end of section-styling -->
         <div id="ctree" class="section-styling">
           <p>W</p>
           <p>W</p>
