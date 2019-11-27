@@ -261,9 +261,13 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 	cd ctree-demo
 
-##### Checkout branch (optional)
+##### Checkout existing branch (optional)
 
-	git checkout -b <BRANCH_NAME>
+	git checkout <BRANCH_NAME>
+	
+_**Note:** if the branch cannot be found:_
+
+	git fetch --all
 
 ##### Install 3rd party dependencies
 
