@@ -1,0 +1,120 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/dom-repeat.html">
+<link rel="import" href="../ctree-icons/ctree-landing-icons.html">
+
+<dom-module id="features-section">
+  <template>
+    <style>
+      :host {
+        display: block;
+        background-color: #FFFFFF;
+        color: #196848;
+        padding-top: var(--app-header-padding-fix);
+        margin-top: var(--app-header-margin-fix);
+      }
+      iron-icon {
+        --iron-icon-fill-color: #62A374;
+        --iron-icon-width: 80px;
+        --iron-icon-height: 80px;
+      }
+      .review-icon {
+        transform: rotate(40deg);
+      }
+      h1, h3 {
+        color: #62A374;
+      }
+      h1 {
+        text-align: center;
+        font-size: 2.9em;
+        letter-spacing: .02em;
+      }
+      h3 {        
+        text-transform: capitalize;
+        margin-top: 0;
+      }
+      p {
+        color: #222322;
+        font-size: 0.75em;
+        letter-spacing: .027em;
+        padding-top: 10px;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        max-width: 1000px;
+        margin: auto;
+      }      
+      .collaboration, .search, .share, .review {
+        display: flex;
+        width: 350px;
+        margin-bottom: 50px;
+      }
+      .image {
+        margin-right: 50px;
+      }
+      /* Mobile Phones */
+      @media (max-width: 500px) {
+        h3 {
+          font-size: 1.25em;
+        }
+        div p {
+          font-size: 1.12em;
+          margin: 0 45px;
+        }
+        div .collaboration, div .search, div .share, div .review {
+          display: block;
+          width: 90%;
+        }
+        div .image {
+          margin-right: 0;
+        }
+      }
+    </style>
+
+    <h1>Features</h1>
+    <div class="container">
+      <dom-repeat items="[[sections]]" as="section">
+        <template>
+          <div class$="[[section.name]]">
+            <div class="image">
+              <iron-icon class$="[[section.name]]-icon" icon="[[section.name]]"></iron-icon>
+            </div>
+            <div>
+              <h3>[[section.name]]</h3>
+              <p>
+                [[section.description]]
+              </p>
+            </div>
+          </div>
+        </template>
+      </dom-repeat>
+    </div>
+  </template>
+
+  <script>
+  
+    class FeaturesSection extends Polymer.Element {
+      static get is() { return 'features-section'; }
+      static get properties() {
+        return {
+          sections: {
+            type: Array,
+            value: () => [
+                {name: 'collaboration',
+                 description: 'Connect with like-minded passionate individuals to solve problems for a cause.'},
+                {name: 'search',
+                 description: 'Discover non-profits and other causes doing good for the world!'},
+                {name: 'share',
+                 description: 'Promote other helpful thoughts and discussions to avoid seeing the same answers over and over again'},
+                {name: 'review', description:
+                 'Edit and Vote for the most helpful version of ideas and solutions'}
+              ]
+          }
+        };
+      }
+    }
+
+    window.customElements.define(FeaturesSection.is, FeaturesSection);
+  </script>
+</dom-module>
