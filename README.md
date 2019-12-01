@@ -261,11 +261,15 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 	cd ctree-demo
 
-##### Checkout branch (optional)
+##### Checkout existing branch (optional)
 
 	git checkout <BRANCH_NAME>
+	
+_**Note:** if the branch cannot be found:_
 
-##### Insall 3rd party dependencies
+	git fetch --all
+
+##### Install 3rd party dependencies
 
 	bower install
 
