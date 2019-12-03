@@ -74,7 +74,7 @@ this license.
         max-width: 1000px;
         margin: auto;
       }      
-      .collaboration, .search, .share, .review {
+      .item {
         display: flex;
         width: 350px;
         margin-bottom: 50px;
@@ -91,7 +91,7 @@ this license.
           font-size: 1.12em;
           margin: 0 45px;
         }
-        div .collaboration, div .search, div .share, div .review {
+        div .item {
           display: block;
           width: 90%;
         }
@@ -105,7 +105,7 @@ this license.
     <div class="container">
       <dom-repeat items="[[sections]]" as="section">
         <template>
-          <div class$="[[section.name]]">
+          <div class="item">
             <div class="image">
               <iron-icon class$="[[section.name]]-icon" icon="[[section.name]]"></iron-icon>
             </div>
