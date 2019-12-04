@@ -13,56 +13,55 @@
         margin-top: var(--app-header-margin-fix);
       }
       iron-icon {
-        --iron-icon-fill-color: #62A374;
-        --iron-icon-width: 80px;
-        --iron-icon-height: 80px;
-      }
-      .review-icon {
-        transform: rotate(40deg);
-      }
-      h1, h3 {
-        color: #62A374;
+        --iron-icon-width: 100px;
+        --iron-icon-height: 100px;
       }
       h1 {
+        color: #62A374;
         text-align: center;
         font-size: 2.9em;
         letter-spacing: .02em;
       }
-      h3 {        
+      h3 {
+        font-size: 1.25em;
+        color: #62A374;
         text-transform: capitalize;
         margin-top: 0;
       }
       p {
-        color: #222322;
-        font-size: 0.75em;
+        color: #000000;
+        font-size: 0.85em;
         letter-spacing: .027em;
-        padding-top: 10px;
       }
       .container {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-evenly;
+        justify-content: space-around;
         max-width: 1000px;
-        margin: auto;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 25px 0 75px 0;
       }      
-      .collaboration, .search, .share, .review {
+      .item {
         display: flex;
-        width: 350px;
-        margin-bottom: 50px;
+        width: 400px;
+        margin-bottom: 75px;
       }
       .image {
         margin-right: 50px;
       }
       /* Mobile Phones */
       @media (max-width: 500px) {
+        .container {
+          padding: 0;
+        }
         h3 {
-          font-size: 1.25em;
+          margin-top: 20px;
         }
         div p {
-          font-size: 1.12em;
           margin: 0 45px;
         }
-        div .collaboration, div .search, div .share, div .review {
+        div .item {
           display: block;
           width: 90%;
         }
@@ -76,9 +75,9 @@
     <div class="container">
       <dom-repeat items="[[sections]]" as="section">
         <template>
-          <div class$="[[section.name]]">
+          <div class="item">
             <div class="image">
-              <iron-icon class$="[[section.name]]-icon" icon="[[section.name]]"></iron-icon>
+              <iron-icon src="../../images/[[section.image_name]].png"></iron-icon>
             </div>
             <div>
               <h3>[[section.name]]</h3>
@@ -95,20 +94,26 @@
   <script>
   
     class FeaturesSection extends Polymer.Element {
+
       static get is() { return 'features-section'; }
+
       static get properties() {
         return {
           sections: {
             type: Array,
             value: () => [
                 {name: 'collaboration',
-                 description: 'Connect with like-minded passionate individuals to solve problems for a cause.'},
+                 description: 'Connect with like-minded passionate individuals to solve problems for a cause.',
+                 image_name: 'pencil'},
                 {name: 'search',
-                 description: 'Discover non-profits and other causes doing good for the world!'},
+                 description: 'Discover non-profits and other causes doing good for the world!',
+                 image_name: 'magnifying-glass'},
                 {name: 'share',
-                 description: 'Promote other helpful thoughts and discussions to avoid seeing the same answers over and over again'},
-                {name: 'review', description:
-                 'Edit and Vote for the most helpful version of ideas and solutions'}
+                 description: 'Promote other helpful thoughts and discussions to avoid seeing the same answers over and over again',
+                 image_name: 'shared-hands'},
+                {name: 'review',
+                 description: 'Edit and Vote for the most helpful version of ideas and solutions',
+                 image_name: 'looping-arrows'}
               ]
           }
         };
