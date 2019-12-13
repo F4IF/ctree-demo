@@ -62,25 +62,28 @@ this license.
       }
       .feedback-user {
         font-size: 1.2em;
+        font-weight: 450;
         color: #000000;
         margin-top: 7%;
-        margin-bottom: 10%;
+        margin-bottom: 6%;
       }
       .user-horizontial-line {
         width: 60%;
       }
       .feedback-user-content {
         font-size: .9em;
+        font-weight: 500;
         color: #000000;
         min-height: 120px;
       }
-      .feedback-content-quotes {
-        quotes: "\201C""\201D""\2018""\2019";
-      }
+      /* .feedback-content-quotes {
+        quotes: "\201C""\201D""\2018""\2019"; 
+      } */
       .feedback-card-button-view-ctree {
           color: #FFFFFF;
           font-family: Roboto;
           font-size: 1.2em;
+          font-weight: lighter;
           border-radius: 5px;
           background-color: #63A375;
           box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
@@ -120,9 +123,7 @@ this license.
            <div class="feedback-user-content">
              <blockquote>
                <p>
-                 <q class="feedback-content-quotes">
-                   {{quote}}
-                 </q>
+                  "{{quote}}"
                </p>
              </blockquote>
            </div>
