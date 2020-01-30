@@ -2,7 +2,7 @@
 
 # Events
 
-We have regular events in Los Angeles every [Tuesday night](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and collaborate online on our [Slack Group](http://slack.ctree.org).
+We have events in Los Angeles on some [Tuesday nights](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and collaborate online on our [Slack Group](http://slack.ctree.org).
 
 # Collaboration Tree
 
@@ -261,17 +261,25 @@ _**Note:** if you're having trouble installing on Mac, try this:_
 
 	cd ctree-demo
 
-##### Checkout branch (optional)
+##### Checkout existing branch (optional)
 
 	git checkout <BRANCH_NAME>
 
-##### Insall 3rd party dependencies
+_**Note:** if the branch cannot be found:_
+
+> git fetch --all
+
+##### Install 3rd party dependencies
 
 	bower install
 
 _**Note:** if you're having trouble installing on Mac, try this:_
 
 > sudo bower install --allow-root
+
+```diff
+- WARNING: if you call git checkout after this, it's always a good idea to run bower install again -
+```
 
 #### Recommended development environment
 

@@ -170,7 +170,7 @@ this license.
       }
 
       attached() {
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (component) {
           component.addEventListener('editing-changed', e => __editingComponentChanged(e));
           component.addEventListener('add-segment-variation', e => _addSegmentVariation(e));
@@ -178,7 +178,7 @@ this license.
       }
 
       detached() {
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (component) {
           component.removeEventListener('editing-changed', e => __editingComponentChanged(e));
           component.removeEventListener('add-segment-variation', e => _addSegmentVariation(e));
@@ -187,20 +187,20 @@ this license.
 
       previous() {
         if (this._variationIndex <= 0) return;
-
+        this.$.component.editing = false;
         this._variationIndex--;
       }
 
       next() {
         if (!this.segment || !this.segment.variations || this._variationIndex >= this.segment.variations.length - 1) return;
-
+        this.$.component.editing = false;
         this._variationIndex++;
       }
 
       _segmentChanged(segment) {
         // validate component type
         var type = segment.type;
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (!type || !component || component.tagName.toLowerCase() !== type.componentName) {
           var parent = this.$.container;
           var child;
@@ -217,13 +217,13 @@ this license.
             component.removeEventListener('editing-changed', e => __editingComponentChanged(e));
             component.removeEventListener('add-segment-variation', e => _addSegmentVariation(e));
             parent.appendChild(component);
+            this.$.component = component;
           }
         }
       }
 
       _contentClicked() {
         if (this.editing) return;
-
         this.editing = true;
       }
 
@@ -262,7 +262,7 @@ this license.
       }
 
       __editingChanged(value) {
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (component) {
           component.editing = value;
           this.dispatchEvent(new CustomEvent('editing-segment-changed', {detail: {value: value, segment: this.segment}, bubbles: true, composed: true}));
@@ -274,7 +274,7 @@ this license.
       }
 
       __updateEditingFromComponent() {
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (!component || this.editing === component.editing) return;
 
         this.editing = component.editing;
@@ -289,7 +289,7 @@ this license.
         if (!this.segment) return;
 
         var variation = this.segment.variations[index];
-        var component = this.shadowRoot.querySelector('#component');
+        var component = this.$.component;
         if (component) {
           component.set('data', variation.data);
           // TODO: don't set height percentage, let full image size be visible
