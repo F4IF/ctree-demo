@@ -36,7 +36,7 @@ this license.
   <template>
     <style>
       :host {
-        width: 265px; /* must be a specific size for flex wrapping */
+        width: 271px; /* must be a specific size for flex wrapping */
       }
       .feedback-card {
         margin-left: 3%;
@@ -45,71 +45,63 @@ this license.
         flex-grow: 1;
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
         transition: 0.3s;
-        margin-bottom: 30%;
+        margin-bottom: 90px;
       }
       .feedback-avatar {
-        margin-top: -20%;
+        margin-top: -45px;
         border-radius: 50%;
         box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
-        max-width: 35%;
-        height: auto;
+        width: 90px;
+        height: 90px;
       }
       .feedback-card-content {
         width: 100%;
         text-align: center;
         justify-content: center;
-        margin: 5% auto;
       }
       .feedback-user {
-        font-size: 1.2em;
+        font-size: 1.15em;
         font-weight: 450;
         color: #000000;
-        margin-top: 7%;
-        margin-bottom: 6%;
+        margin-top: 12px;
+        margin-bottom: 12px;
       }
       .user-horizontial-line {
-        width: 60%;
+        width: 50%;
       }
       .feedback-user-content {
-        font-size: .9em;
+        font-size: 0.85em;
         font-weight: 500;
         color: #000000;
-        min-height: 120px;
+        min-height: 114px;
+        padding-bottom: 2px;
       }
       .feedback-card-button-view-ctree {
           color: #FFFFFF;
           font-family: Roboto;
-          font-size: 1.2em;
+          font-size: 1.15em;
           font-weight: lighter;
-          border-radius: 5px;
+          border-radius: 7px;
           background-color: #63A375;
           box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
-          padding-right: 15%;
-          padding-left: 15%;
-          padding-top: 4%;
-          padding-bottom: 4%;
-          margin-bottom: 10%;
+          padding-top: 9px;
+          padding-bottom: 7px;
+          margin-bottom: 27px;
+          width: 63%;
       }
       /* Mobile Styles */
       @media (max-width: 500px) {
         .feedback-card {
           background-color: #FFFFFF;
         }
-        .feedback-avatar {
-          margin-top: -18%;
-          max-width: 35%;
-        }
         .feedback-user {
           font-size: 1.6em;
-          margin-top: 5%;
-          margin-bottom: 5%;
         }
         .feedback-user-content {
-          font-size: 1.2em;
-
+          font-size: 1.15em;
         }
         .feedback-card-button-view-ctree {
-          font-size: 1.5em;
+          font-size: 1.54em;
         }
       }
     </style>
