@@ -1,0 +1,142 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+
+<dom-module id="ctree-testimonial">
+  <template>
+    <style>
+      :host {
+        width: 271px; /* must be a specific size for flex wrapping */
+      }
+      .feedback-card {
+        margin-left: 3%;
+        margin-right: 3%;
+        flex-basis: 0;
+        flex-grow: 1;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        transition: 0.3s;
+        margin-bottom: 90px;
+      }
+      .feedback-avatar {
+        margin-top: -45px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+        width: 90px;
+        height: 90px;
+      }
+      .feedback-card-content {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+      .feedback-user {
+        font-size: 1.15em;
+        font-weight: 450;
+        color: #000000;
+        margin-top: 12px;
+        margin-bottom: 12px;
+      }
+      .user-horizontial-line {
+        width: 50%;
+      }
+      .feedback-user-content {
+        font-size: 0.85em;
+        font-weight: 500;
+        color: #000000;
+        min-height: 114px;
+        padding-bottom: 2px;
+      }
+      .feedback-card-button-view-ctree {
+          color: #FFFFFF;
+          font-family: Roboto;
+          font-size: 1.15em;
+          font-weight: lighter;
+          border-radius: 7px;
+          background-color: #63A375;
+          box-shadow: 2px 2px 3px 0 rgba(0,0,0,0.5);
+          padding-top: 9px;
+          padding-bottom: 7px;
+          margin-bottom: 27px;
+          width: 63%;
+      }
+      /* Mobile Styles */
+      @media (max-width: 500px) {
+        .feedback-card {
+          background-color: #FFFFFF;
+        }
+        .feedback-user {
+          font-size: 1.6em;
+        }
+        .feedback-user-content {
+          font-size: 1.15em;
+        }
+        .feedback-card-button-view-ctree {
+          font-size: 1.54em;
+        }
+      }
+    </style>
+      <div class=feedback-card>
+         <img src="[[image]]" alt="avatar" class="feedback-avatar"/>
+         <div class="feedback-card-content">
+           <div class="feedback-user">{{handle}}</div>
+           <hr class="user-horizontial-line" />
+           <div class="feedback-user-content">
+             <blockquote>
+               <p>
+                  "{{quote}}"
+               </p>
+             </blockquote>
+           </div>
+           <div class="feedback-card-button-container">
+             <!-- TODO: add button click event to link back to ctree -->
+             <button class="feedback-card-button-view-ctree">View CTree</button>
+           </div>
+         </div>
+      </div>
+  </template>
+  <script>
+    class CTreeTestimonial extends Polymer.Element {
+      static get is() { return  'ctree-testimonial' }
+      static get properties() {
+        return {
+          image: String,
+          handle: String,
+          quote: String,
+          ctree: String
+        }
+      }
+    }
+    customElements.define(CTreeTestimonial.is, CTreeTestimonial);
+  </script>
+
+</dom-module>

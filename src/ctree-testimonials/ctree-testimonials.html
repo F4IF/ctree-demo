@@ -1,0 +1,147 @@
+<!--
+@license
+Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="./ctree-testimony.html">
+
+
+<dom-module id="ctree-testimonials">
+
+  <template>
+    <style>
+      /* Feedback cards styles */
+      .feedback-container {
+        width: 77%;
+        text-align: center;
+        justify-content: center;
+        background-color: #FFFFFF;
+        margin-top: 78px;
+        margin-bottom: 88px;
+        padding-top: 56px;
+        padding-bottom: 34px;
+        margin-left: auto;
+        margin-right: auto;
+        -webkit-box-shadow: 3px 3px 4px 0px #696969;
+	      -moz-box-shadow: 3px 3px 4px 0px #696969;
+	      box-shadow: 3px 3px 4px 0px #696969;
+      }
+      .feedback-cards-header {
+        font-size: 5.1vh;
+        margin-bottom: 86px;
+        font-weight: bold;
+      }
+      .feedback-cards {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        width: 81%;
+        margin: 0 auto;
+      }
+      @media (max-width: 500px) {
+        .feedback-container {
+          margin-top: 34px;
+          margin-bottom: 0px;
+          padding-top: 0px;
+          padding-bottom: 0px;
+          background-color: #DBE8DE;
+          box-shadow: none;
+          width: 100%;
+        }
+        .feedback-cards-header {
+          font-size: 5.65vh;
+          margin-bottom: 78px;
+        }
+        .feedback-cards {
+          width: 85%;
+        }
+      }
+    </style>
+
+    <div class="feedback-container">
+      <div class="feedback-cards-header">Feedback</div>
+      <div class="feedback-cards">
+        <template is="dom-repeat" items="{{testimonies}}">
+          <ctree-testimonial image={{item.image}}
+                             handle={{item.handle}}
+                             quote={{item.quote}}
+                             ctree={{item.ctree}}>
+          </ctree-testimonial>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    class CTreeTestimonials extends Polymer.Element {
+      static get is() { return  'ctree-testimonials' }
+      static get properties() {
+        return {
+          ctreeKey: String,
+          testimonies: {
+            type: Array,
+            value: [
+              {
+                id: "1",
+                image: [[rootPath]] + "/images/avatar01.jpg",
+                handle: "@ecojess",
+                quote: "Collaboration Tree allowed us to evolve our beach cleanups through evolving the idea with our community!",
+                ctree: ""
+              },
+              {
+                id: "2",
+                image: [[rootPath]] + "/images/avatar02.jpg",
+                handle: "@RyanW",
+                quote: "CTree is great since my voice can reach people working directly on causes I am interested and make a difference",
+                ctree: ""
+              },
+              {
+                id: "3",
+                image: [[rootPath]] + "/images/avatar03.jpg",
+                handle: "@hackforla",
+                quote: "Collaboration Tree helped us connect to our volunteers which led to better turn out at our local hack-nights!",
+                ctree: ""
+              },
+              {
+                id: "4",
+                image: [[rootPath]] + "/images/avatar04.jpg",
+                handle: "@Nick",
+                quote: "This is a test",
+                ctree: ""
+              }
+            ]
+          }
+        }
+      }
+    }
+    customElements.define(CTreeTestimonials.is, CTreeTestimonials);
+  </script>
+
+</dom-module>
