@@ -55,16 +55,10 @@ this license.
      * @param {String} ctreeKey Key for cTree to write element to
      */
     _addElement(onComplete, element, id, ctreeKey) {
-      if (!element.description) {
-        console.error('No description set in element');
-        if (onComplete) onComplete.bind(this)();
-        return;
-      }
-
       var descriptionVariations = element.description;
       this.addDescriptionVariation(descriptionVariations[0], id, (descriptionData) => {
         if (!descriptionData) {
-          if (onComplete) onComplete.bind(this)();
+          onComplete.bind(this)();
           return;
         }
 
@@ -118,13 +112,6 @@ this license.
      * @param {String} ctreeKey               Key for cTree to write description variation to
      */
     _addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey) {
-      var segments = descriptionVariation.segments;
-      if (!segments || segments.length <= 0) {
-        console.error('No segments in description variation: ' + segments.length);
-        if (onComplete) onComplete.bind(this)();
-        return;
-      }
-
       // listen for first variation of each segment to finish writing, then write description entry
       var segmentsData = [];
       var segmentIds = [];
@@ -165,7 +152,7 @@ this license.
           }
         } else {
           segmentVariationFailed = true;
-          if (onComplete) onComplete.bind(this)();
+          onComplete.bind(this)();
         }
       }
 
@@ -197,13 +184,13 @@ this license.
             } else if (j === 0) {
               console.error('First variation for segment is empty');
               segmentVariationFailed = true;
-              if (onComplete) onComplete.bind(this)();
+              onComplete.bind(this)();
               return;
             }
           }
         } else {
           console.error('No variations for segment');
-          if (onComplete) onComplete.bind(this)();
+          onComplete.bind(this)();
           return;
         }
       }
@@ -223,7 +210,7 @@ this license.
         if (id) {
           segmentData.id = id;
         }
-        if (onComplete) onComplete.bind(this)(segmentData);
+        onComplete.bind(this)(segmentData);
       }, variationId);
     }
   }

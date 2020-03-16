@@ -1,0 +1,111 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="ctree-writer-behavior-xapi.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  class CTreeElementWriter extends CTree.ElementWriterMixin(CTree.WriterBehaviorXapi) {
+
+    static get is() { return 'ctree-element-writer'; }
+
+    static get properties() {
+      return {
+      };
+    }
+
+    /**
+     * @param {Function([{ElementData}])} onComplete Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Object} element  Element to add
+     * @param {String} id       ID of element
+     * @param {String} ctreeKey Key for cTree to write element to
+     */
+    _addElement(onComplete, element, id, ctreeKey) {
+      /**
+       * TODO: Write element via xAPI.
+       *
+       * Once return from xAPI call, call onComplete with updated element
+       * data if successful, otherwise call onComplete with null data.
+       *
+       * onComplete.bind(this)(returnedData);
+       **/
+    }
+
+    /**
+     * @param {Object} descriptionVariation   Object containing description variation data to be written to database
+     * @param {String} elementId              ID of element this description is associated with
+     * @param {Function([{DescriptionData}])} onComplete Function called when completed, with the description's written data if successful, otherwise null
+     * @param {String} descriptionVariationId ID of description
+     * @param {String} ctreeKey               Key for cTree to write description variation to
+     */
+    _addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey) {
+      /**
+       * TODO: Write description variation via xAPI.
+       *
+       * Once return from xAPI call, call onComplete with updated description
+       * variation data if successful, otherwise call onComplete with null data.
+       *
+       * onComplete.bind(this)(returnedData);
+       **/
+    }
+
+    /**
+     * @param {Object} variation     Object containing variation data to be written to database
+     * @param {String} elementId     ID of element the segment is associated with
+     * @param {String} descriptionId ID of description the segment is associated with
+     * @param {String} segmentId     ID of segment this variation is associated with
+     * @param {Function([{SegmentVariationData}])} onComplete Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {String} variationId   ID of variation
+     * @param {String} ctreeKey      Key for cTree to write segment variation to
+     */
+    _addSegmentVariation(variation, elementId, descriptionId, segmentId, onComplete, variationId, ctreeKey) {
+      /**
+       * TODO: Write segment variation via xAPI
+       *
+       * Once return from xAPI call, call onComplete with updated segment
+       * variation data if successful, otherwise call onComplete with null data.
+       *
+       * onComplete.bind(this)(returnedData);
+       **/
+    }
+  }
+
+  CTree.ElementWriter = CTreeElementWriter;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeElementWriter.is, CTreeElementWriter);
+
+})();
+
+</script>

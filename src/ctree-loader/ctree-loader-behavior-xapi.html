@@ -50,7 +50,7 @@ this license.
     /**
      * Called when the url property changes.
      *
-     * @param  {String} url New value for url
+     * @param {String} url New value for url
      */
     _urlChanged(url) {
       // TODO: implement once support redirecting cTrees to different URLs
@@ -58,37 +58,203 @@ this license.
 
     /**
      * Load the human readable name associated with the cTree
+     *
+     * @param {String} ctreeKey Key for cTree to load name for
+     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
-    _loadName(cTreeData) {
-      // TODO: implement
+    _loadName(cTreeKey, onComplete) {
+      /**
+       * TODO: Load cTree name via xAPI
+       *
+       * Once return from xAPI call, call onComplete with cTree name if
+       * successful, otherwise call onComplete with null.
+       *
+       * onComplete.bind(this)(name);
+       */
     }
 
     /**
-     * Load the element types name associated with the cTree
+     * Load the element types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load element types for
+     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
-    _loadTypes(cTreeData) {
-      // TODO: implement
+    _loadTypes(cTreeKey, onComplete) {
+      /**
+       * TODO: Load element types for cTree via xAPI
+       *
+       * Once return from xAPI call, call onComplete with element types for
+       * cTree if successful, otherwise call onComplete with null.
+       *
+       * onComplete.bind(this)(types);
+       */
     }
 
     /**
      * Load the segment types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load segment types for
+     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
-    _loadSegmentTypes(cTreeData) {
-      // TODO: implement
+    _loadSegmentTypes(cTreeKey, onComplete) {
+      /**
+       * TODO: Load segment types for cTree via xAPI
+       *
+       * Once return from xAPI call, call onComplete with segment types for
+       * cTree if successful, otherwise call onComplete with null.
+       *
+       * onComplete.bind(this)(segmentTypes);
+       */
     }
 
     /**
      * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
      * called with the final, fully loaded item.
      *
-     * @param  {String} elementId           ID of the element to load data for.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * Element Structure:
+     *   {
+     *     id: String,
+     *     type: String,
+     *     title: String,
+     *     parents: [Strings],              // TODO: later
+     *     children: [Strings],             // TODO: later
+     *     childrenSearchComplete: Boolean, // TODO: later
+     *     designer: String,                // TODO: later
+     *     description: [Descriptions],
+     *     feedback: [Feedback],            // TODO: later
+     *     bookmarked: Boolean,             // TODO: later
+     *   }
+     *
+     * @param {String} elementId                  ID of the element to load data for.
+     * @param {Function([{Element}])} onComplete  (Optional) Function called when loading the description and all segments has been completed. This is passed the loaded element as a parameter. If no matching element is found or the request fails this will be called with null data.
+     * @param {String} descriptionId              (Optional) ID of the description you want to load.
+     * @param {Array}  segmentVariations          (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
+     * @param {Number} descriptionVariationsCount (Optional) Total number of description variations to load. Only the first should be loaded fully, with all others loaded without any segments. This may be specified even if descriptionId isn't provided.
+     * @param {Number} segmentVariationsCount     (Optional) Total number of variations to load for each segment. This may be specified even if segmentVariations isn't provided.
      */
-    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
-      // TODO: implement
+    _loadElement(elementId, onComplete, descriptionId, segmentVariations, descriptionVariationsCount, segmentVariationsCount) {
+      /**
+       * TODO: Load the element with the provided ID and populate it with the
+       * description and segment variations specified via a single xAPI call.
+       *
+       * Store the element to the local element cache. If an entry already
+       * exists, update it as needed.
+       *
+       * When done call onComplete.bind(this)(element);
+       */
     }
+
+    /**
+     * Load description data for the provided description ID, including segment
+     * variations for the description. Once complete, onComplete will be called
+     * with the final, fully loaded description.
+     *
+     * Description Structure:
+     *   {
+     *     id: String,
+     *     contributors: [String],  // TODO: later
+     *     segments: [Segments],
+     *   }
+     * Segment Structure:
+     *   {
+     *     id: String,
+     *     type: String,  // not required for descriptions where no segment variations have been loaded
+     *     variations: [SegmentVariations],
+     *   }
+     *
+     * @param {String} descriptionId          ID of the description you want to load.
+     * @param {Function([{Description}])} onComplete Function called when loading the description and all segments has been completed. This is passed the loaded description as a parameter. If no description is found with a matching ID or the request fails this will be called with null data.
+     * @param {Array}  segmentVariations      (Optional) Array of IDs with a variation for each segment to be loaded.
+     * @param {Number} segmentVariationsCount (Optional) Total number of variations to load for each segment. This may be specified even if segmentVariations isn't provided.
+     */
+    _loadDescription(descriptionId, onComplete, segmentVariations, segmentVariationsCount) {
+      /**
+       * TODO: Load the description with the provided ID and populate it with
+       * the segment variations specified via a single xAPI call.
+       *
+       * When done call onComplete.bind(this)(description);
+       */
+    }
+
+    /**
+     * Load the specified number of additional description variations for the
+     * provided element and call onComplete with them. These are shallow
+     * description variations and do not include the segment variations, which
+     * would need to be loaded separately.
+     *
+     * @param {Element} element The element to load the description variations for.
+     * @param {Number}  count   The number of additional description variations to load.
+     * @param {Function([[Descriptions]])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
+     */
+    _loadDescriptionVariations(element, count, onComplete) {
+      /**
+       * TODO: Load the specified number of description variations for the given
+       * element via xAPI call. This should be treated like paged data and
+       * values needed for paging (ex. page number) can be stored to the element
+       * object, prefixed with "_". It's understood that there may be duplicate
+       * description entries in some cases, like if the element was loaded with
+       * a specific description ID, so the caller will handle deduping. Take
+       * care NOT to start paging at the first description in the element if it
+       * was loaded with a specific description ID, as this would miss any
+       * descriptions in pages before it.
+       *
+       * Unlike loading a full description, this should NOT load any variations
+       * for any segments.
+       *
+       * When loading is done, call onComplete with an array of all the newly
+       * loaded descriptions, if there are any.
+       */
+    }
+
+    /**
+     * Load segment variation data for the provided segment ID. Once complete,
+     * onComplete will be called with the result.
+     *
+     * SegmentVariation Structure:
+     *   {
+     *     id: String,
+     *     type: String,
+     *     data: dynamic,	// data type depends on segment type
+     *   }
+     *
+     * @param {String} segmentVariationId ID of the segment variation you want to load.
+     * @param {Function([{SegmentVariation}])} onComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+     */
+    _loadSegmentVariation(segmentVariationId, onComplete) {
+      /**
+       * TODO: Load the segment variation with the provided ID via xAPI call.
+       *
+       * When done call onComplete.bind(this)(segmentVariation);
+       */
+    }
+
+    /**
+     * Load the specified number of additional segment variations for the
+     * provided segments and call onComplete with an array of segment variations
+     * matching the size of the provided array of segments.
+     *
+     * @param {[Segments]} description The segments to load the variations for.
+     * @param {Number}     count       The number of additional variations to load for each segment.
+     * @param {Function([[{SegmentVariations}]])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
+     */
+    _loadSegmentVariations(segments, count, onComplete) {
+      /**
+       * TODO: Load the specified number of segment variations for each given
+       * segment in the array via an xAPI call. This should be treated like
+       * paged data and values needed for paging (ex. page number) can be stored
+       * to the respecitve segment object, prefixed with "_". It's understood
+       * that there may be duplicate variation entries in some cases, like if
+       * the description was loaded with a specific segment IDs, so the caller
+       * will handle deduping. Take care NOT to start paging at the first
+       * variation in the segment if it was loaded with a specific segment ID,
+       * as this would miss any variations in pages before it.
+       *
+       * When loading is done, call onComplete with a 2-dimensional array of all
+       * the newly loaded variations for each segment. If any segment has no
+       * additional variations it should return an empty array in its place.
+       */
+    }
+
   };
 
 })();

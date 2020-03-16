@@ -47,10 +47,10 @@ this license.
          * _cTreeData Structure:
          *   url: String,
          *   name: String,
-         *   types: [Types],
-         *   segmentTypes: [SegmentTypes],
-         *   elements: [Elements],
-         *   users: [Users],
+         *   types: TypesById,
+         *   segmentTypes: SegmentTypesById,
+         *   elements: ElementsById,
+         *   users: UsersById,
          *   lists: {
          *     suggested: {
          *       items: [SuggestedItems],
@@ -71,7 +71,7 @@ this license.
          *       offset: String,
          *     },
          *   },
-         *   cachedElements: [Elements],
+         *   cachedElements: ElementsById,
          *   cachedElementsWithoutParents: [Elements],
          *   cachedSuggested: [Strings],
          *   cachedBookmarks: [Strings],
@@ -127,7 +127,7 @@ this license.
     /**
      * Called when the url property changes.
      *
-     * @param  {String} url New value for url
+     * @param {String} url New value for url
      */
     _urlChanged(url) {
       // TODO: implement once support redirecting cTrees to different URLs
@@ -136,8 +136,8 @@ this license.
     /**
      * New cTreeData was created.
      *
-     * @param  {String} cTreeKey  The key for the cTree
-     * @param  {Object} cTreeData The new cTreeData created
+     * @param {String} cTreeKey  The key for the cTree
+     * @param {Object} cTreeData The new cTreeData created
      */
     _createdCTreeData(cTreeKey, cTreeData) {
       cTreeData.suggestionTypes = [
@@ -174,61 +174,32 @@ this license.
 
     /**
      * Load the human readable name associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load name for
+     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
-    _loadName(cTreeData) {
-      if (!cTreeData) this._cTreeData;
-      this._getData('name', (data) => {
-        if (data) {
-          cTreeData.name = data;
-        } else {
-          cTreeData.name = "";
-        }
-        if (this.ctreeKey === cTreeData.key) {
-          this.name = cTreeData.name;
-        }
-      });
+    _loadName(cTreeKey, onComplete) {
+      this._getData('name', onComplete);
     }
 
     /**
-     * Load the element types name associated with the cTree
+     * Load the element types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load element types for
+     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
-    _loadTypes(cTreeData) {
-      if (!cTreeData) this._cTreeData;
-      this._getData('types', (data) => {
-        if (data) {
-          if (Array.isArray(data)) {
-            cTreeData.types = this._dataArrayToIndexedItems(data);
-          } else {
-            cTreeData.types = this._addIdsToItems(data);
-          }
-        } else {
-          cTreeData.types = {};
-        }
-        if (this.ctreeKey === cTreeData.key) {
-          this._setTypes(cTreeData.types);
-        }
-      });
+    _loadTypes(cTreeKey, onComplete) {
+      this._getData('types', onComplete);
     }
 
     /**
      * Load the segment types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load segment types for
+     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
-    _loadSegmentTypes(cTreeData) {
-      if (!cTreeData) this._cTreeData;
-      this._getData('segmentTypes', (data) => {
-        if (data) {
-          if (Array.isArray(data)) {
-            cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
-          } else {
-            cTreeData.segmentTypes = this._addIdsToItems(data);
-          }
-        } else {
-          cTreeData.segmentTypes = {};
-        }
-        if (this.ctreeKey === cTreeData.key) {
-          this._setSegmentTypes(cTreeData.segmentTypes);
-        }
-      });
+    _loadSegmentTypes(cTreeKey, onComplete) {
+      this._getData('segmentTypes', onComplete);
     }
 
     /**
@@ -375,32 +346,6 @@ this license.
     }
 
     /**
-     * Converts the data array returned by _getData to an object containing each item indexed by
-     * its ID.
-     */
-    _dataArrayToIndexedItems(dataArray) {
-      var items = {};
-      for (var key in dataArray) {
-        var item = this._dataToItem(dataArray[key]);
-        items[item.id] = item;
-      }
-      return items;
-    }
-
-    /**
-     * Adds the key for each item in the collection as an ID value for the item.
-     */
-    _addIdsToItems(items) {
-      var updatedItems = {};
-      for (var key in items) {
-        var item = items[key];
-        item.id = key;
-        updatedItems[key] = item;
-      }
-      return updatedItems;
-    }
-
-    /**
      * Loads list items for each data container in the array.  Once loading
      * completes for each data container or times out it calls
      * processItems(dataContainerArray).  Timeout can be provided in
@@ -440,11 +385,11 @@ this license.
     }
 
     /**
-     * Load list items for dataContainer, and call onComplete(dataContainer)
-     * once it's done.  It's guaranteed that onComplete will be called, even
-     * if no additional items could be loaded.
+     * Load list items for dataContainer, and call onComplete once it's done
+     * it's done.  It's guaranteed that onComplete will be called, even if no
+     * additional items could be loaded.
      *
-     * dataContainer Structure:
+     * DataContainer Structure:
      *   {
      *     key: String,
      *     ascending: Boolean,
@@ -458,6 +403,9 @@ this license.
      *     loading: Boolean,
      *     allLoaded: Boolean
      *   }
+     *
+     * @param {Object} dataContainer  DataContainer with loaded list items and all data needed to load more
+     * @param {Function([{DataContainer}])} onComplete Function called when completed, with the updated DataContainer
      */
     _loadDataListItems(dataContainer, onComplete) {
       if (!dataContainer || dataContainer.allLoaded) {
@@ -592,12 +540,12 @@ this license.
      * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
      * called with the final, fully loaded item.
      *
-     * @param  {String} elementId           ID of the element to load data for.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * @param {String} elementId           ID of the element to load data for.
+     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */
-    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
       var onServerResponse = this._startTimeoutCountdown();
       onServerResponse.bind(this);
 
@@ -611,7 +559,7 @@ this license.
 
       // function to load data for description
       var loadDescription = () => {
-        this._loadDescription(element, onLoadingComplete, onServerResponse, descriptionId, segmentVariations);
+        this._loadDescription(element, onComplete, onServerResponse, descriptionId, segmentVariations);
       };
       // function to process data for element
       var onElementLoaded = data => {
@@ -648,11 +596,11 @@ this license.
      * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
      * item.
      *
-     * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param  {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
-     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * @param {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
+     * @param {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+     * @param {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
+     * @param {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
      */
     _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
       if (onServerResponse) onServerResponse.bind(this);
@@ -740,9 +688,9 @@ this license.
      * Load segment variation data for the provided segment.  Once complete, onLoadingComplete
      * will be called with result.
      *
-     * @param  {Segment} segment            Element data to load the description data for.  The description and segment data will be added to the item.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
-     * @param  {String} segmentVariationId  (Optional) ID of the segment variation you want to load.
+     * @param {Segment}  segment            Element data to load the description data for.  The description and segment data will be added to the item.
+     * @param {Function} onLoadingComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+     * @param {String}   segmentVariationId (Optional) ID of the segment variation you want to load.
      */
     _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
       var segmentVariations = segment.variations;

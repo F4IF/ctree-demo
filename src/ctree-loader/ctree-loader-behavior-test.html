@@ -297,10 +297,10 @@ this license.
         /**
          * _cTreeData Structure:
          *   url: String,
-         *   types: [Types],
-         *   segmentTypes: [SegmentTypes],
-         *   elements: [Elements],
-         *   users: [Users],
+         *   types: TypesById,
+         *   segmentTypes: SegmentTypesById,
+         *   elements: ElementsById,
+         *   users: UsersById,
          *   lists: {
          *     suggested: {
          *       items: [SuggestedItems],
@@ -321,7 +321,7 @@ this license.
          *       offset: String,			// test: Number
          *     },
          *   },
-         *   testElements: [Elements],
+         *   testElements: ElementsById,
          *   testElementsWithoutParents: [Elements],
          *   testSuggested: [Strings],
          *   testBookmarks: [Strings],
@@ -379,12 +379,12 @@ this license.
      * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
      * called with the final, fully loaded item.
      *
-     * @param  {String} elementId           ID of the element to load data for.
-     * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * @param {String} elementId           ID of the element to load data for.
+     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */
-    _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
+    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
       // TODO: support descriptionId and segmentVariations
       this.element = cTreeData.elements[elementId];
 
@@ -397,7 +397,7 @@ this license.
           cTreeData.elements[elementId] = element;
 
           if (this._cTreeData == cTreeData) {
-            onLoadingComplete(element);
+            onComplete(element);
           }
         }, Test.LOAD_DELAY);
       }
