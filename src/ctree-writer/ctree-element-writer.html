@@ -101,6 +101,11 @@ this license.
           id = this.elementId
         }
       }
+      if (!element.description) {
+        console.error('No description set in element');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
       if (!id) {
         id = element.id
         if (!id) {
@@ -175,6 +180,12 @@ this license.
       }
       if (!elementId) {
         console.error('No element ID passed to writer');
+        if (onComplete) onComplete.bind(this)();
+        return;
+      }
+      var segments = descriptionVariation.segments;
+      if (!segments || segments.length <= 0) {
+        console.error('No segments in description variation: ' + segments.length);
         if (onComplete) onComplete.bind(this)();
         return;
       }
@@ -342,7 +353,9 @@ this license.
   }
 
   var ctreeImport = document.createElement('ctree-import');
-  if (CTree.firebaseConfig) {
+  if (CTree.xApiConfig) {
+    ctreeImport.href = '/src/ctree-writer/ctree-wlement-writer-xapi.html';
+  } else if (CTree.firebaseConfig) {
     ctreeImport.href = '/src/ctree-writer/ctree-element-writer-firebase.html';
   } else {
     ctreeImport.href = '/src/ctree-writer/ctree-element-writer-test.html';

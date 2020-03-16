@@ -31,427 +31,327 @@ this license.
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
-<link rel="import" href="ctree-loader-behavior.html">
-
 <script>
 (function() {
 
   'use strict';
 
-  if (CTree.firebaseConfig) {
-    class CTreeListLoader extends CTree.LoaderBehavior {
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
 
-      static get is() { return 'ctree-list-loader'; }
+  /**
+   * Base class for all list loader implementations.  This is done as a Mixin so
+   * the behavior class corresponding to the implementation can be used as the
+   * super class.
+   *
+   * CTreeData Structure:
+   *   url: String,
+   *   name: String,
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: ListData,
+   *     bookmarked: ListData,
+   *     history: ListData,
+   *   },
+   *
+   * ListData Structure:
+   *   items: [Elements],
+   *   loading: Boolean,
+   *   hasMore: Boolean,
+   *   offset: String,			// test: Number
+   */
+  CTree.ListLoaderMixin = (superClass) => class extends superClass {
 
-      static get properties() {
-        return {
-          pageSize: {
-            type: Number,
-            value: 20,
-          },
+    static get is() { return 'ctree-list-loader'; }
 
-          /**
-           * The type of list to load in current properties.  Supported values:
-           *   - suggested
-           *   - bookmarked
-           *   - history
-           */
-          currentName: {
-            type: String,
-            observer: "_currentChanged",
-          },
+    static get properties() {
+      return {
+        pageSize: {
+          type: Number,
+          value: 20,
+        },
 
-          /**
-           * All items loaded for the current list.
-           *
-           * Structure:
-           *   [{
-           *     element: Element,
-           *     feedback: Feedback,
-           *     descriptionConfig: String,
-           *     descriptionSegments: [String],
-           *     commentCode: Number,
-           *     commentData: Object,	// type depends on commentCode
-           *   }, ...]
-           */
-          currentItems: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        /**
+         * The type of list to load in current properties.  Supported values:
+         *   - suggested
+         *   - bookmarked
+         *   - history
+         */
+        currentName: {
+          type: String,
+          observer: "_currentChanged",
+        },
 
-          /**
-           * Indicates if the next page of items for the current list is loading.
-           */
-          currentLoading: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: false,
-          },
+        /**
+         * All items loaded for the current list.
+         *
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: String,
+         *     descriptionSegments: [String],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }, ...]
+         */
+        currentItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-          /**
-           * Indicates if the current list has more items to load.
-           */
-          currentHasMore: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: true,
-          },
+        /**
+         * Indicates if the next page of items for the current list is loading.
+         */
+        currentLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-          /**
-           * Structure:
-           *   [{
-           *     element: Element,
-           *     feedback: Feedback,
-           *     descriptionConfig: String,
-           *     descriptionSegments: [Strings],
-           *     commentCode: Number,
-           *     commentData: Object,	// type depends on commentCode
-           *   }, ...]
-           */
-          suggestedItems: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        /**
+         * Indicates if the current list has more items to load.
+         */
+        currentHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-          suggestedLoading: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: false,
-          },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: String,
+         *     descriptionSegments: [Strings],
+         *     commentCode: Number,
+         *     commentData: Object,	// type depends on commentCode
+         *   }, ...]
+         */
+        suggestedItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-          suggestedHasMore: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: true,
-          },
+        suggestedLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-          /**
-           * Structure:
-           *   [{
-           *     element: Element,
-           *   }, ...]
-           */
-          bookmarkedItems: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        suggestedHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-          bookmarkedLoading: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: false,
-          },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *   }, ...]
+         */
+        bookmarkedItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-          bookmarkedHasMore: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: true,
-          },
+        bookmarkedLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
 
-          /**
-           * Structure:
-           *   [{
-           *     element: Element,
-           *     feedback: Feedback,
-           *     descriptionConfig: String,
-           *     descriptionSegments: [Strings],
-           *     commentCode: Number,
-           *   }, ...]
-           */
-          historyItems: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        bookmarkedHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
 
-          historyLoading: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: false,
-          },
+        /**
+         * Structure:
+         *   [{
+         *     element: Element,
+         *     feedback: Feedback,
+         *     descriptionConfig: String,
+         *     descriptionSegments: [Strings],
+         *     commentCode: Number,
+         *   }, ...]
+         */
+        historyItems: {
+          type: Array,
+          readOnly: true,
+          notify: true,
+        },
 
-          historyHasMore: {
-            type: Boolean,
-            readOnly: true,
-            notify: true,
-            value: true,
-          },
-        };
+        historyLoading: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: false,
+        },
+
+        historyHasMore: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          value: true,
+        },
+      };
+    }
+
+    loadSuggested() {
+      var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
+      var listData = cTreeData.lists.suggested;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('suggested', true);
+
+      this._loadSuggestedItems(cTreeData, listData);
+    }
+
+    loadBookmarked() {
+      var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
+      var listData = cTreeData.lists.bookmarked;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('bookmarked', true);
+
+      this._loadBookmarkedItems(cTreeData, listData);
+    }
+
+    loadHistory() {
+      var cTreeData = this._cTreeData;
+      if (!cTreeData) return;
+      var listData = cTreeData.lists.history;
+      if (!listData.hasMore || listData.loading) return;
+
+      listData.loading = true;
+      this._setLoading('history', true);
+
+      this._loadHistoryItems(cTreeData, listData);
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadSuggestedItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadBookmarkedItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadHistoryItems(cTreeData, listData) {
+      // TODO: override to implement loading
+    }
+
+    _setLoading(name, loading) {
+      if (name == 'suggested') {
+        this._setSuggestedLoading(loading);
+      } else if (name == 'bookmarked') {
+        this._setBookmarkedLoading(loading);
+      } else if (name == 'history') {
+        this._setHistoryLoading(loading);
       }
-
-      loadSuggested() {
-        var cTreeData = this._cTreeData;
-        if (!cTreeData) return;
-        var listData = cTreeData.lists.suggested;
-        if (!listData.hasMore || listData.loading) return;
-
-        listData.loading = true;
-        this._setLoading('suggested', true);
-
-        var quitHolder = {value: false};
-        var startOperationTimeout = null; // will be a Function returned by _startTimeoutCountdown
-        var items = [];
-        var loadedItems = [];
-        var itemCount = 0;
-        var maxItems = 20;
-        var onDoneLoading = function(dataContainerArray) {
-          // TODO: return any items not in loadedItems to their cache
-          this._loadListItems(cTreeData, listData, loadedItems, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
-
-          // check if all data sources have been fully loaded
-          var allLoaded = true;
-          for (var key in dataContainerArray) {
-            if (!dataContainerArray[key].allLoaded) {
-              allLoaded = false;
-              break;
-            }
-          }
-          if (allLoaded) {
-            this._setHasMore('suggested', false);
-          }
-        }.bind(this);
-        var checkHasNextItem = (dataContainer, options) => {
-          if (!dataContainer.allLoaded) {
-            this._hasNextItem(dataContainer, (hasNext) => {
-              startOperationTimeout();
-              if (hasNext) {
-                options.push(dataContainer);
-              }
-            });
-          }
-        }
-        var loadItem = (dataContainerArray) => {
-          if (quitHolder.value || items.length >= maxItems) {
-            onDoneLoading(dataContainerArray);
-            return;
-          }
-
-          // check to see which dataContainers can be options (have items)
-          var options = [];
-          var tempCount = itemCount;
-          for (var key in dataContainerArray) {
-            checkHasNextItem(dataContainerArray[key], options);
-          }
-
-          // get random item from available options
-          var item = null;
-          var randomOption = () => {
-            if (quitHolder.value) {
-              onDoneLoading(dataContainerArray);
-              return;
-            }
-            if (options.length <= 0) {
-              // check if any container has more items
-              var anyLoading = false;
-              for (var key in dataContainerArray) {
-                var dataContainer = dataContainerArray[key];
-                if (!dataContainer.allLoaded) {
-                  anyLoading = true;
-                  // TODO: do we need to check if not added as option and not loading to prevent waiting for containers which stopped loading?
-                }
-              }
-
-              if (anyLoading) {
-                // no options, wait and check again
-                setTimeout(randomOption, 100);
-              } else {
-                // no additional items
-                onDoneLoading(dataContainerArray);
-              }
-              return;
-            }
-
-            // get index of option
-            var optionIndex;
-            if (options.length == 1) {
-              optionIndex = 0;
-            } else {
-              optionIndex = Math.floor(Math.random() * options.length);
-            }
-
-            // get next non-null item from option
-            var dataContainer = options[optionIndex];
-            do {
-              var dataItem = this._getNextItem(dataContainer, true);
-              if (dataItem) {
-                // if item doesn't already exist add it
-                var id = String(Object.keys(dataItem)[0]);
-                if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
-                  item = this._dataToItem(dataItem);
-                  item.typeId = String(item.type);
-                  item.type = this.types[item.typeId];
-                }
-              }
-            } while (!item && this._hasNextItem(dataContainer) && !quitHolder.value);
-            if (!item) {
-              // item was invalid and option has no more items, so remove option and check again
-              options.splice(optionIndex, 1);
-              checkHasNextItem(dataContainer, options);
-            }
-
-            if (item) {
-              // add item to list after load description
-              itemCount++;
-              items.push(item);
-              this._loadDescription(item, item => {
-                var loadedItem = {element: item};
-                // TODO: add reason for suggestion
-                loadedItems.push(loadedItem);
-              }, startOperationTimeout);
-
-              loadItem(dataContainerArray);
-            } else {
-              // last option didn't result in an item, try a different option
-              setTimeout(randomOption, 5);
-            }
-          }
-          randomOption()
-        }
-        startOperationTimeout = this._startTimeoutCountdown(quitHolder);
-        this._loadAllDataListItems(cTreeData.suggestionTypes, loadItem, this.timeout);
-      }
-
-      loadBookmarked() {
-        var cTreeData = this._cTreeData;
-        if (!cTreeData) return;
-        var listData = cTreeData.lists.bookmarked;
-        if (!listData.hasMore || listData.loading) return;
-
-        listData.loading = true;
-        this._setLoading('bookmarked', true);
-
-        this._loadListItems(cTreeData, listData, null, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
-      }
-
-      loadHistory() {
-        var cTreeData = this._cTreeData;
-        if (!cTreeData) return;
-        var listData = cTreeData.lists.history;
-        if (!listData.hasMore || listData.loading) return;
-
-        listData.loading = true;
-        this._setLoading('history', true);
-
-        this._loadListItems(cTreeData, listData, null, 'history', 'historyItems', this._setHistoryHasMore);
-      }
-
-      _loadListItems(cTreeData, listData, items, name, itemsName, hasMore) {
-        if (!listData.offset) {
-          listData.offset = 0;
-        }
-        if (!items || items.length == 0) {
-          listData.hasMore = false;
-          if (this._cTreeData == cTreeData) {
-            hasMore.bind(this)(false);
-          }
-        } else {
-          for (var key in items) {
-            var item = items[key];
-            if (this._cTreeData == cTreeData) {
-              this.push(itemsName, item);
-              if (this.currentName == name) {
-                this.notifySplices('currentItems', [{
-                  index: this.currentItems.length - 1,
-                  removed: [],
-                  addedCount: 1,
-                  object: this.currentItems,
-                  type: 'splice',
-                }]);
-              }
-            } else {
-              listData.items.push(item);
-            }
-            listData.offset++;
-          }
-        }
-        listData.loading = false;
-        if (this._cTreeData == cTreeData) {
-          this._setLoading(name, false);
-        }
-      }
-
-      _setLoading(name, loading) {
-        if (name == 'suggested') {
-          this._setSuggestedLoading(loading);
-        } else if (name == 'bookmarked') {
-          this._setBookmarkedLoading(loading);
-        } else if (name == 'history') {
-          this._setHistoryLoading(loading);
-        }
-        if (name == this.currentName) {
-          this._setCurrentLoading(loading);
-        }
-      }
-
-      _setHasMore(name, hasMore) {
-        if (name == 'suggested') {
-          this._setSuggestedHasMore(hasMore);
-        } else if (name == 'bookmarked') {
-          this._setBookmarkedHasMore(hasMore);
-        } else if (name == 'history') {
-          this._setHistoryHasMore(hasMore);
-        }
-        if (name == this.currentName) {
-          this._setCurrentHasMore(hasMore);
-        }
-      }
-
-      _cTreeDataChanged(cTreeData) {
-        var listData = cTreeData.lists.suggested;
-        this._setSuggestedItems(listData.items);
-        this._setSuggestedLoading(listData.loading);
-        this._setSuggestedHasMore(listData.hasMore);
-        listData = cTreeData.lists.bookmarked;
-        this._setBookmarkedItems(listData.items);
-        this._setBookmarkedLoading(listData.loading);
-        this._setBookmarkedHasMore(listData.hasMore);
-        listData = cTreeData.lists.history;
-        this._setHistoryItems(listData.items);
-        this._setHistoryLoading(listData.loading);
-        this._setHistoryHasMore(listData.hasMore);
-        this._currentChanged(this.currentName, this.currentName);
-      }
-
-      _currentChanged(currentName, previousName) {
-        if (currentName == "suggested") {
-          this.__setCurrent(this.loadSuggested, this.suggestedItems, this.suggestedLoading, this.suggestedHasMore);
-        } else if (currentName == "bookmarked") {
-          this.__setCurrent(this.loadBookmarked, this.bookmarkedItems, this.bookmarkedLoading, this.bookmarkedHasMore);
-        } else if (currentName == "history") {
-          this.__setCurrent(this.loadHistory, this.historyItems, this.historyLoading, this.historyHasMore);
-        } else {
-          this.__setCurrent(null, [], false, false);
-        }
-      }
-
-      __setCurrent(load, items, loading, hasMore) {
-        this._setCurrentItems(items);
+      if (name == this.currentName) {
         this._setCurrentLoading(loading);
-        this._setCurrentHasMore(hasMore);
-        this.loadCurrent = load;
       }
     }
-    CTree.ListLoader = CTreeListLoader;
 
-    // Register custom element definition using standard platform API
-    customElements.define(CTreeListLoader.is, CTreeListLoader);
+    _setHasMore(name, hasMore) {
+      if (name == 'suggested') {
+        this._setSuggestedHasMore(hasMore);
+      } else if (name == 'bookmarked') {
+        this._setBookmarkedHasMore(hasMore);
+      } else if (name == 'history') {
+        this._setHistoryHasMore(hasMore);
+      }
+      if (name == this.currentName) {
+        this._setCurrentHasMore(hasMore);
+      }
+    }
 
-  } else {
-    // fallback to test loader
-    var ctreeImport = document.createElement('ctree-import');
-    ctreeImport.href = '/src/ctree-loader/ctree-list-loader-test.html';
-    ctreeImport.load();
+    _cTreeDataChanged(cTreeData) {
+      var listData = cTreeData.lists.suggested;
+      this._setSuggestedItems(listData.items);
+      this._setSuggestedLoading(listData.loading);
+      this._setSuggestedHasMore(listData.hasMore);
+      listData = cTreeData.lists.bookmarked;
+      this._setBookmarkedItems(listData.items);
+      this._setBookmarkedLoading(listData.loading);
+      this._setBookmarkedHasMore(listData.hasMore);
+      listData = cTreeData.lists.history;
+      this._setHistoryItems(listData.items);
+      this._setHistoryLoading(listData.loading);
+      this._setHistoryHasMore(listData.hasMore);
+      this._currentChanged(this.currentName, this.currentName);
+    }
+
+    _currentChanged(currentName, previousName) {
+      if (currentName == 'suggested') {
+        this.__setCurrent(this.loadSuggested, this.suggestedItems, this.suggestedLoading, this.suggestedHasMore);
+      } else if (currentName == 'bookmarked') {
+        this.__setCurrent(this.loadBookmarked, this.bookmarkedItems, this.bookmarkedLoading, this.bookmarkedHasMore);
+      } else if (currentName == 'history') {
+        this.__setCurrent(this.loadHistory, this.historyItems, this.historyLoading, this.historyHasMore);
+      } else {
+        this.__setCurrent(null, [], false, false);
+      }
+    }
+
+    __setCurrent(load, items, loading, hasMore) {
+      this._setCurrentItems(items);
+      this._setCurrentLoading(loading);
+      this._setCurrentHasMore(hasMore);
+      this.loadCurrent = load;
+    }
   }
+
+  var ctreeImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-list-loader-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    ctreeImport.href = '/src/ctree-loader/ctree-list-loader-firebase.html';
+  } else {
+    ctreeImport.href = '/src/ctree-loader/ctree-list-loader-test.html';
+  }
+  ctreeImport.load();
 
 })();
 

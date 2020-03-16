@@ -57,7 +57,7 @@ this license.
     window.CTree = {};
   }
 
-  // TODO: replace with config from Firebase to use Firebase loaders instead of test loaders
+  // TODO: replace with config from Firebase to use Firebase loaders/writers instead of test loaders/writers
   CTree.firebaseConfig = null;/*{
     apiKey: "1a2B3c4D5e6F7g8H9i0J1k2L3m4N5o6P7q8R9S0",
     authDomain: "yourproject.firebaseapp.com",
@@ -65,6 +65,10 @@ this license.
     projectId: "yourproject",
     storageBucket: "yourproject.appspot.com",
     messagingSenderId: "123456789012"
+  };*/
+  // TODO: replace with config data for xAPI loaders/writers instead of test loaders/writers
+  CTree.xApiConfig = null;/*{
+    TODO: Object data needed to initialize xAPI for loaders/writers
   };*/
 </script>
 
@@ -78,7 +82,7 @@ this license.
 <link rel="import" href="icons.html">
 
 <script>
-  // TODO: create a loder for tree types or add to ctree-loader
+  // TODO: create a loader for tree types or add to ctree-loader
   var ctreePages = {all: {label: "All Saved cTrees",	icon: "/images/app-icon-32.png", saved: true},
       	          future: {label: "Future City",	icon: "/images/app-icon-32.png", saved: true},
       	          recipes: {label: "Recipes",		icon: "/images/app-icon-32.png", saved: true},
@@ -262,7 +266,7 @@ this license.
                     [[item.data.label]]
                   </paper-button>
                 </a>
-                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Boockmarked" title-checked="Bookmarked"></ctree-toggle-button>
+                <ctree-toggle-button id="saveCTree" hidden$="[[!searchText]]" icon-unchecked="bookmark-border" icon-checked="bookmark" checked="{{item.data.saved}}" title-unchecked="Not Bookmarked" title-checked="Bookmarked"></ctree-toggle-button>
               </div>
             </template>
           </iron-selector>
@@ -476,20 +480,24 @@ this license.
         }*/
         var newNavList = [];
         var searchTextLower = this.searchText ? this.searchText.toLowerCase() : '';
-        for (var i = 0; i < ctreeSavedPages.length; i++) {
-          var name = ctreeSavedPages[i];
-          var pageData = ctreePages[name];
-          if (!pageData.icon.startsWith(this.rootPath)) {
-            pageData.icon = this.rootPath + pageData.icon;
-          }
-
-          if (this.searchText) {
-            if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
-                newNavList.push({name: name, data: pageData});
+        if (CTree.firebaseConfig) {
+          // TODO: get list of cTrees from Firebase instead of using hardcoded pages
+        } else {
+          for (var i = 0; i < ctreeSavedPages.length; i++) {
+            var name = ctreeSavedPages[i];
+            var pageData = ctreePages[name];
+            if (!pageData.icon.startsWith(this.rootPath)) {
+              pageData.icon = this.rootPath + pageData.icon;
             }
-          } else {
-            if (pageData.saved) {
-              newNavList.push({name: name, data: pageData});
+
+            if (this.searchText) {
+              if (pageData.label.toLowerCase().indexOf(searchTextLower) !== -1) {
+                  newNavList.push({name: name, data: pageData});
+              }
+            } else {
+              if (pageData.saved) {
+                newNavList.push({name: name, data: pageData});
+              }
             }
           }
         }
@@ -512,10 +520,15 @@ this license.
         var pathSegments = fullPath.split('/');
         if (pathSegments.length > 1) {
           var page;
-          if (ctreeSavedPages.indexOf(pathSegments[1]) < 0) {
-            page = ctreeSavedPages[0];
-          } else {
+          // TODO: default to
+          if (CTree.firebaseConfig || ctreeSavedPages.indexOf(pathSegments[1]) >= 0) {
             page = pathSegments[1];
+          } else if (CTree.firebaseConfig) {
+            // TODO: default to something other than test
+            page = "test"
+          } else {
+            // default to first saved page
+            page = ctreeSavedPages[0];
           }
           var subpage;
           if (pathSegments.length > 2) {
@@ -527,7 +540,11 @@ this license.
             subpage = 'suggested';
           }
         } else {
-          page = ctreeSavedPages[0];
+          if (CTree.firebaseConfig) {
+            page = "test"
+          } else {
+            page = ctreeSavedPages[0];
+          }
           subpage = 'suggested';
         }
         var forceSubpageChanged = (this.page != page && this.subpage == subpage);

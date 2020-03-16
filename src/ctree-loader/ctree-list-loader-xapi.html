@@ -1,0 +1,127 @@
+<!--
+@license
+Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<link rel="import" href="ctree-loader-behavior-xapi.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Implementation of list loader using xAPI.
+   *
+   * CTreeData Structure:
+   *   url: String,
+   *   name: String,
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: ListData,
+   *     bookmarked: ListData,
+   *     history: ListData,
+   *   },
+   *
+   * ListData Structure:
+   *   items: [Elements],
+   *   loading: Boolean,
+   *   hasMore: Boolean,
+   *   offset: String,			// test: Number
+   */
+  class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
+
+    static get is() { return 'ctree-list-loader'; }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadSuggestedItems(cTreeData, listData) {
+      /**
+       * TODO: Load next page of suggested items via xAPI for the cTree with the
+       * key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadBookmarkedItems(cTreeData, listData) {
+      /**
+       * TODO: Load next page of bookmarked items via xAPI for the cTree with
+       * the key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadHistoryItems(cTreeData, listData) {
+      /**
+       * TODO: Load next page of history items via xAPI for the cTree with the
+       * key cTreeData.key.
+       *
+       * When the items are loaded update all the listData fields appropriately.
+       *
+       * Store list items to local element cache. If an item already exists,
+       * update it as needed.
+       **/
+    }
+  }
+  CTree.ListLoader = CTreeListLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeListLoader.is, CTreeListLoader);
+
+})();
+
+</script>

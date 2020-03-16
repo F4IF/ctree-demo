@@ -1,6 +1,6 @@
 <!--
 @license
-Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,21 +29,21 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-loader-behavior-test.html">
+<link rel="import" href="ctree-writer-behavior.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  class CTreeUserLoader extends CTree.UserLoaderMixin(CTree.LoaderBehavior) {
+  CTree.WriterBehaviorXapi = class extends CTree.WriterBehaviorBase {
+    static get properties() {
+      return {
+      };
+    }
 
-    static get is() { return 'ctree-user-loader'; }
-  }
-  CTree.UserLoader = CTreeUserLoader;
-
-  // Register custom element definition using standard platform API
-  customElements.define(CTreeUserLoader.is, CTreeUserLoader);
+    // TODO: add any generic functions useful for writing via xAPI
+  };
 
 })();
 

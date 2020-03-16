@@ -41,993 +41,454 @@ this license.
   // monostate data
   var cTreesData = {};
 
-  /*var ElementTypes = [
-    [
-      {id: 1, name: "Subject",	description: "What this cTree is about",	prompt: "Create cTree",
-      	iconUrl: "/images/app-icon-32.png",	color: "#8a5b15", parentsRequired: false,	parentsMax: 0,	parentTypes: [], elements: []},
-      {id: 2, name: "Goals",	description: "Areas which need to be addresed",	prompt: "Add goal",
-        iconUrl: "/images/app-icon-32.png",	color: "#d58c20", parentsRequired: true,	parentsMax: -1,	parentTypes: [1, 2], elements: []},
-      {id: 3, name: "Implementation",	description: "How to structure or accomplish suggestion", prompt: "",
-        iconUrl: "/images/app-icon-32.png",	color: "#16ad16", parentsRequired: true,	parentsMax: 1,	parentTypes: [3, 5, 7], elements: []},
-      {id: 4, name: "Question",	description: "Something which needs to be answered", prompt: "Ask question",
-        iconUrl: "/images/app-icon-32.png",	color: "#d1d100", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
-      {id: 5, name: "Answer",	description: "Possible answer to question", prompt: "Answer question",
-        iconUrl: "/images/app-icon-32.png",	color: "#2c2ce2", parentsRequired: true,	parentsMax: -1,	parentTypes: [4], elements: []},
-      {id: 6, name: "Problem",	description: "Issue which needs to be solved", prompt: "Identify problem",
-        iconUrl: "/images/app-icon-32.png",	color: "#e12323", parentsRequired: true,	parentsMax: 1,	parentTypes: [2, 3, 5, 7], elements: []},
-      {id: 7, name: "Solution",	description: "Potential way to address problem", prompt: "Suggest solution",
-        iconUrl: "/images/app-icon-32.png",	color: "#00aeae", parentsRequired: true,	parentsMax: -1,	parentTypes: [6], elements: []},
-    ],
-  ];
-  var SegmentTypes = [
-    {id: 1, componentName: 'ctree-segment-text', canBeThumbnail: false},
-    {id: 2, componentName: 'ctree-segment-image', canBeThumbnail: true},
-  ];*/
-
   // Create my namespace, if it doesn't exist
   if (!window.CTree) {
     window.CTree = {};
   }
 
-  if (CTree.firebaseConfig) {
-    CTree.LoaderBehavior = class extends Polymer.Element {
-      static get properties() {
-        return {
-          /**
-           * Total time before stop trying to load the requested data and return any data which has
-           * been fully loaded.
-           */
-          timeout: {
-            type: Number,
-            value: 7500,
-          },
+  CTree.LoaderBehaviorBase = class extends Polymer.Element {
+    static get properties() {
+      return {
+        /**
+         * Total time before stop trying to load the requested data and return any data which has
+         * been fully loaded.
+         */
+        timeout: {
+          type: Number,
+          value: 7500,
+        },
 
-          /**
-           * Maximum time between different responses from server before we give up and return any
-           * data which has been fully loaded.
-           */
-          timeoutBetweenResponses: {
-            type: Number,
-            value: 1500,
-          },
+        /**
+         * Maximum time between different responses from server before we give up and return any
+         * data which has been fully loaded.
+         */
+        timeoutBetweenResponses: {
+          type: Number,
+          value: 1500,
+        },
 
-          /**
-           * Alternate url where cTree is hosted.  The default is the root domain
-           * where the page holding this element is being hosted.
-           */
-          // TODO: support changing Firebase targets (will require new config details in addition to URL)
-          url: {
-            type: String,
-            notify: true,
-            observer: '_urlChanged',
-          },
+        /**
+         * Alternate url where cTree is hosted.  The default is the root domain
+         * where the page holding this element is being hosted.
+         */
+        // TODO: support changing Firebase targets (will require new config details in addition to URL)
+        url: {
+          type: String,
+          notify: true,
+          observer: '_urlChanged',
+        },
 
-          /**
-           * The unique key identifying a cTree.  If the site only has one cTree
-           * this doesn't need to be set.
-           */
-          ctreeKey: {
-            type: String,
-            observer: '_keyChanged',
-          },
+        /**
+         * The unique key identifying a cTree.  If the site only has one cTree
+         * this doesn't need to be set.
+         */
+        ctreeKey: {
+          type: String,
+          observer: '_keyChanged',
+        },
 
-          /**
-           * The name of the cTree to display to users.
-           */
-          name: {
-            type: String,
-            notify: true,
-          },
+        /**
+         * The name of the cTree to display to users.
+         */
+        name: {
+          type: String,
+          notify: true,
+        },
 
-          /**
-           * All types for current cTree, indexed by ID.
-           *
-           * Structure:
-           *   [{
-           *     id: String,
-           *     name: String,
-           *     description: String,
-           *     iconUrl: String,
-           *     color: String,
-           *     parentsRequired: Boolean,
-           *     parentsMax: Number,
-           *     parentTypes: [Strings],
-           *     elements: [Elements],
-           *   }, ...]
-           */
-          types: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        /**
+         * All types for current cTree, indexed by ID.
+         *
+         * Structure:
+         *   {
+         *     id: {
+         *       id: String,
+         *       name: String,
+         *       description: String,
+         *       iconUrl: String,
+         *       color: String,
+         *       parentsRequired: Boolean,
+         *       parentsMax: Number,
+         *       parentTypes: [Strings],
+         *     },
+         *     ...
+         *   }
+         */
+        types: {
+          type: Object,
+          readOnly: true,
+          notify: true,
+        },
 
-          /**
-           * All segment types supported by current cTree, indexed by ID.
-           *
-           * Structure:
-           *   [{
-           *     id: String,
-           *     componentName: String,
-           *     canBeThumbnail: Boolean,
-           *   }, ...]
-           */
-          segmentTypes: {
-            type: Array,
-            readOnly: true,
-            notify: true,
-          },
+        /**
+         * All segment types supported by current cTree, indexed by ID.
+         *
+         * Structure:
+         *   {
+         *     id: {
+         *       id: String,
+         *       componentName: String,
+         *       canBeThumbnail: Boolean,
+         *     },
+         *     ...
+         *   }
+         */
+        segmentTypes: {
+          type: Object,
+          readOnly: true,
+          notify: true,
+        },
 
-          /**
-           * Object holding all values for current cTrees.  All item lists will be
-           * cleared for all cTrees when the user value changes.
-           *
-           * Structure:
-           *   url: String,
-           *   name: String,
-           *   types: [Types],
-           *   segmentTypes: [SegmentTypes],
-           *   elements: [Elements],
-           *   users: [Users],
-           *   lists: {
-           *     suggested: {
-           *       items: [SuggestedItems],
-           *       loading: Boolean,
-           *       hasMore: Boolean,
-           *       offset: String,
-           *     },
-           *     bookmarked: {
-           *       items: [BookmarkedItems],
-           *       loading: Boolean,
-           *       hasMore: Boolean,
-           *       offset: String,
-           *     },
-           *     history: {
-           *       items: [HistoryItems],
-           *       loading: Boolean,
-           *       hasMore: Boolean,
-           *       offset: String,
-           *     },
-           *   },
-           *   cachedElements: [Elements],
-           *   cachedElementsWithoutParents: [Elements],
-           *   cachedSuggested: [Strings],
-           *   cachedBookmarks: [Strings],
-           *   cachedHistory: [Strings],
-           *   suggestionTypes: [{
-           *     key: String,
-           *     ascending: Boolean,
-           *     startAt: Number,
-           *     loadGroup: Boolean,
-           *     cachedElements: [Elements],
-           *     nextCacheIndex: Number,
-           *   }, ...]
-           *
-           * Elements Structure:
-           *   [{
-           *     id: String,
-           *     type: ElementType,
-           *     title: String,
-           *     parents: [Strings],
-           *     children: [Strings],
-           *     childrenSearchComplete: Boolean,
-           *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
-           *     description: [{
-           *       id: String,
-           *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
-           *       segments: [{
-           *         id: String,
-           *         type: SegmentType,
-           *         variations: [{
-           *           id: String,
-           *           data: dynamic,	// data type depends on segment type
-           *         }, ...],
-           *       }, ...],
-           *     }, ...],
-           *     feedback: [{
-           *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
-           *       text: String,
-           *     }, ...],
-           *     bookmarked: Boolean,
-           *   }, ...]
-           *
-           * Users Structure:
-           *   [{
-           *     id: String,
-           *     name: String,
-           *     avatar: String,
-           *     // TODO: add more public data
-           *   }, ...]
-           */
-          _cTreeData: {
-            type: Object,
-            observer: '_cTreeDataChanged',
-          },
-        };
-      }
-
-      _urlChanged(url) {
-        // TODO: implement once supported
-      }
-
-      _keyChanged(cTreeKey, previousKey) {
-        if (cTreeKey == previousKey) return;
-
-        var cTreeData = cTreesData[cTreeKey];
-        var createCTree = !cTreeData;
-        if (createCTree) {
-          cTreeData = {
-            key: cTreeKey,
-            name: "",
-            url: this.url,
-            types: {},
-            segmentTypes: {},
-            elements: [],
-            users: [],
-            lists: {
-              suggested:  {items: [], loading: false, hasMore: true},
-              bookmarked: {items: [], loading: false, hasMore: true},
-              history:    {items: [], loading: false, hasMore: true},
-            },
-            suggestionTypes: [
-              {
-                key: 'rating',
-                ascending: false,
-              },
-              {
-                key: 'createdDate',
-                ascending: false,
-              },
-              {
-                key: 'childCount',
-                ascending: true,
-              },
-              {
-                key: 'feedbackCount',
-                ascending: true,
-              },
-              {
-                key: 'interactionCount',
-                ascending: false,
-              },
-              {
-                key: 'lastInteractionDate',
-                ascending: true,
-              },
-              {
-                key: 'lastInteractionDate',
-                ascending: false,
-              },
-            ]
-          };
-          cTreesData[cTreeKey] = cTreeData;
-        }
-
-        this._cTreeData = cTreeData;
-        this._setTypes(this._cTreeData.types);
-        this._setSegmentTypes(this._cTreeData.segmentTypes);
-        this.name = cTreeData.name;
-
-        if (cTreeData.name.length == 0) {
-          this._getData('name', (data) => {
-            if (data) {
-              cTreeData.name = data;
-            } else {
-              cTreeData.name = "";
-            }
-            if (this.ctreeKey === cTreeData.key) {
-              this.name = cTreeData.name;
-            }
-          });
-        }
-        if (Object.keys(cTreeData.types).length == 0) {
-          this._getData('types', (data) => {
-            if (data) {
-              if (Array.isArray(data)) {
-                cTreeData.types = this._dataArrayToIndexedItems(data);
-              } else {
-                cTreeData.types = this._addIdsToItems(data);
-              }
-            } else {
-              cTreeData.types = {};
-            }
-            if (this.ctreeKey === cTreeData.key) {
-              this._setTypes(cTreeData.types);
-            }
-          });
-        }
-        if (Object.keys(cTreeData.segmentTypes).length == 0) {
-          this._getData('segmentTypes', (data) => {
-            if (data) {
-              if (Array.isArray(data)) {
-                cTreeData.segmentTypes = this._dataArrayToIndexedItems(data);
-              } else {
-                cTreeData.segmentTypes = this._addIdsToItems(data);
-              }
-            } else {
-              cTreeData.segmentTypes = {};
-            }
-            if (this.ctreeKey === cTreeData.key) {
-              this._setSegmentTypes(cTreeData.segmentTypes);
-            }
-          });
-        }
-      }
-
-      /**
-       * Start the timeout countdown based on the timeout parameter.  If provided, this will track
-       * the state of if the operation should quit or not in the quitHolder parameter.  This will
-       * also notify the onTimeout function if provided.  This returns a function which can be used
-       * to check if too much time has ellapsed between network calls when frequent network calls
-       * are needed.
-       *
-       * @param  {{value: Boolean}} quitHolder An object who's value field is updated to reflect if the timeout has been triggered or not.
-       * @param  {Function} onTimeout          A function to call when the timeout is reached.
-       * @return {Function}                    A function which can be used to check if too much time has ellapsed between network calls when frequent network calls are needed.
-       */
-      _startTimeoutCountdown(quitHolder, onTimeout) {
-        if (!quitHolder) {
-          quitHolder = {value: false};
-        } else {
-          quitHolder.value = false;
-        }
-        var operationCount = 0;
-        var startOperationTimeout = () => {
-          if (quitHolder.value) return false;
-
-          operationCount++;
-          var operationIndex = operationCount;
-          setTimeout(() => {
-            if (operationCount == operationIndex) {
-              // no additional operations, so timeout loading
-              if (!quitHolder.value) {
-                quitHolder.value = true;
-                if (onTimeout) onTimeout();
-              }
-            }
-          }, this.timeoutBetweenResponses);
-          return !quitHolder.value;
-        }
-        setTimeout(() => {
-          if (!quitHolder.value) {
-            quitHolder.value = true;
-            if (onTimeout) onTimeout();
-          }
-        }, this.timeout);
-        return startOperationTimeout;
-      }
-
-      /**
-       * Gets the data at the given path and calls handleData({key: Object}).
-       *
-       * @param  {String}         path       Path within tree where to get data from
-       * @param  {Function([{key: Object}])} handleData Function to call with loaded data as an array of key-value pairs
-       * @param  {String}         orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
-       * @param  {Boolean}        ascending  Sort the items by ascending order.
-       * @param  {Any}            value      A specific value used to start from in the field specified by orderBy.
-       * @param  {Number}         count      Specifies the count of items to return.  If not specified and value is given it returns all items matching that value, otherwise returns all items.
-       * @return null
-       */
-      _getData(path, handleData, orderBy, ascending = true, value, count) {
-        if (!this.ctreeKey) return; // TODO: we should probably handle error cases immediately instead of leaving it to the caller to timeout
-
-        var loader;
-        if (value == null) {
-          loader = document.createElement('firebase-document');
-        } else {
-          loader = document.createElement('firebase-query');
-
-          loader.orderByChild = orderBy;
-          if (!count || count <= 0) {
-            loader.equalTo = value;
-          } else if (ascending) {
-            if (value || value === 0) {
-              loader.startAt = value;
-            }
-            loader.limitToFirst = count;
-          } else {
-            if (value || value === 0) {
-              loader.endAt = value;
-            }
-            loader.limitToLast = count;
-          }
-        }
-        loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
-        var processed = false;
-        var listener = function() {
-          // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
-          if (processed) return;
-
-          var data = loader.data;
-          if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
-            processed = true;
-            loader.removeEventListener('data-changed', listener);
-            loader.remove();
-            // TODO: if we never get valid data we never remove the node, which should be fixed, probably by adding a timeout
-            if (loader.parentNode) loader.parentNode.removeChild(loader);
-            var mapFunction = function(key) {
-              var object = {}
-              var value = data[key]
-              if (value.$key) {
-                key = value.$key
-                delete value.$key
-              }
-              if (data.$value) {
-                value = value.$value
-              }
-              object[key] = value;
-              return object;
-            }
-            if (typeof(data) === 'object' && (orderBy != null || !ascending)) {
-              data = Object.keys(data).map(mapFunction);
-              data.sort(function(a, b) {
-                var keyA = Object.keys(a)[0];
-                var keyB = Object.keys(b)[0];
-                var valueA;
-                var valueB;
-                if (orderBy != null) {
-                  valueA = a[keyA][orderBy];
-                  valueB = b[keyB][orderBy];
-                } else {
-                  valueA = keyA;
-                  valueB = keyB;
-                }
-                if (ascending) {
-                  return valueA - valueB;
-                } else {
-                  return valueB - valueA;
-                }
-              });
-            } else if (Array.isArray(data)) {
-              data = Object.keys(data).map(mapFunction);
-            }
-            handleData.bind(this)(data);
-          }
-        };
-        loader.addEventListener('data-changed', listener.bind(this));
-        document.body.appendChild(loader);
-      }
-
-      /**
-       * Converts a data entry from the array returned by _getData, which is in the format
-       * {id: dataEntry}, to an item with ID as a property of the item.
-       */
-      _dataToItem(data) {
-        var id = String(Object.keys(data)[0]);
-        return Object.assign({id: id}, data[id]);
-      }
-
-      /**
-       * Converts the data array returned by _getData to an object containing each item indexed by
-       * its ID.
-       */
-      _dataArrayToIndexedItems(dataArray) {
-        var items = {};
-        for (var key in dataArray) {
-          var item = this._dataToItem(dataArray[key]);
-          items[item.id] = item;
-        }
-        return items;
-      }
-
-      /**
-       * Adds the key for each item in the collection as an ID value for the item.
-       */
-      _addIdsToItems(items) {
-        var updatedItems = {};
-        for (var key in items) {
-          var item = items[key];
-          item.id = key;
-          updatedItems[key] = item;
-        }
-        return updatedItems;
-      }
-
-      /**
-       * Loads list items for each data container in the array.  Once loading
-       * completes for each data container or times out it calls
-       * processItems(dataContainerArray).  Timeout can be provided in
-       * milliseconds.
-       */
-      _loadAllDataListItems(dataContainerArray, processItems, timeout) {
-        var count = dataContainerArray.length;
-        var completed = 0;
-        var processDataStarted = false;
-        for (var i = 0; i < count; i++) {
-          var dataContainer = dataContainerArray[i];
-          this._loadDataListItems(dataContainer, (dataContainer) => {
-            completed++
-            if (completed >= count && !processDataStarted) {
-              var allComplete = true;
-              for (var j = 0; j < dataContainerArray.length; j++) {
-                if (dataContainerArray[j].loading) {
-                  allComplete = false;
-                  break;
-                }
-              }
-              if (allComplete) {
-                processDataStarted = true;
-                processItems.bind(this)(dataContainerArray);
-              }
-            }
-          });
-        }
-        if (!processDataStarted && timeout != null && timeout >= 0) {
-          setTimeout((dataContainer) => {
-            if (!processDataStarted) {
-              processDataStarted = true;
-              processItems.bind(this)(dataContainerArray);
-            }
-          }, timeout);
-        }
-      }
-
-      /**
-       * Load list items for dataContainer, and call onComplete(dataContainer)
-       * once it's done.  It's guaranteed that onComplete will be called, even
-       * if no additional items could be loaded.
-       *
-       * dataContainer Structure:
-       *   {
-       *     key: String,
-       *     ascending: Boolean,
-       *     startAt: Number,
-       *     loadGroup: Boolean,
-       *     cachedItems: [
-       *       {key: Object},
-       *       ...
-       *     ],
-       *     nextCacheIndex: Number,
-       *     loading: Boolean,
-       *     allLoaded: Boolean
-       *   }
-       */
-      _loadDataListItems(dataContainer, onComplete) {
-        if (!dataContainer || dataContainer.allLoaded) {
-          if (onComplete) {
-            onComplete.bind(this)(dataContainer);
-          }
-          return;
-        }
-        if (!dataContainer.startAt && dataContainer.startAt !== 0) {
-          if (dataContainer.ascending) {
-            dataContainer.startAt = Number.MIN_VALUE;
-          } else {
-            dataContainer.startAt = Number.MAX_VALUE;
-          }
-        }
-        if (!dataContainer.callbacks) {
-          dataContainer.callbacks = [];
-        }
-        if (dataContainer.loading) {
-          if (onComplete) {
-            // add to list of callbacks
-            var called = false;
-            var callbacks = dataContainer.callbacks;
-            var index = callbacks.length;
-            callbacks.push(dataContainer => {
-              if (!called) {
-                called = true;
-                onComplete.bind(this)(dataContainer);
-              }
-            });
-            if ((!dataContainer.loading || dataContainer.callbacks != callbacks) && !called) {
-              // since we added the callback loading may have completed but the callback wasn't called, so call it to be sure
-              called = true;
-              onComplete.bind(this)(dataContainer);
-            }
-          }
-        } else if (dataContainer.loadGroup) {
-          // get all elements matching value (ignore first because we already loaded it)
-          dataContainer.loading = true;
-          if (onComplete) {
-            dataContainer.callbacks.push(onComplete);
-          }
-          this._getData('elements', (data) => {
-            dataContainer.loadGroup = false;
-            if (dataContainer.ascending) {
-              dataContainer.startAt++;
-            } else {
-              dataContainer.startAt--;
-            }
-            dataContainer.nextCacheIndex = 1;
-            dataContainer.cachedItems = data;
-            // TODO: add/update elements in cTreeData
-            dataContainer.loading = false;
-            if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) {
-              this.__processCallbacks(dataContainer);
-            } else {
-              this._loadDataListItems(dataContainer);
-            }
-          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
-        } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
-          // get next value
-          dataContainer.loading = true;
-          if (onComplete) {
-            dataContainer.callbacks.push(onComplete);
-          }
-          this._getData('elements', (data) => {
-            dataContainer.nextCacheIndex = 0;
-            dataContainer.cachedItems = data;
-            // TODO: add/update elements in cTreeData
-            if (data && data.length > 0) {
-              var value = Object.values(data[0])[0];
-              dataContainer.startAt = value[dataContainer.key];
-              dataContainer.loadGroup = true;
-            } else {
-              dataContainer.allLoaded = true;
-            }
-            dataContainer.loading = false;
-            this.__processCallbacks(dataContainer);
-          }, dataContainer.key, dataContainer.ascending, dataContainer.startAt, 1);
-        } else if (onComplete) {
-          onComplete(dataContainer);
-        }
-      }
-
-      __processCallbacks(dataContainer) {
-        var callbacks = dataContainer.callbacks;
-        for (var i = 0; i < callbacks.length; i++) {
-          var callback = callbacks[i];
-          if (callback) {
-            callback.bind(this)(dataContainer);
-          }
-        }
-        dataContainer.callbacks = [];
-      }
-
-      /**
-       * Return if has a next item ready in the cache.  If onHasNext(boolean) is passed, this will
-       * trigger caching more items if needed and call onHasNext once that attempt to cache more
-       * items is done, with the parameter set to true if cached items are available.
-       */
-      _hasNextItem(dataContainer, onHasNext) {
-        var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
-        if (onHasNext) {
-          if (hasNext) {
-            onHasNext.bind(this)(hasNext);
-          } else {
-            this._loadDataListItems(dataContainer, (dataContainer) => {
-              var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
-              onHasNext.bind(this)(hasNext);
-            });
-          }
-        }
-        return hasNext;
-      }
-
-      /**
-       * Returns next item as a {key: Object} structured Object, or null if none exist.
-       */
-      _getNextItem(dataContainer, preload) {
-        var item = null;
-        if (this._hasNextItem(dataContainer)) {
-          item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
-          dataContainer.nextCacheIndex++;
-        }
-        if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) && !dataContainer.loading) {
-          this._loadDataListItems(dataContainer);
-        }
-        return item;
-      }
-
-      /**
-       * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
-       * called with the final, fully loaded item.
-       *
-       * @param  {String} elementId           ID of the element to load data for.
-       * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-       * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-       * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
-       */
-      _loadElement(elementId, onLoadingComplete, descriptionId, segmentVariations) {
-        var onServerResponse = this._startTimeoutCountdown();
-        onServerResponse.bind(this);
-
-        var cTreeData = this.cTreeData;
-        var elements = cTreeData.elements;
-        if (!elements) {
-          elements = [];
-          cTreeData.elements = elements;
-        }
-        var element = elements[elementId];
-
-        // function to load data for description
-        var loadDescription = () => {
-          this._loadDescription(element, onLoadingComplete, onServerResponse, descriptionId, segmentVariations);
-        };
-        // function to process data for element
-        var onElementLoaded = data => {
-          element = elements[elementId];
-          if (!element) {
-            var typeId = String(data.type);
-            element = Object.assign(data, {
-              id: elementId,
-              typeId: typeId,
-              type: cTreeData.types[typeId],
-            });
-            elements[elementId] = element;
-          }
-          if (!onServerResponse || onServerResponse()) {
-            loadDescription();
-          }
-        };
-
-        if (onServerResponse) onServerResponse.bind(this);
-        if (!element) {
-          // load element with provided ID
-          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
-          if (!onServerResponse || onServerResponse()) {
-            this._getData('elements/' + elementId, onElementLoaded);
-          }
-        } else {
-          // already loaded element with provided ID, so ensure description is fully loaded
-          loadDescription();
-        }
-      }
-
-      /**
-       * Load description data for the provided item, including segment variations for the
-       * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
-       * item.
-       *
-       * @param  {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
-       * @param  {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-       * @param  {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
-       * @param  {String} descriptionId       (Optional) ID of the description you want to load.
-       * @param  {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
-       */
-      _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
-        if (onServerResponse) onServerResponse.bind(this);
-
-        var descriptions = item.description;
-        if (!descriptions) {
-          descriptions = [];
-          item.description = descriptions;
-        }
-        var descriptionItem = null;
-        var segments = null;
-
-        // function to check if description with matching ID already exists
-        var checkForDescription = descriptionId => {
-          var descriptionFound = false;
-          for (var key in descriptions) {
-            if (descriptions[key].id == descriptionId) {
-              descriptionItem = descriptions[key];
-              segments = descriptionItem.segments;
-              descriptionFound = true;
-              break;
-            }
-          }
-          return descriptionFound;
-        };
-        // function to load data for each segment
-        var loadSegments = () => {
-          var segmentCount = segments.length;
-          var loadedCount = 0;
-          for (var key in segments) {
-            var segmentVariationId = null;
-            if (segmentVariations) {
-              segmentVariationId = segmentVariations[key];
-            }
-            this._loadSegmentVariation(segments[key], () => {
-              loadedCount++;
-
-              if ((!onServerResponse || onServerResponse()) && onLoadingComplete && loadedCount >= segmentCount) {
-                onLoadingComplete(item);
-              }
-            }, segmentVariationId);
-          }
-        };
-        // function to process data for description
-        var onDescriptionLoaded = data => {
-          var descriptionData;
-          if (descriptionId) {
-            // ID specified when loading, so use raw data
-            descriptionData = data;
-          } else {
-            // searched for best match, so look up ID and description from data
-            var dataItem = data[0];
-            descriptionId = String(Object.keys(dataItem)[0]);
-            descriptionData = dataItem[descriptionId];
-          }
-          // TODO: add/update description for element
-          if (!checkForDescription(descriptionId)) {
-            segments = descriptionData.segments.map(segmentId => { return {id: segmentId}; });
-            descriptionItem = {id: descriptionId, segments: segments};
-            descriptions.push(descriptionItem);
-          }
-          if (!onServerResponse || onServerResponse()) {
-            loadSegments();
-          }
-        };
-
-        if (!descriptionId) {
-          // load top rated description variation
-          if (!onServerResponse || onServerResponse()) {
-            this._getData('descriptions/forElement/' + item.id, onDescriptionLoaded, 'rating', false, null, 1);
-          }
-        } else if (!checkForDescription(descriptionId)) {
-          // load description variation with provided ID
-          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
-          if (!onServerResponse || onServerResponse()) {
-            this._getData('descriptions/forElement/' + item.id + '/' + descriptionId, onDescriptionLoaded);
-          }
-        } else {
-          // already loaded description with provided ID, so ensure segments are all loaded
-          loadSegments();
-        }
-      }
-
-      /**
-       * Load segment variation data for the provided segment.  Once complete, onLoadingComplete
-       * will be called with result.
-       *
-       * @param  {Segment} segment            Element data to load the description data for.  The description and segment data will be added to the item.
-       * @param  {Function} onLoadingComplete (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
-       * @param  {String} segmentVariationId  (Optional) ID of the segment variation you want to load.
-       */
-      _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
-        var segmentVariations = segment.variations;
-        if (!segmentVariations) {
-          segmentVariations = [];
-          segment.variations = segmentVariations;
-        }
-        var segmentVariationItem = null;
-        var segments = null;
-
-        // function to check if segment variation with matching ID already exists
-        var checkForSegmentVariation = segmentVariationId => {
-          var segmentVariationFound = false;
-          for (var key in segmentVariations) {
-            if (segmentVariations[key].id == segmentVariationId) {
-              segmentVariationItem = segmentVariations[key];
-              segmentVariationFound = true;
-              break;
-            }
-          }
-          return segmentVariationFound;
-        };
-        // function to process data for segment variation
-        var onSegmentVariationLoaded = data => {
-          var segmentVariation;
-          if (segmentVariationItem) {
-            // ID specified when loading, so use raw data
-            segmentVariation = data;
-          } else {
-            // searched for best match, so look up ID and segment variation from data
-            var dataItem = data[0];
-            var segmentVariationId = String(Object.keys(dataItem)[0]);
-            segmentVariation = dataItem[segmentVariationId];
-          }
-          // TODO: add/update segment for description
-          if (!segment.typeId) {
-            segment.typeId = String(segmentVariation.type);
-            segment.type = this.segmentTypes[segment.typeId];
-          }
-          if (!checkForSegmentVariation(segmentVariationId) && segmentVariation.type == segment.typeId) {
-            segmentVariationItem = {id: segmentVariationId, data: segmentVariation.data};
-            segmentVariations.push(segmentVariationItem);
-          }
-          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
-        }
-
-        if (!segmentVariationId) {
-          // load top rated segment variation
-          this._getData('segmentVariations/forSegment/' + segment.id, onSegmentVariationLoaded, 'rating', false, null, 1);
-        } else if (!checkForSegmentVariation(segmentVariationId)) {
-          // load segment variation with provided ID
-          // TODO: may need to create _getData version which returns object and doesn't try to convert it to an array
-          this._getData('segmentVariations/forSegment/' + segment.id + '/' + segmentVariationId, onSegmentVariationLoaded);
-        } else {
-          // already loaded segment variation with provided ID, so just call onLoadingComplete
-          if (onLoadingComplete) onLoadingComplete.bind(this)(segmentVariationItem);
-        }
-      }
-
-      _cTreeDataChanged(cTreeData, previousCTreeData) {
-        // Implement when include behavior to initialize additional fields when cTreeData changes
-      }
-    };
-
-    // Initialize object to hold shared static constants and functions
-    CTree.Loader = {};
+        /**
+         * Object holding all values for current cTrees.  All item lists will be
+         * cleared for all cTrees when the user value changes.
+         *
+         * Base Structure:
+         *   url: String,
+         *   name: String,
+         *   types: TypesById,
+         *   segmentTypes: SegmentTypesById,
+         *   elements: ElementsById,
+         *   users: UsersById,
+         *   lists: {
+         *     suggested: {
+         *       items: [SuggestedItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *     bookmarked: {
+         *       items: [BookmarkedItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *     history: {
+         *       items: [HistoryItems],
+         *       loading: Boolean,
+         *       hasMore: Boolean,
+         *       offset: String,			// test: Number
+         *     },
+         *   },
+         *
+         * Elements Structure:
+         *   [{
+         *     id: String,
+         *     type: ElementType,
+         *     title: String,
+         *     parents: [Strings],
+         *     children: [Strings],
+         *     childrenSearchComplete: Boolean,
+         *     designer: String,		// TODO: should probably be an object (user ID or reference to public user object)
+         *     description: [{
+         *       id: String,
+         *       contributors: [String],  // TODO: should probably be an object (user ID or reference to public user object)
+         *       segments: [{
+         *         id: String,
+         *         type: SegmentType,
+         *         variations: [{
+         *           id: String,
+         *           data: dynamic,	// data type depends on segment type
+         *         }, ...],
+         *       }, ...],
+         *     }, ...],
+         *     feedback: [{
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     bookmarked: Boolean,
+         *   }, ...]
+         *
+         * Users Structure:
+         *   [{
+         *     id: String,
+         *     name: String,
+         *     avatar: String,
+         *     // TODO: add more public data
+         *   }, ...]
+         */
+        _cTreeData: {
+          type: Object,
+          observer: '_cTreeDataChanged',
+        },
+      };
+    }
 
     /**
-     * Object containing all cached cTree data, with the cTreeKey as the key for each cTree data.
+     * Called when the url property changes.
      *
-     * Structure:
-     *   url: String,
-     *   name: String
-     *   types: {Types},
-     *   segmentTypes: {SegmentTypes},
-     *   elements: {Elements},
-     *   users: {Users},
-     *   lists: {
-     *     suggested: {
-     *       items: [SuggestedItems],
-     *       loading: Boolean,
-     *       hasMore: Boolean,
-     *       offset: String,			// test: Number
-     *     },
-     *     bookmarked: {
-     *       items: [BookmarkedItems],
-     *       loading: Boolean,
-     *       hasMore: Boolean,
-     *       offset: String,			// test: Number
-     *     },
-     *     history: {
-     *       items: [HistoryItems],
-     *       loading: Boolean,
-     *       hasMore: Boolean,
-     *       offset: String,			// test: Number
-     *     },
-     *   },
+     * @param {String} url New value for url
      */
-    CTree.Loader.CTREES_DATA = cTreesData;
-
-    // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
-    // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
-    CTree.Loader.COMMENT_CATEGORY = {
-      // Never look up values
-      NEW: 100,
-      UPDATED: 200,
-      TRANSLATED: 300,
-      NEEDS: 400,
-      NEEDS_FEEDBACK_FOR: 500,
-
-      // Look up some values
-      POPULAR_FROM: 600,
-      POPULAR_WITH: 700,
-      SIMILAR_TO: 800,
-      OPPOSING: 900,
-    };
-
-    CTree.Loader.COMMENT_SUBJECT = {
-      // popular: no from/with
-      ELEMENT: 0,
-      TYPE: 1,
-
-      // popular: don't look up, no from/with
-      TITLE: 10,
-      DESCRIPTION: 11,
-      TRANSLATION: 12,
-      FEEDBACK: 13,
-
-      CATEGORY: 20,
-      GROUP: 21,
-      USER: 22,
-
-      // popular: child of
-      PARENT: 30,
-      // popular: parent of
-      CHILD: 31,
-      // popular: sibling of
-      SIBLING: 32,
-    };
+    _urlChanged(url) {
+      // TODO: override in implementation
+    }
 
     /**
-     * Gets the first object from the array with the id property equal to the id
-     * parameter passed to this function.  If defaultToFirst is true this will
-     * return the first item from the array if no matching item is found, else
-     * will return undefined.
+     * Called when the ctreeKey property changes.
      *
-     * @param {Array} array
-     * @param {String} id
-     * @param {Boolean} [defaultToFirst=true]
+     * @param {String} cTreeKey    New value for cTreeKey
+     * @param {String} previousKey Previous value for cTreeKey
      */
-    CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
-      if (!array) return undefined;
+    _keyChanged(cTreeKey, previousKey) {
+      if (cTreeKey == previousKey) return;
 
-      if (id) {
-        for (var i = 0; i < array.length; i++) {
-          if (array[i].id == id) {
-            return array[i];
+      var cTreeData = cTreesData[cTreeKey];
+      var createCTree = !cTreeData;
+      if (createCTree) {
+        cTreeData = {
+          key: cTreeKey,
+          name: "",
+          url: this.url,
+          types: {},
+          segmentTypes: {},
+          elements: {},
+          users: {},
+          lists: {
+            suggested:  {items: [], loading: false, hasMore: true},
+            bookmarked: {items: [], loading: false, hasMore: true},
+            history:    {items: [], loading: false, hasMore: true},
+          },
+        };
+        this._createdCTreeData(cTreeKey, cTreeData);
+        cTreesData[cTreeKey] = cTreeData;
+      }
+
+      this._cTreeData = cTreeData;
+      this._setTypes(this._cTreeData.types);
+      this._setSegmentTypes(this._cTreeData.segmentTypes);
+      this.name = cTreeData.name;
+
+      if (cTreeData.name.length == 0) {
+        this._loadName(cTreeData.key, (name) => {
+          if (!name) name = "";
+          cTreeData.name = name;
+          if (this.ctreeKey === cTreeData.key) {
+            this.name = name;
           }
+        });
+      }
+      if (Object.keys(cTreeData.types).length == 0) {
+        this._loadTypes(cTreeData.key, (types) => {
+          if (types) {
+            if (Array.isArray(types)) {
+              cTreeData.types = this._dataArrayToIndexedItems(types);
+            } else {
+              cTreeData.types = this._addIdsToItems(types);
+            }
+          } else {
+            cTreeData.types = {};
+          }
+          if (this.ctreeKey === cTreeData.key) {
+            this._setTypes(cTreeData.types);
+          }
+        });
+      }
+      if (Object.keys(cTreeData.segmentTypes).length == 0) {
+        this._loadSegmentTypes(cTreeData.key, (segmentTypes) => {
+          if (segmentTypes) {
+            if (Array.isArray(segmentTypes)) {
+              cTreeData.segmentTypes = this._dataArrayToIndexedItems(segmentTypes);
+            } else {
+              cTreeData.segmentTypes = this._addIdsToItems(segmentTypes);
+            }
+          } else {
+            cTreeData.segmentTypes = {};
+          }
+          if (this.ctreeKey === cTreeData.key) {
+            this._setSegmentTypes(cTreeData.segmentTypes);
+          }
+        });
+      }
+    }
+
+    /**
+     * New cTreeData was created.  Override this to add additional data to the new cTreeData.
+     *
+     * @param {String} cTreeKey  The key for the cTree
+     * @param {Object} cTreeData The new cTreeData created
+     */
+    _createdCTreeData(cTreeKey, cTreeData) {
+      // TODO: override in implementation
+    }
+
+    /**
+     * Load the human readable name associated with the cTree
+     *
+     * @param {String} ctreeKey Key for cTree to load name for
+     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
+     */
+    _loadName(cTreeKey, onComplete) {
+      // TODO: override in implementation
+    }
+
+    /**
+     * Load the element types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load element types for
+     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
+     */
+    _loadTypes(cTreeKey, onComplete) {
+      // TODO: override in implementation
+    }
+
+    /**
+     * Load the segment types associated with the cTree
+     *
+     * @param {String} cTreeKey Key for cTree to load segment types for
+     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
+     */
+    _loadSegmentTypes(cTreeKey, onComplete) {
+      // TODO: override in implementation
+    }
+
+    /**
+     * Converts the data array returned by an API call to an object containing
+     * each item indexed by its ID.
+     */
+    _dataArrayToIndexedItems(dataArray) {
+      var items = {};
+      for (var key in dataArray) {
+        var item = this._dataToItem(dataArray[key]);
+        items[item.id] = item;
+      }
+      return items;
+    }
+
+    /**
+     * Adds the key for each item in the collection as an ID value for the item.
+     */
+    _addIdsToItems(items) {
+      var updatedItems = {};
+      for (var key in items) {
+        var item = items[key];
+        item.id = key;
+        updatedItems[key] = item;
+      }
+      return updatedItems;
+    }
+
+    /**
+     * Called when the cTreeData property changes.  This can be used to initialize
+     * additional fields.
+     *
+     * @param {Object} cTreeData         New cTreeData value
+     * @param {Object} previousCTreeData Previous cTreeData value
+     */
+    _cTreeDataChanged(cTreeData, previousCTreeData) {
+      // TODO: override to initialize additional fields when cTreeData changes
+    }
+
+    /**
+     * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
+     * called with the final, fully loaded item.
+     *
+     * @param {String} elementId           ID of the element to load data for.
+     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {String} descriptionId       (Optional) ID of the description you want to load.
+     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
+     */
+    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
+      // TODO: override in implementation
+    }
+  };
+
+  // Initialize object to hold shared static constants and functions
+  CTree.Loader = {};
+
+  /**
+   * Object containing all cached cTree data, with the cTreeKey as the key for each cTree data.
+   *
+   * Structure:
+   *   url: String,
+   *   name: String
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: {
+   *       items: [SuggestedItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *     bookmarked: {
+   *       items: [BookmarkedItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *     history: {
+   *       items: [HistoryItems],
+   *       loading: Boolean,
+   *       hasMore: Boolean,
+   *       offset: String,			// test: Number
+   *     },
+   *   },
+   */
+  CTree.Loader.CTREES_DATA = cTreesData;
+
+  // Popular [from][child of], Popular with, Similar to, Opposing, Updated, Needs, Needs feedback for
+  // TYPE, description, translation, title, feedback, child of PARENT, from CATEGORY, from GROUP, from USER
+  CTree.Loader.COMMENT_CATEGORY = {
+    // Never look up values
+    NEW: 100,
+    UPDATED: 200,
+    TRANSLATED: 300,
+    NEEDS: 400,
+    NEEDS_FEEDBACK_FOR: 500,
+
+    // Look up some values
+    POPULAR_FROM: 600,
+    POPULAR_WITH: 700,
+    SIMILAR_TO: 800,
+    OPPOSING: 900,
+  };
+
+  CTree.Loader.COMMENT_SUBJECT = {
+    // popular: no from/with
+    ELEMENT: 0,
+    TYPE: 1,
+
+    // popular: don't look up, no from/with
+    TITLE: 10,
+    DESCRIPTION: 11,
+    TRANSLATION: 12,
+    FEEDBACK: 13,
+
+    CATEGORY: 20,
+    GROUP: 21,
+    USER: 22,
+
+    // popular: child of
+    PARENT: 30,
+    // popular: parent of
+    CHILD: 31,
+    // popular: sibling of
+    SIBLING: 32,
+  };
+
+  /**
+   * Gets the first object from the array with the id property equal to the id
+   * parameter passed to this function.  If defaultToFirst is true this will
+   * return the first item from the array if no matching item is found, else
+   * will return undefined.
+   *
+   * @param {Array} array
+   * @param {String} id
+   * @param {Boolean} [defaultToFirst=true]
+   */
+  CTree.Loader.getFromArrayWithId = function(array, id, defaultToFirst=true) {
+    if (!array) return undefined;
+
+    if (id) {
+      for (var i = 0; i < array.length; i++) {
+        if (array[i].id == id) {
+          return array[i];
         }
       }
-      return defaultToFirst ? array[0] : undefined;
-    };
-  }
+    }
+    return defaultToFirst ? array[0] : undefined;
+  };
 
 })();
 

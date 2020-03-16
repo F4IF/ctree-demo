@@ -1,0 +1,258 @@
+<!--
+@license
+Copyright (c) 2018 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<link rel="import" href="ctree-loader-behavior-firebase.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Implementation of list loader using Firebase.
+   *
+   * CTreeData Structure:
+   *   url: String,
+   *   name: String,
+   *   types: TypesById,
+   *   segmentTypes: SegmentTypesById,
+   *   elements: ElementsById,
+   *   users: UsersById,
+   *   lists: {
+   *     suggested: ListData,
+   *     bookmarked: ListData,
+   *     history: ListData,
+   *   },
+   *
+   * ListData Structure:
+   *   items: [Elements],
+   *   loading: Boolean,
+   *   hasMore: Boolean,
+   *   offset: String,			// test: Number
+   */
+  class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
+
+    static get is() { return 'ctree-list-loader'; }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData} cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadSuggestedItems(cTreeData, listData) {
+      var quitHolder = {value: false};
+      var startOperationTimeout = null; // will be a Function returned by _startTimeoutCountdown
+      var items = [];
+      var loadedItems = [];
+      var itemCount = 0;
+      var maxItems = 20;
+      var onDoneLoading = function(dataContainerArray) {
+        // TODO: return any items not in loadedItems to their cache
+        this._loadListItems(cTreeData, listData, loadedItems, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+
+        // check if all data sources have been fully loaded
+        var allLoaded = true;
+        for (var key in dataContainerArray) {
+          if (!dataContainerArray[key].allLoaded) {
+            allLoaded = false;
+            break;
+          }
+        }
+        if (allLoaded) {
+          this._setHasMore('suggested', false);
+        }
+      }.bind(this);
+      var checkHasNextItem = (dataContainer, options) => {
+        if (!dataContainer.allLoaded) {
+          this._hasNextItem(dataContainer, (hasNext) => {
+            startOperationTimeout();
+            if (hasNext) {
+              options.push(dataContainer);
+            }
+          });
+        }
+      }
+      var loadItem = (dataContainerArray) => {
+        if (quitHolder.value || items.length >= maxItems) {
+          onDoneLoading(dataContainerArray);
+          return;
+        }
+
+        // check to see which dataContainers can be options (have items)
+        var options = [];
+        var tempCount = itemCount;
+        for (var key in dataContainerArray) {
+          checkHasNextItem(dataContainerArray[key], options);
+        }
+
+        // get random item from available options
+        var item = null;
+        var randomOption = () => {
+          if (quitHolder.value) {
+            onDoneLoading(dataContainerArray);
+            return;
+          }
+          if (options.length <= 0) {
+            // check if any container has more items
+            var anyLoading = false;
+            for (var key in dataContainerArray) {
+              var dataContainer = dataContainerArray[key];
+              if (!dataContainer.allLoaded) {
+                anyLoading = true;
+                // TODO: do we need to check if not added as option and not loading to prevent waiting for containers which stopped loading?
+              }
+            }
+
+            if (anyLoading) {
+              // no options, wait and check again
+              setTimeout(randomOption, 100);
+            } else {
+              // no additional items
+              onDoneLoading(dataContainerArray);
+            }
+            return;
+          }
+
+          // get index of option
+          var optionIndex;
+          if (options.length == 1) {
+            optionIndex = 0;
+          } else {
+            optionIndex = Math.floor(Math.random() * options.length);
+          }
+
+          // get next non-null item from option
+          var dataContainer = options[optionIndex];
+          do {
+            var dataItem = this._getNextItem(dataContainer, true);
+            if (dataItem) {
+              // if item doesn't already exist add it
+              var id = String(Object.keys(dataItem)[0]);
+              if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
+                item = this._dataToItem(dataItem);
+                item.typeId = String(item.type);
+                item.type = this.types[item.typeId];
+              }
+            }
+          } while (!item && this._hasNextItem(dataContainer) && !quitHolder.value);
+          if (!item) {
+            // item was invalid and option has no more items, so remove option and check again
+            options.splice(optionIndex, 1);
+            checkHasNextItem(dataContainer, options);
+          }
+
+          if (item) {
+            // add item to list after load description
+            itemCount++;
+            items.push(item);
+            this._loadDescription(item, item => {
+              var loadedItem = {element: item};
+              // TODO: add reason for suggestion
+              loadedItems.push(loadedItem);
+            }, startOperationTimeout);
+
+            loadItem(dataContainerArray);
+          } else {
+            // last option didn't result in an item, try a different option
+            setTimeout(randomOption, 5);
+          }
+        }
+        randomOption()
+      }
+      startOperationTimeout = this._startTimeoutCountdown(quitHolder);
+      this._loadAllDataListItems(cTreeData.suggestionTypes, loadItem, this.timeout);
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadBookmarkedItems(cTreeData, listData) {
+      this._loadListItems(cTreeData, listData, null, 'bookmarked', 'bookmarkedItems', this._setBookmarkedHasMore);
+    }
+
+    /**
+     * Load the next page of suggested items.
+     *
+     * @param {CTreeData}  cTreeData The cTreeData the loaded items should be associated with
+     * @param {ListLoader} listData  The listData the items will be added to
+     */
+    _loadHistoryItems(cTreeData, listData) {
+      this._loadListItems(cTreeData, listData, null, 'history', 'historyItems', this._setHistoryHasMore);
+    }
+
+    _loadListItems(cTreeData, listData, items, name, itemsName, hasMore) {
+      if (!listData.offset) {
+        listData.offset = 0;
+      }
+      if (!items || items.length == 0) {
+        listData.hasMore = false;
+        if (this._cTreeData == cTreeData) {
+          hasMore.bind(this)(false);
+        }
+      } else {
+        for (var key in items) {
+          var item = items[key];
+          if (this._cTreeData == cTreeData) {
+            this.push(itemsName, item);
+            if (this.currentName == name) {
+              this.notifySplices('currentItems', [{
+                index: this.currentItems.length - 1,
+                removed: [],
+                addedCount: 1,
+                object: this.currentItems,
+                type: 'splice',
+              }]);
+            }
+          } else {
+            listData.items.push(item);
+          }
+          listData.offset++;
+        }
+      }
+      listData.loading = false;
+      if (this._cTreeData == cTreeData) {
+        this._setLoading(name, false);
+      }
+    }
+  }
+  CTree.ListLoader = CTreeListLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeListLoader.is, CTreeListLoader);
+
+})();
+
+</script>
