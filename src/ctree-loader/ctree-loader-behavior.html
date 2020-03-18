@@ -314,7 +314,7 @@ this license.
      * Load the human readable name associated with the cTree
      *
      * @param {String} ctreeKey Key for cTree to load name for
-     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
+     * @param {Function(String)} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
     _loadName(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -324,7 +324,7 @@ this license.
      * Load the element types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load element types for
-     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
+     * @param {Function(Types)} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
     _loadTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -334,7 +334,7 @@ this license.
      * Load the segment types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load segment types for
-     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
+     * @param {Function(SegmentTypes)} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
     _loadSegmentTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -382,7 +382,7 @@ this license.
      * called with the final, fully loaded item.
      *
      * @param {String} elementId           ID of the element to load data for.
-     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {Function(Element[])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
      * @param {String} descriptionId       (Optional) ID of the description you want to load.
      * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */

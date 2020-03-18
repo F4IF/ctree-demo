@@ -55,7 +55,7 @@ this license.
       } else {
         // polyfill web components
         var e = document.createElement('script');
-        e.src = '/bower_components/webcomponentsjs/webcomponents-loader.js';
+        e.src = rootPath + '/bower_components/webcomponentsjs/webcomponents-loader.js';
         document.head.appendChild(e);
       }
     })();
@@ -63,7 +63,7 @@ this license.
     // load pre-caching service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register(rootPath + '/service-worker.js');
       });
     }
 
