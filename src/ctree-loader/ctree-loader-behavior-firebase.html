@@ -505,6 +505,9 @@ this license.
      * Return if has a next item ready in the cache.  If onHasNext(boolean) is passed, this will
      * trigger caching more items if needed and call onHasNext once that attempt to cache more
      * items is done, with the parameter set to true if cached items are available.
+     *
+     * @param {Object} dataContainer  DataContainer with loaded list items and all data needed to load more
+     * @param {?Function(Boolean)} onHasNext Function called when attempt to cache more items is done, with parameter indicating if cached any new items
      */
     _hasNextItem(dataContainer, onHasNext) {
       var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
@@ -523,6 +526,9 @@ this license.
 
     /**
      * Returns next item as a {key: Object} structured Object, or null if none exist.
+     *
+     * @param {Object}  dataContainer  DataContainer with loaded list items and all data needed to load more
+     * @param {Boolean} preload        If set to true, will preload more items into cache if there aren't any more in the
      */
     _getNextItem(dataContainer, preload) {
       var item = null;
@@ -530,7 +536,7 @@ this license.
         item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
         dataContainer.nextCacheIndex++;
       }
-      if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) && !dataContainer.loading) {
+      if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) && !dataContainer.loading) {
         this._loadDataListItems(dataContainer);
       }
       return item;
@@ -540,10 +546,10 @@ this license.
      * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
      * called with the final, fully loaded item.
      *
-     * @param {String} elementId           ID of the element to load data for.
-     * @param {Function(Element)} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
-     * @param {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
+     * @param {String}             elementId         ID of the element to load data for.
+     * @param {?Function(Element)} onComplete        (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {?String}            descriptionId     (Optional) ID of the description you want to load.
+     * @param {?Array}             segmentVariations (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */
     _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
       var onServerResponse = this._startTimeoutCountdown();
@@ -596,11 +602,11 @@ this license.
      * description.  Once complete, onLoadingComplete will be called with the final, fully loaded
      * item.
      *
-     * @param {Element} item               Element data to load the description data for.  The description and segment data will be added to the item.
-     * @param {Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
-     * @param {Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
-     * @param {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
+     * @param {Element}   item              Element data to load the description data for.  The description and segment data will be added to the item.
+     * @param {?Function} onLoadingComplete (Optional) Function called when loading the description and all segments has been completed.  This is passed the item as a parameter.
+     * @param {?Function} onServerResponse  (Optional) Function called whenever the server responds.  This function should return a boolean value of true if processing should continue (ex. if loading has not timed out).
+     * @param {?String}   descriptionId     (Optional) ID of the description you want to load.
+     * @param {?Array}    segmentVariations (Optional) Array of IDs with a variation for each segment to be loaded.  The corresponding descriptionId must also be specified.
      */
     _loadDescription(item, onLoadingComplete, onServerResponse, descriptionId, segmentVariations) {
       if (onServerResponse) onServerResponse.bind(this);
@@ -688,9 +694,9 @@ this license.
      * Load segment variation data for the provided segment.  Once complete, onLoadingComplete
      * will be called with result.
      *
-     * @param {Segment}  segment            Element data to load the description data for.  The description and segment data will be added to the item.
-     * @param {Function} onLoadingComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
-     * @param {String}   segmentVariationId (Optional) ID of the segment variation you want to load.
+     * @param {Segment}   segment            Element data to load the description data for.  The description and segment data will be added to the item.
+     * @param {?Function} onLoadingComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+     * @param {?String}   segmentVariationId (Optional) ID of the segment variation you want to load.
      */
     _loadSegmentVariation(segment, onLoadingComplete, segmentVariationId) {
       var segmentVariations = segment.variations;
