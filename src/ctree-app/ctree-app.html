@@ -468,7 +468,9 @@ this license.
       }
 
       _loadingListItemsChanged(loadingListItems) {
-        this.$.scrollThreshold.clearTriggers();
+        if (!loadingListItems) {
+          this.$.scrollThreshold.clearTriggers();
+        }
       }
 
       _getCTreeList() {
