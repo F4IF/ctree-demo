@@ -99,8 +99,8 @@ this license.
     </div><div id="feedback">
       <div id="content" hidden="true"></div>
       <div id="comment">[[comment]]</div>
-      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!item]]"></ctree-feedback-bar>
-      <ctree-feedback-entry id="userComment" hidden$="[[!_commenting]]"></ctree-feedback-entry>
+      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!_and(item,allowUserFeedback)]]"></ctree-feedback-bar>
+      <ctree-feedback-entry id="userComment" hidden$="[[!_and(_commenting,allowUserFeedback)]]"></ctree-feedback-entry>
     </div>
   </template>
 
@@ -140,6 +140,8 @@ this license.
 
           comment: String,
 
+          allowUserFeedback: Boolean,
+
           // TODO: we probalby need to reset this whenever the item is changed (listen for ID or other handle change)
           // TODO: store entered (but not submitted) comment by ID and clear it so list recycling works correctly
           _commenting: {
@@ -155,6 +157,15 @@ this license.
         super.ready();
 
         this.addEventListener('iron-resize', e => this._onSizeChanged(e));
+      }
+
+      _and() {
+        for (var i = 0; i < arguments.length; i++) {
+          if (!arguments[i]) {
+            return false;
+          }
+        }
+        return true;
       }
 
       _showAuthorData(author, sentiment) {
