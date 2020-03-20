@@ -38,6 +38,37 @@ this license.
   }
 
   CTree.UtilsMixin = (superClass) => class extends superClass {
+
+    /**
+     * A function to get the logical boolean AND of all arguments.  This is
+     * useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean AND of all arguments passed to the function
+     */
+    and() {
+      for (var i = 0; i < arguments.length; i++) {
+        if (!arguments[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * A function to get the logical boolean OR of all arguments.  This is
+     * useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean OR of all arguments passed to the function
+     */
+    or() {
+      for (var i = 0; i < arguments.length; i++) {
+        if (arguments[i]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     /**
      * Checks for property match, and if the property doesn't match it will call
      * the provided listener when changes to a matching value. Successive calls to
@@ -71,7 +102,6 @@ this license.
 
       return matches;
     }
-
 
     /**
      * Remove any registered listener for property match from checkProperty

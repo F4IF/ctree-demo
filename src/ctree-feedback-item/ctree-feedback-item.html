@@ -35,6 +35,7 @@ this license.
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
 <link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-utils/ctree-utils-mixin.html">
 
 <dom-module id="ctree-feedback-item">
   <template>
@@ -99,13 +100,13 @@ this license.
     </div><div id="feedback">
       <div id="content" hidden="true"></div>
       <div id="comment">[[comment]]</div>
-      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!_and(item,allowUserFeedback)]]"></ctree-feedback-bar>
-      <ctree-feedback-entry id="userComment" hidden$="[[!_and(_commenting,allowUserFeedback)]]"></ctree-feedback-entry>
+      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!and(item,allowUserFeedback)]]"></ctree-feedback-bar>
+      <ctree-feedback-entry id="userComment" hidden$="[[!and(_commenting,allowUserFeedback)]]"></ctree-feedback-entry>
     </div>
   </template>
 
   <script>
-    class CTreeFeedbackItem extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
+    class CTreeFeedbackItem extends CTree.UtilsMixin(Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element)) {
 
       static get is() { return 'ctree-feedback-item'; }
 
@@ -157,15 +158,6 @@ this license.
         super.ready();
 
         this.addEventListener('iron-resize', e => this._onSizeChanged(e));
-      }
-
-      _and() {
-        for (var i = 0; i < arguments.length; i++) {
-          if (!arguments[i]) {
-            return false;
-          }
-        }
-        return true;
       }
 
       _showAuthorData(author, sentiment) {
