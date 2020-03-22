@@ -40,6 +40,15 @@ this license.
 
   'use strict';
 
+  /**
+   * Minimum step between values in Firebase. If this doesn't match the number
+   * of decimals for numbers in Firebase used for sorting it can result in
+   * skipping items in a list.  The precision used in Firebase should be
+   * enforced when setting the numbers (ex. using Number.toFixed()).
+   */
+  CTree.Loader.FIREBASE_MIN_DECIMAL_STEP = 1e-10;
+  CTree.Loader.FIREBASE_MAX_DECIMAL_PLACES = 10;
+
   CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
     static get properties() {
       return {
@@ -269,13 +278,19 @@ this license.
         if (!count || count <= 0) {
           loader.equalTo = value;
         } else if (ascending) {
-          if (value || value === 0) {
+          if (value) {
             loader.startAt = value;
+          } else if (value === 0) {
+            // required to behave correctly for a 0 value
+            loader.startAt = "0";
           }
           loader.limitToFirst = count;
         } else {
-          if (value || value === 0) {
+          if (value) {
             loader.endAt = value;
+          } else if (value === 0) {
+            // required to behave correctly for a 0 value
+            loader.endAt = "0";
           }
           loader.limitToLast = count;
         }
@@ -416,9 +431,9 @@ this license.
       }
       if (!dataContainer.startAt && dataContainer.startAt !== 0) {
         if (dataContainer.ascending) {
-          dataContainer.startAt = Number.MIN_VALUE;
+          dataContainer.startAt = Number.MIN_SAFE_INTEGER;
         } else {
-          dataContainer.startAt = Number.MAX_VALUE;
+          dataContainer.startAt = Number.MAX_SAFE_INTEGER;
         }
       }
       if (!dataContainer.callbacks) {
@@ -451,9 +466,9 @@ this license.
         this._getData('elements', (data) => {
           dataContainer.loadGroup = false;
           if (dataContainer.ascending) {
-            dataContainer.startAt++;
+            dataContainer.startAt += CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           } else {
-            dataContainer.startAt--;
+            dataContainer.startAt -= CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           }
           dataContainer.nextCacheIndex = 1;
           dataContainer.cachedItems = data;
