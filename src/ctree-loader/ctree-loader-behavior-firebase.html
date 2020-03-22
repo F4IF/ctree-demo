@@ -352,11 +352,19 @@ this license.
     }
 
     /**
+     * Gets the ID for the data item from the array returned by _getData, which
+     * is in the format {id: dataEntry}.
+     */
+    _getDataItemId(data) {
+      return String(Object.keys(data)[0]);
+    }
+
+    /**
      * Converts a data entry from the array returned by _getData, which is in the format
      * {id: dataEntry}, to an item with ID as a property of the item.
      */
     _dataToItem(data) {
-      var id = String(Object.keys(data)[0]);
+      var id = this._getDataItemId(data);
       return Object.assign({id: id}, data[id]);
     }
 
@@ -372,7 +380,7 @@ this license.
       var processDataStarted = false;
       for (var i = 0; i < count; i++) {
         var dataContainer = dataContainerArray[i];
-        this._loadDataListItems(dataContainer, (dataContainer) => {
+        this._loadDataListItems(dataContainer, 'elements', (dataContainer) => {
           completed++
           if (completed >= count && !processDataStarted) {
             var allComplete = true;
@@ -419,16 +427,19 @@ this license.
      *     allLoaded: Boolean
      *   }
      *
-     * @param {Object} dataContainer  DataContainer with loaded list items and all data needed to load more
-     * @param {Function(DataContainer)} onComplete Function called when completed, with the updated DataContainer
+     * @param {Object} dataContainer    DataContainer with loaded list items and all data needed to load more
+     * @param {String} relativePath     Path of list in Firebase, relative to cTree
+     * @param {?Function(DataContainer)} onComplete Function called when completed, with the updated DataContainer
+     * @param {Number} [minCacheSize=1] The minimum number of items to ensure are in the cache
      */
-    _loadDataListItems(dataContainer, onComplete) {
+    _loadDataListItems(dataContainer, relativePath, onComplete, minCacheSize=1) {
       if (!dataContainer || dataContainer.allLoaded) {
         if (onComplete) {
           onComplete.bind(this)(dataContainer);
         }
         return;
       }
+
       if (!dataContainer.startAt && dataContainer.startAt !== 0) {
         if (dataContainer.ascending) {
           dataContainer.startAt = Number.MIN_SAFE_INTEGER;
@@ -436,10 +447,13 @@ this license.
           dataContainer.startAt = Number.MAX_SAFE_INTEGER;
         }
       }
+
       if (!dataContainer.callbacks) {
         dataContainer.callbacks = [];
       }
+
       if (dataContainer.loading) {
+        // already loading, so don't start loading again
         if (onComplete) {
           // add to list of callbacks
           var called = false;
@@ -457,104 +471,201 @@ this license.
             onComplete.bind(this)(dataContainer);
           }
         }
+
       } else if (dataContainer.loadGroup) {
-        // get all elements matching value (ignore first because we already loaded it)
+        // get all elements matching value (ignore items already loaded by offseting cache index start)
         dataContainer.loading = true;
+
         if (onComplete) {
           dataContainer.callbacks.push(onComplete);
         }
-        this._getData('elements', (data) => {
-          dataContainer.loadGroup = false;
+        this._getData(relativePath, (data) => {
+          // update properties for loading next set of items
+          if (!this.__testValid(dataContainer, data)) return;
+          var matchValue = dataContainer.startAt;
           if (dataContainer.ascending) {
             dataContainer.startAt += CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           } else {
             dataContainer.startAt -= CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           }
-          dataContainer.nextCacheIndex = 1;
-          dataContainer.cachedItems = data;
-          // TODO: add/update elements in cTreeData
-          dataContainer.loading = false;
-          if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex < dataContainer.cachedItems.length) {
-            this.__processCallbacks(dataContainer);
-          } else {
-            this._loadDataListItems(dataContainer);
+          dataContainer.loadGroup = false;
+
+          // count items in cache matching startAt value
+          const cachedItems = dataContainer.cachedItems;
+          var matchingItemCount = 0;
+          if (cachedItems && data) {
+            for (var i = cachedItems.length - 1; i >= 0; i--) {
+              var value = Object.values(cachedItems[i])[0];
+              if (value[dataContainer.key] !== matchValue) {
+                break;
+              }
+              matchingItemCount++;
+            }
           }
+
+          this.__processNewData(dataContainer, relativePath, minCacheSize, data, matchingItemCount);
         }, dataContainer.key, dataContainer.ascending, dataContainer.startAt);
-      } else if (dataContainer.cachedItems == null || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) {
-        // get next value
+
+      } else if (!dataContainer.cachedItems || dataContainer.nextCacheIndex + minCacheSize > dataContainer.cachedItems.length) {
+        // get enough new values to reach minCacheSize
         dataContainer.loading = true;
         if (onComplete) {
           dataContainer.callbacks.push(onComplete);
         }
-        this._getData('elements', (data) => {
-          dataContainer.nextCacheIndex = 0;
-          dataContainer.cachedItems = data;
-          // TODO: add/update elements in cTreeData
-          if (data && data.length > 0) {
-            var value = Object.values(data[0])[0];
-            dataContainer.startAt = value[dataContainer.key];
+        this._getData(relativePath, (data) => {
+          // update properties for loading next set of items
+          if (!this.__testValid(dataContainer, data)) return;
+          var lastItemIndex = data ? data.length - 1 : -1;
+          if (lastItemIndex >= 0) {
+            const item = Object.values(data[lastItemIndex])[0];
+            dataContainer.startAt = item[dataContainer.key];
             dataContainer.loadGroup = true;
           } else {
+            // no more items found, so must have loaded them all
             dataContainer.allLoaded = true;
           }
-          dataContainer.loading = false;
-          this.__processCallbacks(dataContainer);
-        }, dataContainer.key, dataContainer.ascending, dataContainer.startAt, 1);
+
+          this.__processNewData(dataContainer, relativePath, minCacheSize, data);
+        }, dataContainer.key, dataContainer.ascending, dataContainer.startAt, minCacheSize);
       } else if (onComplete) {
         onComplete(dataContainer);
       }
     }
 
-    __processCallbacks(dataContainer) {
-      var callbacks = dataContainer.callbacks;
-      for (var i = 0; i < callbacks.length; i++) {
-        var callback = callbacks[i];
-        if (callback) {
-          callback.bind(this)(dataContainer);
+    /**
+     * This validates that the data returned from a search matches the conditions
+     * set in dataContainer.  This shouldn't always be needed, but is good for
+     * debugging.  Returns true if the data is valid, otherwise logs an error and
+     * returns false.
+     *
+     * TODO: only test when in a debug mode or something
+     */
+    __testValid(dataContainer, data) {
+      if (!data) return true;
+      for (var i = 0; i < data.length; i++) {
+        const item = Object.values(data[i])[0];
+        const value = item[dataContainer.key];
+        if ((dataContainer.ascending && value < dataContainer.startAt) || (!dataContainer.ascending && value > dataContainer.startAt)) {
+          console.error('invalid items returned for ' + dataContainer.key + (dataContainer.loadGroup ? ' group' : '') + ' ' + (dataContainer.ascending ? 'ascending' : 'descending'));
+          return false;
         }
       }
-      dataContainer.callbacks = [];
+      return true;
+    }
+
+    __processNewData(dataContainer, relativePath, minCacheSize, data, matchingItemCount=0) {
+      // set new cache items
+      const cachedItems = dataContainer.cachedItems;
+      const oldNextCacheIndex = dataContainer.nextCacheIndex;
+      if (!cachedItems || dataContainer.nextCacheIndex >= cachedItems.length) {
+        // reached end of cache, replace entire cache with new data and set offset to number of matching items to avoid duplicates
+        dataContainer.nextCacheIndex = matchingItemCount;
+      } else if (data) {
+        if (dataContainer.nextCacheIndex > 0) {
+          // remove items already loaded from cache
+          cachedItems.splice(0, cachedItems.length - dataContainer.nextCacheIndex);
+          dataContainer.nextCacheIndex = 0;
+        }
+        // add items from cache to front of new data array
+        data.splice(0, matchingItemCount, ...cachedItems);
+      }
+      dataContainer.cachedItems = data;
+
+      // TODO: add/update elements in cTreeData
+      dataContainer.loading = false;
+
+      const cachedItemsNeeded = this.__getCachedItemsNeeded(dataContainer, minCacheSize) + matchingItemCount;
+      if (cachedItemsNeeded > 0 && !dataContainer.allLoaded) {
+        // need to cache more items and we haven't loaded all items from the server yet
+        // TODO: may want to check for timeout before calling this and reset the any active timeout countdown
+        this._loadDataListItems(dataContainer, relativePath, null, cachedItemsNeeded);
+      } else {
+        // cache size is big enough, or no more items to cache, so process callbacks
+        var callbacks = dataContainer.callbacks;
+        dataContainer.callbacks = [];
+        for (var i = 0; i < callbacks.length; i++) {
+          var callback = callbacks[i];
+          if (callback) {
+            callback.bind(this)(dataContainer);
+          }
+        }
+      }
     }
 
     /**
-     * Return if has a next item ready in the cache.  If onHasNext(boolean) is passed, this will
-     * trigger caching more items if needed and call onHasNext once that attempt to cache more
-     * items is done, with the parameter set to true if cached items are available.
-     *
-     * @param {Object} dataContainer  DataContainer with loaded list items and all data needed to load more
-     * @param {?Function(Boolean)} onHasNext Function called when attempt to cache more items is done, with parameter indicating if cached any new items
+     * Helper function to return how many cached items are needed to reach the
+     * minCacheSize provided.
      */
-    _hasNextItem(dataContainer, onHasNext) {
-      var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+    __getCachedItemsNeeded(dataContainer, minCacheSize) {
+      return dataContainer.cachedItems ? minCacheSize - (dataContainer.cachedItems.length - dataContainer.nextCacheIndex) : minCacheSize;
+    }
+
+    /**
+     * Return if has the next item(s) ready in the cache.  If onHasNext(boolean) is passed, this will
+     * trigger caching more items if needed and call onHasNext once that attempt to cache more
+     * items is done, with the parameter set to true if cached items are available.  This will call
+     * onHasNext(boolean) immediately if hasNext is already true.
+     *
+     * WARNING: This is NOT guaranteed to return true if more items are available from Firebase,
+     *    just if they've been cached yet.
+     *
+     * @param {Object} dataContainer         DataContainer with loaded list items and all data needed to load more
+     * @param {?String} relativePath         Path of list in Firebase, relative to cTree.  Only needs to be specified if onHasNext is non-null.
+     * @param {?Function(Boolean)} onHasNext Function called when attempt to cache more items is done, with parameter indicating if cached any new items
+     * @param {Number} [minItemCount=1]      The number of items needed in the cache for this to return true
+     * @return {Boolean} Returns true if has the specified number (default=1) of items ready, or the last page of items is ready
+     */
+    _hasNextItem(dataContainer, relativePath, onHasNext, minItemCount=1) {
+      const cachedItemsNeeded = this.__getCachedItemsNeeded(dataContainer, minItemCount);
+      var hasNext = cachedItemsNeeded <= 0
+          || (dataContainer.allLoaded && dataContainer.cachedItems && dataContainer.cachedItems.length > 1);
       if (onHasNext) {
         if (hasNext) {
           onHasNext.bind(this)(hasNext);
         } else {
-          this._loadDataListItems(dataContainer, (dataContainer) => {
-            var hasNext = dataContainer.cachedItems != null && dataContainer.nextCacheIndex < dataContainer.cachedItems.length;
+          this._loadDataListItems(dataContainer, relativePath, (dataContainer) => {
+            var hasNext = this.__getCachedItemsNeeded(dataContainer, minItemCount) <= 0;
             onHasNext.bind(this)(hasNext);
-          });
+          }, cachedItemsNeeded);
         }
       }
       return hasNext;
     }
 
     /**
-     * Returns next item as a {key: Object} structured Object, or null if none exist.
+     * Returns next data item as a {key: Object} structured Object, or null if
+     * none exist.
      *
-     * @param {Object}  dataContainer  DataContainer with loaded list items and all data needed to load more
-     * @param {Boolean} preload        If set to true, will preload more items into cache if there aren't any more in the
+     * @param {Object}   dataContainer DataContainer with loaded list items and all data needed to load more
+     * @param {?String}  relativePath  Path of list in Firebase, relative to cTree, to preload more items into cache from if needed.  If empty or null, won't preload any items.
+     * @return {?Object} Returns next item as a {key: Object} structured Object, or null if none exist.
      */
-    _getNextItem(dataContainer, preload) {
-      var item = null;
-      if (this._hasNextItem(dataContainer)) {
-        item = dataContainer.cachedItems[dataContainer.nextCacheIndex];
-        dataContainer.nextCacheIndex++;
+    _getNextDataItem(dataContainer, relativePath) {
+      var items = this._getNextDataItems(dataContainer, 1, relativePath);
+      return items.length >= 1 ? items[0] : null;
+    }
+
+    /**
+     * Returns next data items as an array of {key: Object} structured Objects,
+     * or an empty array if none exist.
+     *
+     * @param {Object}   dataContainer    DataContainer with loaded list items and all data needed to load more
+     * @param {Number}   [maxItemCount=1] The maximum number of items to return
+     * @param {?String}  relativePath     Path of list in Firebase, relative to cTree, to preload more items into cache from if needed.  If empty or null, won't preload any items.
+     * @return {Array} Returns next items as an array of {key: Object} structured Objects, or an empty array if none exist.
+     */
+    _getNextDataItems(dataContainer, maxItemCount=1, relativePath) {
+      var items;
+      if (dataContainer.cachedItems && dataContainer.nextCacheIndex < dataContainer.cachedItems.length) {
+        items = dataContainer.cachedItems.slice(dataContainer.nextCacheIndex, dataContainer.nextCacheIndex + maxItemCount);
+        dataContainer.nextCacheIndex += items.length;
+      } else {
+        items = [];
       }
-      if (preload && (!dataContainer.cachedItems || dataContainer.nextCacheIndex >= dataContainer.cachedItems.length) && !dataContainer.loading) {
-        this._loadDataListItems(dataContainer);
+      if (relativePath && relativePath.length > 0 && this.__getCachedItemsNeeded(dataContainer, maxItemCount) > 0) {
+        this._loadDataListItems(dataContainer, relativePath, null, maxItemCount);
       }
-      return item;
+      return items;
     }
 
     /**
@@ -674,7 +785,7 @@ this license.
         } else {
           // searched for best match, so look up ID and description from data
           var dataItem = data[0];
-          descriptionId = String(Object.keys(dataItem)[0]);
+          descriptionId = this._getDataItemId(dataItem);
           descriptionData = dataItem[descriptionId];
         }
         // TODO: add/update description for element
@@ -743,7 +854,7 @@ this license.
         } else {
           // searched for best match, so look up ID and segment variation from data
           var dataItem = data[0];
-          var segmentVariationId = String(Object.keys(dataItem)[0]);
+          var segmentVariationId = this._getDataItemId(dataItem);
           segmentVariation = dataItem[segmentVariationId];
         }
         // TODO: add/update segment for description

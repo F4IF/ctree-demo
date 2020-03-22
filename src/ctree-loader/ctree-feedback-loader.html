@@ -185,7 +185,7 @@ this license.
 
             if (this.parent === parent && this._cTreeData === cTreeData && this.__loadingLock === loadingLock) {
               if (this.feedback === feedback) {
-                if (feedbackItems && feedbackItems.length !== pageSize && (feedbackUpdated || feedbackItems.length === 0)) {
+                if (!feedbackItems || (feedbackItems.length !== pageSize && (feedbackUpdated || feedbackItems.length === 0))) {
                   // number of items returned don't match number requested, which should mean there aren't any more
                   this._setHasMore(false);
                 }
