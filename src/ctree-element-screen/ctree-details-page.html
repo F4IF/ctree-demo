@@ -26,13 +26,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Please email contact@innovativeFuture.org for inquiries related to
 this license.
 -->
-
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-element/ctree-element-header.html">
 <link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
+<link rel="import" href="../ctree-feedback-item/ctree-feedback-item.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
 <link rel="import" href="ctree-description.html">
 
@@ -49,7 +51,7 @@ this license.
         left: 0;
         right: 16px;
       }
-      .scrollRegion {
+      iron-scroll-threshold {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -81,6 +83,9 @@ this license.
         margin-left: 8px;
         margin-right: 8px;
       }
+      .commentItem {
+        padding: 0 8px;
+      }
       #submit {
         margin-bottom: 16px;
         background-color: var(--paper-indigo-500);
@@ -100,11 +105,21 @@ this license.
         height: 1px;
         background: black;
       }
+      #loadingIndicator {
+        text-align: center;
+      }
+      #loadingIndicator paper-spinner {
+        margin-right: 8px;
+      }
+      .loadingLabel {
+        display: inline-block;
+        vertical-align: middle;
+      }
     </style>
 
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
 
-    <div class="scrollRegion">
+    <iron-scroll-threshold id="scrollThreshold" lower-threshold="500" on-lower-threshold="_loadMoreComments">
       <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
       <div id="childButtonPrompts">
         <template is="dom-repeat" items="[[childTypes]]" as="type">
@@ -117,14 +132,17 @@ this license.
         <paper-textarea id="comment" class="comment" label="Comment" value="{{_comment}}" no-label-float></paper-textarea>
         <paper-button id="submit" raised disabled on-tap="_submitComment">Submit</paper-button>
       </div>
-      <template is="dom-repeat" items="{{element.feedback}}" as="item">
-        <div class="commentContainer">
-          <div class="divider"></div>
-          <div class="comment">[[item.text]]</div>
-          <ctree-feedback-bar rating="{{item.rating}}" element-id="[[element.id]]" comment-id="[[item.text]]"></ctree-feedback-bar>
+      <template id="commentList" is="dom-repeat" items="{{_feedback}}" as="item">  <!-- TODO: change to element.feedback -->
+        <div class="commentItem">
+          <div class="divider" style="margin-bottom: 4px;"></div>
+          <ctree-feedback-item parent="[[element]]" item="[[item]]"></ctree-feedback-item>
         </div>
       </template>
-    </div>
+      <div id="loadingIndicator" hidden$="[[!loading]]">
+        <div class="divider"></div>
+        <paper-spinner class="loadingLabel" active$="[[loading]]"></paper-spinner><div class="loadingLabel"> Loading more</div>
+      </div>
+    </iron-scroll-threshold>
     <!--<ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>-->
   </template>
 
@@ -185,6 +203,23 @@ this license.
             observer: '__segmentsChanged',
           },
 
+          loading: {
+            type: Boolean,
+            value: false,
+          },
+
+          // TODO: remove once loading real feedback is supported
+          _feedback: {
+            type: Array,
+            value: [
+              {text: "Test comment 1"},
+              {text: "Test response"},
+              {text: "Test sub-response"},
+              {text: "Test deep-response"},
+              {text: "Test comment 2"}
+            ],
+          },
+
           childTypes: Array,
 
           _comment: {
@@ -196,6 +231,12 @@ this license.
 
           __tempSegments: Array,
         };
+      }
+
+      static get observers() {
+        return [
+          '_loadingListItemsChanged(loading)',
+        ];
       }
 
       _descriptionChanged(description, descriptionSegments) {
@@ -215,6 +256,25 @@ this license.
 
       _fireRelatedTapped() {
         super.dispatchEvent(new CustomEvent('related-tapped', {bubbles: true, composed: true}));
+      }
+
+      _loadMoreComments() {
+        this.loading = true;
+        // TODO: replace with real loading, then set loading false and clear triggers once more loaded
+        setTimeout(() => {
+          this.loading = false;
+          this.push('_feedback',
+              {text: 'new comment #' + (this._feedback.length + 1)},
+              {text: 'new comment #' + (this._feedback.length + 2)},
+              {text: 'new comment #' + (this._feedback.length + 3)},
+              {text: 'new comment #' + (this._feedback.length + 4)},
+              {text: 'new comment #' + (this._feedback.length + 5)});
+          this.$.scrollThreshold.clearTriggers();
+        }, 1000);
+      }
+
+      _loadingListItemsChanged(loading) {
+        //this.$.scrollThreshold.clearTriggers();
       }
 
       __segmentsChanged(e) {

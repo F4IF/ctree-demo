@@ -42,12 +42,17 @@ this license.
       :host {
         display: block;
       }
-      #sentiment {
+      #depthPadding {
+        display: inline-block;
+        width: 0px;
+        padding: 0px;
+      }
+      #author {
         display: inline-block;
         vertical-align: top;
         text-align: center;
         width: 36px;
-        padding: 8px;
+        padding: 8px 0 8px 8px;
       }
       #avatar {
         display: block;
@@ -65,11 +70,18 @@ this license.
         display: inline-block;
         vertical-align: top;
         text-align: right;
-        width: calc(100% - 60px);
         padding: 8px 8px 8px 0;
+        width: calc(100% - 8px);  /* subtract left/right padding */
       }
       #comment {
         text-align: left;
+        padding-left: 8px;
+      }
+      #author[hidden] {
+        display: none;
+      }
+      #avatar[hidden] {
+        display: none;
       }
       /* TODO: there's probably a bug with paper-icon-button that needs to be fixed  */
       paper-icon-button[hidden] {
@@ -79,14 +91,15 @@ this license.
 
     <ctree-user-dialog-accessor id="userDialog"></ctree-user-dialog-accessor>
 
-    <div id="sentiment">
-      <paper-button id="avatar" title="Username" on-tap="_userClicked" raised></paper-button>
+    <div id="depthPadding"></div><div id="author" hidden$="[[!_showAuthorData(author,sentiment)]]">
+      <paper-button id="avatar" title="Username" on-tap="_userClicked" raised hidden$="[[!author]]"></paper-button>
+      <!-- Indicate if the general sentiment expressed by this feedback is positive or negative (neither for neutral) -->
       <paper-icon-button id="thumbs-up" icon="thumbs-up" title="liked" hidden$="[[!_equals(sentiment, 1)]]"></paper-icon-button>
       <paper-icon-button id="thumbs-down" icon="thumbs-down" title="disliked" hidden$="[[!_equals(sentiment, -1)]]"></paper-icon-button>
     </div><div id="feedback">
       <div id="content" hidden="true"></div>
       <div id="comment">[[comment]]</div>
-      <ctree-feedback-bar on-feedback-tapped="_commentTapped"></ctree-feedback-bar>
+      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!item]]"></ctree-feedback-bar>
       <ctree-feedback-entry id="userComment" hidden$="[[!_commenting]]"></ctree-feedback-entry>
     </div>
   </template>
@@ -105,14 +118,22 @@ this license.
 
       static get properties() {
         return {
+          parent: Object,
+
           item: {
             type: Object,
             observer: '_itemChanged',
+            value: null
           },
 
           depth: {
             type: Number,
             observer: '_depthChanged',
+          },
+
+          author: {
+            type: Object,
+            value: null
           },
 
           sentiment: Number,
@@ -136,6 +157,10 @@ this license.
         this.addEventListener('iron-resize', e => this._onSizeChanged(e));
       }
 
+      _showAuthorData(author, sentiment) {
+        return !!author || sentiment === 1 || sentiment === -1;
+      }
+
       _equals(v1, v2) {
         return v1 === v2;
       }
@@ -151,7 +176,10 @@ this license.
       }
 
       _itemChanged(newItem, oldItem) {
-        // TODO: get user comment store/restore working
+        if (newItem) {
+          this.comment = newItem.text;
+        }
+        /*// TODO: get user comment store/restore working
         if (oldItem) {
           // store comment in progress
           oldItem.commenting = this._commenting;
@@ -159,7 +187,7 @@ this license.
         }
         this._commenting = newItem.commenting;
         //this.$.userComment.comment = newItem.comment;
-        // TODO: if item has content populate it, otherwise hide content div
+        // TODO: if item has content populate it, otherwise hide content div*/
       }
 
       _onSizeChanged() {
@@ -167,13 +195,25 @@ this license.
       }
 
       _depthChanged(depth) {
-        var sentiment = this.$.sentiment;
-        var sentimentWidth = sentiment.offsetWidth;
-        var offset = Math.min(depth * sentimentWidth * 3 / 4, this.offsetWidth / 4);
+        var width = this.offsetWidth;
+        // scale depth increment based on component width, bounded at 10 and 40 pixels (min/max)
+        var depthIncrementWidth = Math.max(Math.min(width / 20, 40), 10);
+        // bound maximum depth size to leave room for content
+        var offset = Math.min(depth * depthIncrementWidth, width / 3);
+
         if (offset != this._offset) {
           this._offset = offset;
-          sentiment.style.marginLeft = offset + 'px';
-          this.$.feedback.style.width = 'calc(100% - ' + (sentimentWidth + 8 + offset) + 'px)';
+          this.$.depthPadding.style.marginLeft = offset + 'px';
+
+          // subtract offset from content width
+          var feedbackStyle = this.$.feedback.style;
+          if (this._showAuthorData(this.author, this.sentiment)) {
+            console.log("subtract author data width");
+            // apply avatar & sentiment width
+            offset += this.$.author.offsetWidth;
+          }
+          offset += feedbackStyle.paddingLeft + feedbackStyle.paddingRight; // remove padding
+          feedbackStyle.width = 'calc(100% - ' + offset + 'px)';
         }
       }
     }
