@@ -40,6 +40,18 @@ this license.
 
   'use strict';
 
+  /**
+   * Minimum step between values in Firebase. If this doesn't match the
+   * number of decimals for numbers in Firebase used for sorting it can
+   * result in skipping items in a list.  Note that this can't be the
+   * maximum decimals used by JS, because this is divided by 2 to resolve
+   * a bug with using 0 in Firebase queries.  Both Firebase and JS have
+   * the same decimal precision, so the precision used in Firebase needs
+   * to be enforced when setting the numbers (ex. using Number.toFixed()).
+   */
+  CTree.Loader.FIREBASE_MIN_DECIMAL_STEP = 1e-10;
+  CTree.Loader.FIREBASE_MAX_DECIMAL_PLACES = 10;
+
   CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
     static get properties() {
       return {
@@ -270,11 +282,19 @@ this license.
           loader.equalTo = value;
         } else if (ascending) {
           if (value || value === 0) {
+            // HACK: startAt doesn't work correctly when set to 0, so decrease by half step
+            if (value === 0) {
+              value -= CTree.Loader.FIREBASE_MIN_DECIMAL_STEP / 2;
+            }
             loader.startAt = value;
           }
           loader.limitToFirst = count;
         } else {
           if (value || value === 0) {
+            // HACK: endAt doesn't work correctly when set to 0, so increase by half step
+            if (value === 0) {
+              value += CTree.Loader.FIREBASE_MIN_DECIMAL_STEP / 2;
+            }
             loader.endAt = value;
           }
           loader.limitToLast = count;
@@ -416,9 +436,9 @@ this license.
       }
       if (!dataContainer.startAt && dataContainer.startAt !== 0) {
         if (dataContainer.ascending) {
-          dataContainer.startAt = Number.MIN_VALUE;
+          dataContainer.startAt = Number.MIN_SAFE_INTEGER;
         } else {
-          dataContainer.startAt = Number.MAX_VALUE;
+          dataContainer.startAt = Number.MAX_SAFE_INTEGER;
         }
       }
       if (!dataContainer.callbacks) {
@@ -451,9 +471,9 @@ this license.
         this._getData('elements', (data) => {
           dataContainer.loadGroup = false;
           if (dataContainer.ascending) {
-            dataContainer.startAt++;
+            dataContainer.startAt += CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           } else {
-            dataContainer.startAt--;
+            dataContainer.startAt -= CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
           }
           dataContainer.nextCacheIndex = 1;
           dataContainer.cachedItems = data;
