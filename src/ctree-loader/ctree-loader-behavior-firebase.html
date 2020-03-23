@@ -40,15 +40,6 @@ this license.
 
   'use strict';
 
-  /**
-   * Minimum step between values in Firebase. If this doesn't match the number
-   * of decimals for numbers in Firebase used for sorting it can result in
-   * skipping items in a list.  The precision used in Firebase should be
-   * enforced when setting the numbers (ex. using Number.toFixed()).
-   */
-  CTree.Loader.FIREBASE_MIN_DECIMAL_STEP = 1e-10;
-  CTree.Loader.FIREBASE_MAX_DECIMAL_PLACES = 10;
-
   CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
     static get properties() {
       return {
@@ -153,6 +144,7 @@ this license.
         {
           key: 'rating',
           ascending: false,
+          minStepSize: 0.001,
         },
         {
           key: 'createdDate',
@@ -408,6 +400,7 @@ this license.
      *   {
      *     key: String,
      *     ascending: Boolean,
+     *     minStepSize: Number, // default=1, enforce when writing numbers (ex. using Number.toFixed()), otherwise could skip items
      *     startAt: Number,
      *     loadGroup: Boolean,
      *     cachedItems: [
@@ -465,11 +458,24 @@ this license.
         }
         this._getData('elements', (data) => {
           dataContainer.loadGroup = false;
-          if (dataContainer.ascending) {
-            dataContainer.startAt += CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
-          } else {
-            dataContainer.startAt -= CTree.Loader.FIREBASE_MIN_DECIMAL_STEP;
-          }
+          var oldStartAt = dataContainer.startAt;
+          var stepSize = dataContainer.minStepSize ? dataContainer.minStepSize : 1;
+          do {
+            if (dataContainer.ascending) {
+              dataContainer.startAt += stepSize;
+            } else {
+              dataContainer.startAt -= stepSize;
+            }
+            if (dataContainer.startAt === oldStartAt) {
+              // Size hasn't changed so must have exceeeded double precision (15
+              // decimals). Increase the step size and try again.
+              console.error('Applying step size of ' + stepSize
+                  + ' to start position ' + oldStartAt + ' for ' + dataContainer.key
+                  + ' made no change. Increasing step size and trying again.');
+              stepSize *= 10;
+              continue;
+            }
+          } while (false);
           dataContainer.nextCacheIndex = 1;
           dataContainer.cachedItems = data;
           // TODO: add/update elements in cTreeData
