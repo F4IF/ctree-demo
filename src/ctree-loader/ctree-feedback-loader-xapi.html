@@ -1,0 +1,79 @@
+<!--
+@license
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="ctree-loader-behavior-xapi.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Implementation of feedback loader using xAPI.
+   */
+  class CTreeFeedbackLoader extends CTree.FeedbackLoaderMixin(CTree.LoaderBehavior) {
+
+    static get is() { return 'ctree-feedback-loader'; }
+
+    /**
+     * Load the next page of feedback items for the parent.
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *     rating: Number
+     *   }
+     *
+     * @param {Element|Feedback} parent         Data type of parent
+     * @param {Function(items: Feedback[], offset: String)} onComplete Function to call once items have been returned. Return null for items if the request fails.
+     * @param {Number} [pageSize=this.pageSize] Number of items to retrieve
+     * @param {String} [offset=null]            Offset value from previous page request, used to get next page
+     */
+    _loadFeedback(parent, onComplete, pageSize=this.pageSize, offset=null) {
+      /**
+       * TODO: Load next page of feedback items via xAPI for the cTree with the
+       * key cTreeData.key.
+       *
+       * When the items are loaded, call callback function with new items
+       * and offset for next page, or null items if failed.
+       **/
+    }
+  }
+  CTree.FeedbackLoader = CTreeFeedbackLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeFeedbackLoader.is, CTreeFeedbackLoader);
+
+})();
+
+</script>

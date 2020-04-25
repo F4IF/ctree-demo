@@ -35,6 +35,7 @@ this license.
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
 <link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-utils/ctree-utils-mixin.html">
 
 <dom-module id="ctree-feedback-item">
   <template>
@@ -99,13 +100,13 @@ this license.
     </div><div id="feedback">
       <div id="content" hidden="true"></div>
       <div id="comment">[[comment]]</div>
-      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!item]]"></ctree-feedback-bar>
-      <ctree-feedback-entry id="userComment" hidden$="[[!_commenting]]"></ctree-feedback-entry>
+      <ctree-feedback-bar on-feedback-tapped="_commentTapped" hidden$="[[!and(item,allowUserFeedback)]]"></ctree-feedback-bar>
+      <ctree-feedback-entry id="userComment" hidden$="[[!and(_commenting,allowUserFeedback)]]"></ctree-feedback-entry>
     </div>
   </template>
 
   <script>
-    class CTreeFeedbackItem extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
+    class CTreeFeedbackItem extends CTree.UtilsMixin(Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element)) {
 
       static get is() { return 'ctree-feedback-item'; }
 
@@ -139,6 +140,8 @@ this license.
           sentiment: Number,
 
           comment: String,
+
+          allowUserFeedback: Boolean,
 
           // TODO: we probalby need to reset this whenever the item is changed (listen for ID or other handle change)
           // TODO: store entered (but not submitted) comment by ID and clear it so list recycling works correctly
@@ -208,7 +211,6 @@ this license.
           // subtract offset from content width
           var feedbackStyle = this.$.feedback.style;
           if (this._showAuthorData(this.author, this.sentiment)) {
-            console.log("subtract author data width");
             // apply avatar & sentiment width
             offset += this.$.author.offsetWidth;
           }

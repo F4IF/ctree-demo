@@ -466,15 +466,16 @@ this license.
     }
   }
 
-  var ctreeImport = document.createElement('ctree-import');
+  CTree.ElementLoaderElementImport = document.createElement('ctree-import');
   if (CTree.xApiConfig) {
-    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-xapi.html';
+    CTree.ElementLoaderElementImport.href = '/src/ctree-loader/ctree-element-loader-xapi.html';
   } else if (CTree.firebaseConfig) {
-    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-firebase.html';
+    CTree.ElementLoaderElementImport.href = '/src/ctree-loader/ctree-element-loader-firebase.html';
   } else {
-    ctreeImport.href = '/src/ctree-loader/ctree-element-loader-test.html';
+    CTree.ElementLoaderElementImport.href = '/src/ctree-loader/ctree-element-loader-test.html';
   }
-  ctreeImport.load();
+  document.documentElement.appendChild(CTree.ElementLoaderElementImport);
+  CTree.ElementLoaderElementImport.load();
 
 })();
 

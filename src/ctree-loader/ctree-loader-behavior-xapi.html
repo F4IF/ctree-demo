@@ -28,9 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
@@ -60,7 +57,7 @@ this license.
      * Load the human readable name associated with the cTree
      *
      * @param {String} ctreeKey Key for cTree to load name for
-     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
+     * @param {Function(String)} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
     _loadName(cTreeKey, onComplete) {
       /**
@@ -77,7 +74,7 @@ this license.
      * Load the element types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load element types for
-     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
+     * @param {Function(Types)} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
     _loadTypes(cTreeKey, onComplete) {
       /**
@@ -94,7 +91,7 @@ this license.
      * Load the segment types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load segment types for
-     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
+     * @param {Function(SegmentTypes)} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
     _loadSegmentTypes(cTreeKey, onComplete) {
       /**
@@ -126,7 +123,7 @@ this license.
      *   }
      *
      * @param {String} elementId                  ID of the element to load data for.
-     * @param {Function([{Element}])} onComplete  (Optional) Function called when loading the description and all segments has been completed. This is passed the loaded element as a parameter. If no matching element is found or the request fails this will be called with null data.
+     * @param {Function(Element)} onComplete  (Optional) Function called when loading the description and all segments has been completed. This is passed the loaded element as a parameter. If no matching element is found or the request fails this will be called with null data.
      * @param {String} descriptionId              (Optional) ID of the description you want to load.
      * @param {Array}  segmentVariations          (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      * @param {Number} descriptionVariationsCount (Optional) Total number of description variations to load. Only the first should be loaded fully, with all others loaded without any segments. This may be specified even if descriptionId isn't provided.
@@ -163,7 +160,7 @@ this license.
      *   }
      *
      * @param {String} descriptionId          ID of the description you want to load.
-     * @param {Function([{Description}])} onComplete Function called when loading the description and all segments has been completed. This is passed the loaded description as a parameter. If no description is found with a matching ID or the request fails this will be called with null data.
+     * @param {Function(Description)} onComplete Function called when loading the description and all segments has been completed. This is passed the loaded description as a parameter. If no description is found with a matching ID or the request fails this will be called with null data.
      * @param {Array}  segmentVariations      (Optional) Array of IDs with a variation for each segment to be loaded.
      * @param {Number} segmentVariationsCount (Optional) Total number of variations to load for each segment. This may be specified even if segmentVariations isn't provided.
      */
@@ -184,7 +181,7 @@ this license.
      *
      * @param {Element} element The element to load the description variations for.
      * @param {Number}  count   The number of additional description variations to load.
-     * @param {Function([[Descriptions]])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
+     * @param {Function(Descriptions[])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
      */
     _loadDescriptionVariations(element, count, onComplete) {
       /**
@@ -218,7 +215,7 @@ this license.
      *   }
      *
      * @param {String} segmentVariationId ID of the segment variation you want to load.
-     * @param {Function([{SegmentVariation}])} onComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
+     * @param {Function(SegmentVariation)} onComplete  (Optional) Function called when loading the segmentvariation has been completed.  This is passed the resulting segment variation item, or null if none is found with the expected type.
      */
     _loadSegmentVariation(segmentVariationId, onComplete) {
       /**
@@ -235,7 +232,7 @@ this license.
      *
      * @param {[Segments]} description The segments to load the variations for.
      * @param {Number}     count       The number of additional variations to load for each segment.
-     * @param {Function([[{SegmentVariations}]])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
+     * @param {Function(SegmentVariations[])} onComplete Function called when loading the description variations has completed. It's passed an array of all loaded descriptions, if there were any. If the request fails this will be called with null data.
      */
     _loadSegmentVariations(segments, count, onComplete) {
       /**

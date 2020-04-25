@@ -1,0 +1,138 @@
+<!--
+@license
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<script>
+(function() {
+
+  'use strict';
+
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
+  CTree.UtilsMixin = (superClass) => class extends superClass {
+
+    /**
+     * A function to get the logical boolean AND of all arguments.  This is
+     * useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean AND of all arguments passed to the function
+     */
+    and() {
+      for (var i = 0; i < arguments.length; i++) {
+        if (!arguments[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * A function to get the logical boolean OR of all arguments.  This is
+     * useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean OR of all arguments passed to the function
+     */
+    or() {
+      for (var i = 0; i < arguments.length; i++) {
+        if (arguments[i]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * Checks for property match, and if the property doesn't match it will call
+     * the provided listener when changes to a matching value. Successive calls to
+     * this does not clear previously registered listeners, so listeners must
+     * support being called after they are no longer needed. To remove the
+     * listener call removeLoadedListener.
+     *
+     * @param  {propertyName}                       propertyName               Name of property to check for match
+     * @param  {?Function(*)}                       onMatchListener            Optional function to call when matches. If already matches, this function will only be called if alwaysCallListener parameter is true.
+     * @param  {(Undefined|Function(*): Boolean|*)} match                      If undefined, matches any defined, non-null value. If it's a function, calls with current property value to get boolean result indicating matching. Otherwise, property value will be considered matching if equal to this.
+     * @param  {Boolean}                            [alwaysCallListener=false] Indicates if onMatchListener should be called if the property already matches.
+     * @return {Boolean} Returns true if property matches
+     */
+    checkProperty(propertyName, onMatchListener, match, alwaysCallListener=false) {
+      var value = this[propertyName];
+      var matches = this.__isMatch(value, match);
+
+      if (onMatchListener && (!matches || alwaysCallListener)) {
+        if (!matches) {
+          this.addEventListener(propertyName + '-changed', (event) => {
+            var value = event.detail.value;//this[propertyName];
+            if (!this.__isMatch(value, match)) return;
+
+            this.removePropertyCheckListener(propertyName, onMatchListener);
+            onMatchListener(value);
+          });
+        } else if (alwaysCallListener) {
+          onMatchListener(value);
+        }
+      }
+
+      return matches;
+    }
+
+    /**
+     * Remove any registered listener for property match from checkProperty
+     * function.
+     *
+     * @param  {String}   propertyName    Name of property being checked for match
+     * @param  {Function} onMatchListener Function registered to listen for match
+     */
+    removePropertyCheckListener(propertyName, onMatchListener) {
+      if (!propertyName || !onMatchListener) return;
+
+      this.removeEventListener(propertyName + '-changed', onMatchListener);
+    }
+
+    /**
+     * Checks for value match.
+     *
+     * @param  {(Undefined|Function(*): Boolean|*)} match If undefined, matches any defined, non-null value. If it's a function, calls with value to get boolean result indicating matching. Otherwise, value will be considered matching if equal to this.
+     * @return {Boolean} Returns true if value matches
+     */
+    __isMatch(value, match) {
+      if (match === undefined) {
+        return value;
+      } else if (typeof(match) === 'function') {
+        return match(value);
+      } else {
+        return value === match;
+      }
+    }
+  }
+
+})();
+
+</script>

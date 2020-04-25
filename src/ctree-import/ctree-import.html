@@ -30,6 +30,8 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
+<link rel="import" href="../ctree-utils/ctree-utils-mixin.html">
+
 <script>
 (function() {
 
@@ -40,7 +42,7 @@ this license.
     window.CTree = {};
   }
 
-  class CTreeImport extends Polymer.Element {
+  class CTreeImport extends CTree.UtilsMixin(Polymer.Element) {
 
     static get is() { return 'ctree-import'; }
 

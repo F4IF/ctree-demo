@@ -48,7 +48,7 @@ this license.
      *
      * @param {String} path Path within tree where to write the data
      * @param {Object} data The data to write at the given path
-     * @param {Function([data: {Object}, uuid: {String}])} onComplete Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
+     * @param {Function(data: Object, uuid: String)} onComplete Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
      * @param {String} uuid (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
      */
     _writeNewEntry(path, data, onComplete, uuid) {
@@ -73,7 +73,7 @@ this license.
      *
      * @param {String} path Path within tree where to write the data
      * @param {Object} data The data to write at the given path
-     * @param {Function([Boolean])} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
+     * @param {Function(Boolean)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
      */
     _writeData(path, data, onComplete) {
       if (!this.ctreeKey) {

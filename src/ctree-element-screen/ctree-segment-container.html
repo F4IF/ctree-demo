@@ -266,7 +266,7 @@ this license.
         var component = this.shadowRoot.querySelector('#component');
         if (component) {
           component.editing = value;
-          this.dispatchEvent(new CustomEvent('editing-segment-changed', {detail: {value: value, segment: this.segment}, bubbles: true, composed: true}));
+          this.dispatchEvent(new CustomEvent('editing-segment-changed', {detail: {value: value, segment: this.segment, queueProperty: true}, bubbles: true, composed: true}));
         }
       }
 

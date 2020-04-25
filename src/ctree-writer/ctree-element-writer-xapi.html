@@ -46,7 +46,7 @@ this license.
     }
 
     /**
-     * @param {Function([{ElementData}])} onComplete Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Function(ElementData)} onComplete Function called when completed, with the element's written data if successful, otherwise null
      * @param {Object} element  Element to add
      * @param {String} id       ID of element
      * @param {String} ctreeKey Key for cTree to write element to
@@ -65,7 +65,7 @@ this license.
     /**
      * @param {Object} descriptionVariation   Object containing description variation data to be written to database
      * @param {String} elementId              ID of element this description is associated with
-     * @param {Function([{DescriptionData}])} onComplete Function called when completed, with the description's written data if successful, otherwise null
+     * @param {Function(DescriptionData)} onComplete Function called when completed, with the description's written data if successful, otherwise null
      * @param {String} descriptionVariationId ID of description
      * @param {String} ctreeKey               Key for cTree to write description variation to
      */
@@ -85,7 +85,7 @@ this license.
      * @param {String} elementId     ID of element the segment is associated with
      * @param {String} descriptionId ID of description the segment is associated with
      * @param {String} segmentId     ID of segment this variation is associated with
-     * @param {Function([{SegmentVariationData}])} onComplete Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {Function(SegmentVariationData)} onComplete Function called when completed, with the variation's written data if successful, otherwise null
      * @param {String} variationId   ID of variation
      * @param {String} ctreeKey      Key for cTree to write segment variation to
      */

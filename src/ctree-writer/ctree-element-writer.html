@@ -85,7 +85,7 @@ this license.
     }
 
     /**
-     * @param {Function([{ElementData}])} onComplete (Optional) Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Function(ElementData)} onComplete (Optional) Function called when completed, with the element's written data if successful, otherwise null
      * @param {Object} element (Optional) Element to add.  If not provided, the value from the element property will be used.
      * @param {String} id (Optional) ID of element.  If not provided and the element isn't specified, the elementId property will be used.  If the value is still null the element object's ID will be used if it's not null, otherwise a new UUID will be generated.
      */
@@ -137,7 +137,7 @@ this license.
     }
 
     /**
-     * @param {Function([{ElementData}])} onComplete Function called when completed, with the element's written data if successful, otherwise null
+     * @param {Function(ElementData)} onComplete Function called when completed, with the element's written data if successful, otherwise null
      * @param {Object} element  Element to add
      * @param {String} id       ID of element
      * @param {String} ctreeKey Key for cTree to write element to
@@ -148,7 +148,7 @@ this license.
 
     /**
      * @param {String} id ID of description to add
-     * @param {Function([{DescriptionData}])} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
+     * @param {Function(DescriptionData)} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
      */
     addDescriptionVariationWithId(id, onComplete) {
       if (!this.element) {
@@ -169,7 +169,7 @@ this license.
     /**
      * @param {Object} descriptionVariation   Object containing description variation data to be written to database
      * @param {String} elementId              ID of element this description is associated with
-     * @param {Function([{DescriptionData}])} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
+     * @param {Function(DescriptionData)} onComplete (Optional) Function called when completed, with the descriptions's written data if successful, otherwise null
      * @param {String} descriptionVariationId (Optional) ID of description.  If not provided, a new UUID will be generated.
      */
     addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey = this.ctreeKey) {
@@ -219,7 +219,7 @@ this license.
     /**
      * @param {Object} descriptionVariation   Object containing description variation data to be written to database
      * @param {String} elementId              ID of element this description is associated with
-     * @param {Function([{DescriptionData}])} onComplete Function called when completed, with the description's written data if successful, otherwise null
+     * @param {Function(DescriptionData)} onComplete Function called when completed, with the description's written data if successful, otherwise null
      * @param {String} descriptionVariationId ID of description
      * @param {String} ctreeKey               Key for cTree to write description variation to
      */
@@ -231,7 +231,7 @@ this license.
      * @param {String} elementId      ID of element the segment is associated with
      * @param {String} descriptionId  ID of description the segment is associated with
      * @param {String} segmentId      ID of segment this variation is associated with
-     * @param {Function([{SegmentVariationData}])} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {Function(SegmentVariationData)} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
      * @param {String} variationId    (Optional) ID of variation.  If not provided, a new UUID will be generated.
      */
     addSegmentVariationWithId(elementId, descriptionId, segmentId, onComplete, variationId) {
@@ -268,7 +268,7 @@ this license.
      * @param {String} descriptionId ID of description the segment is associated with
      * @param {String} segmentId     ID of segment this variation is associated with
      * @param {String} typeId        ID of the segment type
-     * @param {Function([{SegmentVariationData}])} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {Function(SegmentVariationData)} onComplete (Optional) Function called when completed, with the variation's written data if successful, otherwise null
      * @param {String} variationId   (Optional) ID of variation.  If not provided, a new UUID will be generated.
      */
     addSegmentVariation(variation, elementId, descriptionId, segmentId, typeId, onComplete, variationId, ctreeKey = this.ctreeKey) {
@@ -343,7 +343,7 @@ this license.
      * @param {String} elementId     ID of element the segment is associated with
      * @param {String} descriptionId ID of description the segment is associated with
      * @param {String} segmentId     ID of segment this variation is associated with
-     * @param {Function([{SegmentVariationData}])} onComplete Function called when completed, with the variation's written data if successful, otherwise null
+     * @param {Function(SegmentVariationData)} onComplete Function called when completed, with the variation's written data if successful, otherwise null
      * @param {String} variationId   ID of variation
      * @param {String} ctreeKey      Key for cTree to write segment variation to
      */

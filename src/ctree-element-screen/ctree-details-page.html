@@ -36,6 +36,7 @@ this license.
 <link rel="import" href="../ctree-feedback-bar/ctree-feedback-bar.html">
 <link rel="import" href="../ctree-feedback-item/ctree-feedback-item.html">
 <link rel="import" href="../ctree-icons/ctree-icons.html">
+<link rel="import" href="../ctree-loader/ctree-feedback-loader.html">
 <link rel="import" href="ctree-description.html">
 
 <dom-module id="ctree-details-page">
@@ -107,6 +108,8 @@ this license.
       }
       #loadingIndicator {
         text-align: center;
+        height: 60px;
+        padding: 0 8px;
       }
       #loadingIndicator paper-spinner {
         margin-right: 8px;
@@ -118,6 +121,7 @@ this license.
     </style>
 
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
+    <ctree-feedback-loader id="feedbackLoader" ctree-key="[[ctreeKey]]" parent="[[element]]" has-more="{{_hasMoreFeedback}}" loading="{{_loadingFeedback}}" feedback="{{_feedbackItems}}"></ctree-feedback-loader>
 
     <iron-scroll-threshold id="scrollThreshold" lower-threshold="500" on-lower-threshold="_loadMoreComments">
       <ctree-description segments="[[segments]]" segment-ids="[[descriptionSegments]]"></ctree-description>
@@ -132,15 +136,15 @@ this license.
         <paper-textarea id="comment" class="comment" label="Comment" value="{{_comment}}" no-label-float></paper-textarea>
         <paper-button id="submit" raised disabled on-tap="_submitComment">Submit</paper-button>
       </div>
-      <template id="commentList" is="dom-repeat" items="{{_feedback}}" as="item">  <!-- TODO: change to element.feedback -->
+      <template id="commentList" is="dom-repeat" items="[[_feedbackItems]]" as="item">
         <div class="commentItem">
           <div class="divider" style="margin-bottom: 4px;"></div>
           <ctree-feedback-item parent="[[element]]" item="[[item]]"></ctree-feedback-item>
         </div>
       </template>
-      <div id="loadingIndicator" hidden$="[[!loading]]">
+      <div id="loadingIndicator" hidden$="[[!_hasMoreFeedback]]">
         <div class="divider"></div>
-        <paper-spinner class="loadingLabel" active$="[[loading]]"></paper-spinner><div class="loadingLabel"> Loading more</div>
+        <paper-spinner class="loadingLabel" active$="[[_hasMoreFeedback]]"></paper-spinner><div class="loadingLabel"> Loading more</div>
       </div>
     </iron-scroll-threshold>
     <!--<ctree-element-header on-contributors-tapped="_fireContributorsTapped" on-related-tapped="_fireRelatedTapped"></ctree-element-header>-->
@@ -203,24 +207,16 @@ this license.
             observer: '__segmentsChanged',
           },
 
-          loading: {
+          childTypes: Array,
+
+          _hasMoreFeedback: Boolean,
+
+          _loadingFeedback: {
             type: Boolean,
             value: false,
           },
 
-          // TODO: remove once loading real feedback is supported
-          _feedback: {
-            type: Array,
-            value: [
-              {text: "Test comment 1"},
-              {text: "Test response"},
-              {text: "Test sub-response"},
-              {text: "Test deep-response"},
-              {text: "Test comment 2"}
-            ],
-          },
-
-          childTypes: Array,
+          _feedbackItems: Array,
 
           _comment: {
             type: String,
@@ -235,8 +231,18 @@ this license.
 
       static get observers() {
         return [
-          '_loadingListItemsChanged(loading)',
+          '_loadingFeedbackChanged(_loadingFeedback, _hasMoreFeedback)'
         ];
+      }
+
+      _elementChanged(element, previousElement) {
+        if (element === previousElement) return;
+
+        // TODO: reset scroll to top
+        if (!this._loadingFeedback && this._hasMoreFeedback && this._feedbackItems.length < this.$.feedbackLoader.pageSize) {
+          // trigger loading the first page of feedback when switch element
+          this._loadMoreComments();
+        }
       }
 
       _descriptionChanged(description, descriptionSegments) {
@@ -259,22 +265,15 @@ this license.
       }
 
       _loadMoreComments() {
-        this.loading = true;
-        // TODO: replace with real loading, then set loading false and clear triggers once more loaded
-        setTimeout(() => {
-          this.loading = false;
-          this.push('_feedback',
-              {text: 'new comment #' + (this._feedback.length + 1)},
-              {text: 'new comment #' + (this._feedback.length + 2)},
-              {text: 'new comment #' + (this._feedback.length + 3)},
-              {text: 'new comment #' + (this._feedback.length + 4)},
-              {text: 'new comment #' + (this._feedback.length + 5)});
-          this.$.scrollThreshold.clearTriggers();
-        }, 1000);
+        if (CTree.FeedbackLoaderElementImport.checkProperty('loaded', this._loadMoreComments.bind(this), true)) {
+          this.$.feedbackLoader.load();
+        }
       }
 
-      _loadingListItemsChanged(loading) {
-        //this.$.scrollThreshold.clearTriggers();
+      _loadingFeedbackChanged(loading, hasMore) {
+        if (!loading && hasMore) {
+          this.$.scrollThreshold.clearTriggers();
+        }
       }
 
       __segmentsChanged(e) {

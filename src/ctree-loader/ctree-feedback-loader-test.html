@@ -1,0 +1,105 @@
+<!--
+@license
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-writer/ctree-writer-behavior.html">
+
+<link rel="import" href="ctree-loader-behavior-test.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Test implementation of feedbac loader.
+   */
+  class CTreeFeedbackLoader extends CTree.FeedbackLoaderMixin(CTree.LoaderBehavior) {
+
+    static get is() { return 'ctree-feedback-loader'; }
+
+    /**
+     * Load the next page of feedback items for the parent.
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *     rating: Number
+     *   }
+     *
+     * @param {Element|Feedback} parent         Data type of parent
+     * @param {Function(items: Feedback[], offset: String)} onComplete Function to call once items have been returned. Return null for items if the request fails.
+     * @param {Number} [pageSize=this.pageSize] Number of items to retrieve
+     * @param {String} [offset=null]            Offset value from previous page request, used to get next page
+     */
+    _loadFeedback(parent, onComplete, pageSize=this.pageSize, offset=null) {
+      setTimeout(() => {
+        var feedbackLoaded = 0;
+        var feedbackTotal = 0;
+        var lastRating = 0;
+        if (!offset) {
+          // no offset, randomly generate total feedback count and highest rating
+          feedbackTotal = Math.max(Math.floor(Math.random() * 60) - 10, 0);
+          lastRating = Math.floor(Math.random() * feedbackTotal * 2);
+        } else {
+          // extract feedback total, number generated so far, and last rating
+          var offsetStrings = offset.split("/");
+          feedbackLoaded = parseInt(offsetStrings[0]);
+          feedbackTotal = parseInt(offsetStrings[1]);
+          lastRating = parseInt(offsetStrings[2]);
+        }
+
+        // generate next page of feedback items
+        var newItemCount = pageSize;
+        if (feedbackLoaded + pageSize > feedbackTotal) {
+          newItemCount = feedbackTotal - feedbackLoaded;
+        }
+        var feedback = [];
+        for (var i = 0; i < newItemCount; i++) {
+          lastRating = lastRating - Math.floor(Math.random() * 3);
+          feedback.push({id: CTree.Writer.getUuid(), text: 'test comment #' + (feedbackLoaded + i + 1), rating: lastRating});
+        }
+
+        if (onComplete) {
+          onComplete.bind(this)(feedback, (feedbackLoaded + newItemCount) + "/" + feedbackTotal + "/" + lastRating);
+        }
+      }, 2000);
+    }
+  }
+  CTree.FeedbackLoader = CTreeFeedbackLoader;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeFeedbackLoader.is, CTreeFeedbackLoader);
+
+})();
+
+</script>

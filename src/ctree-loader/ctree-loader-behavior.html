@@ -28,8 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
 <link rel="import" href="../ctree-import/ctree-import.html">
 
@@ -39,7 +37,7 @@ this license.
   'use strict';
 
   // monostate data
-  var cTreesData = {};
+  const cTreesData = {};
 
   // Create my namespace, if it doesn't exist
   if (!window.CTree) {
@@ -314,7 +312,7 @@ this license.
      * Load the human readable name associated with the cTree
      *
      * @param {String} ctreeKey Key for cTree to load name for
-     * @param {Function([{String}])} onComplete Function called when completed, with the cTree name if successful, otherwise null
+     * @param {Function(String)} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
     _loadName(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -324,7 +322,7 @@ this license.
      * Load the element types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load element types for
-     * @param {Function([{Types])} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
+     * @param {Function(Types)} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
     _loadTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -334,7 +332,7 @@ this license.
      * Load the segment types associated with the cTree
      *
      * @param {String} cTreeKey Key for cTree to load segment types for
-     * @param {Function([{SegmentTypes])} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
+     * @param {Function(SegmentTypes)} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
     _loadSegmentTypes(cTreeKey, onComplete) {
       // TODO: override in implementation
@@ -351,6 +349,19 @@ this license.
         items[item.id] = item;
       }
       return items;
+    }
+
+    /**
+     * If needed, converts a data entry from a data array returned by the server
+     * to an item with "id" as a property of the item.  If changes are needed,
+     * they're applied to a copy of the data object, not by changing the
+     * original item.  By default this returns the same, unchanged data object.
+     * This can be customized depending on the loader implementation.
+     */
+    _dataToItem(data) {
+      // TODO: override to apply any changes to convert the server data object
+      //    to an item object compatible with ctree UI elements
+      return data;
     }
 
     /**
@@ -382,7 +393,7 @@ this license.
      * called with the final, fully loaded item.
      *
      * @param {String} elementId           ID of the element to load data for.
-     * @param {Function([{Element])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
+     * @param {Function(Element[])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
      * @param {String} descriptionId       (Optional) ID of the description you want to load.
      * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
      */
@@ -488,6 +499,75 @@ this license.
       }
     }
     return defaultToFirst ? array[0] : undefined;
+  };
+
+  CTree.Loader.DATA_TYPES = {
+    ELEMENT: "element",
+    DESCRIPTION: "description",
+    SEGMENT: "segment",
+    SEGMENT_VARIATION: "segmentVariation",
+    FEEDBACK: "feedback",
+    ELEMENT_TYPE: "elementType",  // TODO: Firebase needs to be updated to use this instead of 'type'
+    SEGMENT_TYPE: "segmentType",
+    USER: "user",
+  };
+
+  CTree.Loader.__UNIQUE_DATA_TYPE_FIELDS = [
+      {type: CTree.Loader.DATA_TYPES.ELEMENT,           fields: ["title", "designer"]},
+      {type: CTree.Loader.DATA_TYPES.DESCRIPTION,       fields: ["segments", "contributors"]},
+      {type: CTree.Loader.DATA_TYPES.SEGMENT,           fields: ["variations"]},
+      {type: CTree.Loader.DATA_TYPES.SEGMENT_VARIATION, fields: ["data"]},
+      {type: CTree.Loader.DATA_TYPES.FEEDBACK,          fields: ["text", "reviewer"]},
+      {type: CTree.Loader.DATA_TYPES.ELEMENT_TYPE,      fields: ["parentsRequired", "parentsMax"]},
+      {type: CTree.Loader.DATA_TYPES.SEGMENT_TYPE,      fields: ["componentName"]},
+      {type: CTree.Loader.DATA_TYPES.USER,              fields: ["avatar"]},
+  ];
+
+  /**
+   * Determines the string name for the type of data is held by the object
+   * provided, based on unique required fields for each data type.  This works
+   * for all data types which can be returned from loader.
+   *
+   * @param {Object} object
+   * @param {Boolean} [capitalizeFirstLetter=true]
+   */
+  CTree.Loader.getObjectDataType = function(object, capitalizeFirstLetter=false) {
+    if (!object || typeof(object) !== "object" || !object.id) return undefined;
+
+    // if unique fields from a type are defined in the object, return the associated type
+    var type = undefined;
+    CTree.Loader.__UNIQUE_DATA_TYPE_FIELDS.forEach((item) => {
+      var match = false;
+      item.fields.forEach((fieldName) => {if (object[fieldName] != undefined) match = true;});
+      if (match) {
+        if (type) console.error("getObjectDataType() returned multiple matches: " + type + ", " + item.type);
+        type = item.type;
+      }
+    });
+
+    // capetalize the first letter if needed
+    if (type && capitalizeFirstLetter) {
+      type = type.charAt(0).toUpperCase() + type.substring(1);;
+    }
+
+    return type;
+  };
+
+  /**
+   * Correctly generates the plural form of the data type string. This expects
+   * the dataType to be from the DATA_TYPES list.
+   *
+   * @param {String} dataType The data type string from the DATA_TYPES list.
+   */
+  CTree.Loader.makeDataTypePlural = function(dataType) {
+    if (!dataType) return dataType;
+
+    // Feedback is the only type which is the same when plural. Add 's' to the
+    // end of all other types.
+    if (dataType !== CTree.Loader.DATA_TYPES.FEEDBACK) {
+      dataType = dataType + 's';
+    }
+    return dataType;
   };
 
 })();

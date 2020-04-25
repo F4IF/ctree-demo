@@ -1,0 +1,249 @@
+<!--
+@license
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  // Create my namespace, if it doesn't exist
+  if (!window.CTree) {
+    window.CTree = {};
+  }
+
+  CTree.FeedbackLoaderMixin = (superClass) => class extends superClass {
+
+    static get properties() {
+      return {
+        /**
+         * Parent data object to load feedback for.  Events will be fired for this element as
+         * data is loaded into it.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     feedback: [{
+         *       id: String,
+         *       reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *       text: String,
+         *     }, ...],
+         *     ...
+         *   }
+         */
+        parent: {
+          type: Object,
+          observer: '_parentChanged',
+        },
+
+        pageSize: {
+          type: Number,
+          value: 10,
+        },
+
+        feedback: {
+          type: Array,
+          notify: true,
+          readOnly: true,
+          value: [],
+        },
+
+        hasMore: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+
+        loading: {
+          type: Boolean,
+          notify: true,
+          value: false,
+          observer: '_loadingChanged',
+        },
+
+        __loadingLock: Object,
+      };
+    }
+
+    /**
+     * Trigger loading the next page of feedback for the parent.
+     */
+    load() {
+      if (!this.hasMore) return;
+
+      this.loading = true;
+    }
+
+    /**
+     * Load the next page of feedback items for the parent.
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *     rating: Number
+     *   }
+     *
+     * @param {Element|Feedback} parent         Data type of parent
+     * @param {Function(items: Feedback[], offset: String)} onComplete Function to call once items have been returned. Return null for items if the request fails.
+     * @param {Number} [pageSize=this.pageSize] Number of items to retrieve
+     * @param {String} [offset=null]            Offset value from previous page request, used to get next page
+     */
+    _loadFeedback(parent, onComplete, pageSize=this.pageSize, offset=null) {
+      // TODO: override to implement platform specific
+    }
+
+    _keyChanged(cTreeKey, previousKey) {
+      super._keyChanged(cTreeKey, previousKey);
+      // TODO: consider something similar for the parent object
+      /*if (cTreeKey != previousKey && this._cTreeData && this.elementId && (!this.element || this.elementId != this.element.id)) {
+        // reload element from new tree
+        this._elementIdChanged(this.elementId);
+      }*/
+    }
+
+    _parentChanged(parent, previousParent) {
+      if (parent === previousParent) return;
+
+      if (this.loading) {
+        this.loading = false;
+      }
+      if (parent) {
+        if (parent.feedback) {
+          this._setFeedback(parent.feedback);
+        } else {
+          this._setFeedback([]);
+        }
+        this._setHasMore(true);
+      } else {
+        this._setFeedback([]);
+        this._setHasMore(false);
+      }
+    }
+
+    _loadingChanged(loading, previousLoading) {
+      if (loading === previousLoading) return;
+
+      if (loading) {
+        var cTreeData = this._cTreeData;
+        var parent = this.parent;
+        if (this.hasMore && parent && cTreeData) {
+          // load next page of feedback
+          const feedback = this.feedback;
+          const pageSize = this.pageSize;
+          const offset = parent.feedbackNextPageOffset;
+          const loadingLock = {};
+          this.__loadingLock = loadingLock;
+
+          this._loadFeedback(parent, (feedbackItems, newOffset) => {
+            if (this.__loadingLock !== loadingLock) return;
+
+            var feedbackUpdated = false;
+            if (feedbackItems && parent.feedbackNextPageOffset === offset) {
+              // update offset for next page
+              parent.feedbackNextPageOffset = newOffset;
+              if (!parent.feedback) {
+                parent.feedback = this.feedback;
+              }
+              if (feedbackItems.length > 0) {
+                // add items
+                feedback.push(...feedbackItems); // feedback.push.apply(feedback, feedbackItems);
+                feedbackUpdated = true;
+              }
+            }
+
+            if (this.parent === parent && this._cTreeData === cTreeData && this.__loadingLock === loadingLock) {
+              if (this.feedback === feedback) {
+                if (!feedbackItems || (feedbackItems.length !== pageSize && (feedbackUpdated || feedbackItems.length === 0))) {
+                  // number of items returned don't match number requested, which should mean there aren't any more
+                  this._setHasMore(false);
+                }
+
+                if (feedbackUpdated) {
+                  // added items, send notification about changes
+                  var count = feedbackItems.length;
+                  this.notifySplices('feedback', [{
+                    index: feedback.length - count,
+                    removed: [],
+                    addedCount: count,
+                    object: feedback,
+                    type: 'splice'
+                  }]);
+                }
+              }
+
+              if (this.__loadingLock === loadingLock) {
+                this.loading = false;
+              }
+            }
+          }, pageSize, offset);
+
+        } else {
+          // can't load or nothing to load, so reset
+          this.loading = false;
+        }
+
+      } else {
+        // effectively cancel loading by releasing the lock
+        this.__loadingLock = undefined;
+      }
+    }
+
+    _urlChanged(url) {
+      // TODO: support loading elements from a cTree at a different URL
+    }
+
+    _cTreeDataChanged(cTreeData) {
+      this.cTreeData = cTreeData;
+      // TODO: set/clear data as needed
+    }
+
+    _userChanged(user) {
+      // TODO: update as needed based on user (primarily to impact access rights)
+    }
+  }
+
+  CTree.FeedbackLoaderElementImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    CTree.FeedbackLoaderElementImport.href = '/src/ctree-loader/ctree-feedback-loader-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    CTree.FeedbackLoaderElementImport.href = '/src/ctree-loader/ctree-feedback-loader-firebase.html';
+  } else {
+    CTree.FeedbackLoaderElementImport.href = '/src/ctree-loader/ctree-feedback-loader-test.html';
+  }
+  document.documentElement.appendChild(CTree.FeedbackLoaderElementImport);
+  CTree.FeedbackLoaderElementImport.load();
+
+})();
+
+</script>

@@ -28,7 +28,6 @@ this license.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
 
 <link rel="import" href="ctree-loader-behavior-firebase.html">
 
@@ -94,7 +93,7 @@ this license.
       }.bind(this);
       var checkHasNextItem = (dataContainer, options) => {
         if (!dataContainer.allLoaded) {
-          this._hasNextItem(dataContainer, (hasNext) => {
+          this._hasNextItem(dataContainer, 'elements', (hasNext) => {
             startOperationTimeout();
             if (hasNext) {
               options.push(dataContainer);
@@ -154,10 +153,10 @@ this license.
           // get next non-null item from option
           var dataContainer = options[optionIndex];
           do {
-            var dataItem = this._getNextItem(dataContainer, true);
+            var dataItem = this._getNextDataItem(dataContainer, 'elements');
             if (dataItem) {
               // if item doesn't already exist add it
-              var id = String(Object.keys(dataItem)[0]);
+              var id = this._getDataItemId(dataItem);
               if (!items.find(existingItem => existingItem.id == id) && !this.suggestedItems.find(existingItem => existingItem.id == id)) {
                 item = this._dataToItem(dataItem);
                 item.typeId = String(item.type);
