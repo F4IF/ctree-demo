@@ -1,0 +1,103 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="ctree-writer-behavior.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Base class for writer behavior implementations which break down data into
+   * their respective sub-components and writes them.  This isn't needed if
+   * breaking down data is done on the server side.  This allows reduces the
+   * implementation specific code needed.
+   */
+  CTree.WriterBehaviorIncrementalBase = class extends CTree.WriterBehaviorBase {
+    static get properties() {
+      return {
+      };
+    }
+
+    /**
+     * Writes the data at the given path and calls onComplete({uuid: String}).
+     *
+     * @param {String} path Path within tree where to write the data
+     * @param {Object} data The data to write at the given path
+     * @param {Function(data: Object, uuid: String)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
+     * @param {String} uuid (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
+     */
+    _writeNewEntry(path, data, onComplete, uuid) {
+      if (!path) {
+        // notify failed, no path value set
+        Log.error('Unable to write data, no path set');
+        if (onComplete) onComplete.bind(this)(false);
+        return;
+      }
+      if (!data) {
+        // notify failed, no data value set
+        Log.error('Unable to write data, no data set');
+        if (onComplete) onComplete.bind(this)(false);
+        return;
+      }
+
+      if (!uuid) {
+        uuid = CTree.Writer.getUuid();
+      }
+      var listener = null;
+      if (onComplete) {
+        listener = (success) => {
+          if (!success) {
+            data = null;
+            uuid = null;
+          }
+          onComplete.bind(this)(data, uuid);
+        };
+      }
+      this._writeData(path + '/' + uuid, data, listener);
+    }
+
+    /**
+     * Writes the data at the given path and calls onComplete({success: Boolean}).
+     *
+     * @param {String} path Path within tree where to write the data
+     * @param {Object} data The data to write at the given path
+     * @param {Function(Boolean)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
+     */
+    _writeData(path, data, onComplete) {
+      // TODO: override to implement writing data
+    }
+  };
+
+})();
+
+</script>

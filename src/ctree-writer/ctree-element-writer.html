@@ -45,8 +45,7 @@ this license.
     static get properties() {
       return {
         /**
-         * Element to load data for.  Events will be fired for this element as
-         * data is loaded into it.
+         * Element to write data for.
          *
          * Structure:
          *   {
@@ -90,15 +89,12 @@ this license.
      * @param {String} id (Optional) ID of element.  If not provided and the element isn't specified, the elementId property will be used.  If the value is still null the element object's ID will be used if it's not null, otherwise a new UUID will be generated.
      */
     addElement(onComplete, element, id) {
-      if (!this.element && !element) {
-        console.error('No element set for writer');
-        if (onComplete) onComplete.bind(this)();
-        return;
-      }
       if (!element) {
         element = this.element;
-        if (!id) {
-          id = this.elementId
+        if (!element) {
+          console.error('No element set for writer');
+          if (onComplete) onComplete.bind(this)();
+          return;
         }
       }
       if (!element.description) {
@@ -107,7 +103,7 @@ this license.
         return;
       }
       if (!id) {
-        id = element.id
+        id = element.id;
         if (!id) {
           id = CTree.Writer.getUuid();
         }
@@ -126,6 +122,7 @@ this license.
               ctreeData.elements[id] = elementData;
             }
             // TODO: may want to check to see if the element already exists (if so, remove it before adding it again)
+            // TODO: may need to update the element and elementId properties so they have the correct ID values
             ctreeData.lists.history.items.unshift(elementData);
           } else {
             elementData.type = null;
@@ -352,15 +349,16 @@ this license.
     }
   }
 
-  var ctreeImport = document.createElement('ctree-import');
+  CTree.ElementWriterElementImport = document.createElement('ctree-import');
   if (CTree.xApiConfig) {
-    ctreeImport.href = '/src/ctree-writer/ctree-wlement-writer-xapi.html';
+    CTree.ElementWriterElementImport.href = '/src/ctree-writer/ctree-element-writer-xapi.html';
   } else if (CTree.firebaseConfig) {
-    ctreeImport.href = '/src/ctree-writer/ctree-element-writer-firebase.html';
+    CTree.ElementWriterElementImport.href = '/src/ctree-writer/ctree-element-writer-firebase.html';
   } else {
-    ctreeImport.href = '/src/ctree-writer/ctree-element-writer-test.html';
+    CTree.ElementWriterElementImport.href = '/src/ctree-writer/ctree-element-writer-test.html';
   }
-  ctreeImport.load();
+  document.documentElement.appendChild(CTree.ElementWriterElementImport);
+  CTree.ElementWriterElementImport.load();
 
 })();
 

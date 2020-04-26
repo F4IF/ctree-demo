@@ -29,41 +29,17 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-writer-behavior.html">
+<link rel="import" href="ctree-writer-behavior-incremental.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  CTree.WriterBehaviorTest = class extends CTree.WriterBehaviorBase {
+  CTree.WriterBehaviorTest = class extends CTree.WriterBehaviorIncrementalBase {
     static get properties() {
       return {
       };
-    }
-
-    /**
-     * Writes the data at the given path and calls onComplete({uuid: String}).
-     *
-     * @param {String} path Path within tree where to write the data
-     * @param {Object} data The data to write at the given path
-     * @param {Function(data: Object, uuid: String)} onComplete Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
-     * @param {String} uuid (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
-     */
-    _writeNewEntry(path, data, onComplete, uuid) {
-      if (!uuid) {
-        uuid = CTree.Writer.getUuid();
-      }
-      var listener = null;
-      if (onComplete) {
-        listener = (success) => {
-          if (!success) {
-            uuid = null;
-          }
-          onComplete.bind(this)(data, uuid);
-        };
-      }
-      this._writeData(path + '/' + uuid, data, listener);
     }
 
     /**

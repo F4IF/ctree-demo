@@ -29,16 +29,22 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../ctree-import/ctree-import.html">
-<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
-
-<link rel="import" href="ctree-writer-behavior-firebase.html">
+<link rel="import" href="ctree-writer-behavior-incremental.html">
 
 <script>
 (function() {
 
   'use strict';
 
+  /**
+   * Mixin for element writer implementations which break down data into their
+   * respective sub-components and writes them.  This isn't needed if breaking
+   * down data is done on the server side.  This allows just passing the
+   * behavior implementation, so no specific element writer implementation is
+   * needed.
+   *
+   * This can only be used with classes which extend CTree.WriterBehaviorIncrementalBase
+   */
   CTree.ElementWriterIncrementalMixin = (superClass) => class extends CTree.ElementWriterMixin(superClass) {
 
     static get is() { return 'ctree-element-writer'; }
