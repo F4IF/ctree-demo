@@ -279,9 +279,8 @@ this license.
 
       _onCommentSubmitted(e) {
         var comment = e.detail.comment
-        // TODO: when adding comment support, ensure this adds to both the visible list and backend, may need to use notifySplice if this isn't working
-        // TODO: check if we need to escape some text to protect the backend from hacking or errors
-        this.splice('element.feedback', 0, 0, {text: comment, rating: 0});
+        // don't need to add, already added by ctree-details-page
+        //this.unshift('element.feedback', {text: comment, rating: 0});
       }
     }
 
