@@ -1,0 +1,241 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<link rel="import" href="ctree-writer-behavior.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  CTree.FeedbackWriterMixin = (superClass) => class extends superClass {
+
+    static get properties() {
+      return {
+        /**
+         * Parent data object to write feedback for.  Current compatible types
+         * are Element and Feedback.  If feedback is currently being written,
+         * changing this property will cancel handling any current writing
+         * response by setting the feedbackWriting property to false.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     feedback: [Feedback],
+         *     ...
+         *   }
+         */
+        parent: {
+          type: Object,
+          observer: '_parentChanged',
+        },
+
+        /**
+         * Feedback to write.  If feedback is currently being written,
+         * changing this property will cancel handling any current writing
+         * response by setting the feedbackWriting property to false.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+         *     text: String,
+         *   }
+         */
+        feedback: {
+          type: Object,
+          observer: '_feedbackChanged',
+        },
+
+        /**
+         * Indicates if feedback is currently being written.  Setting this to
+         * true will trigger writing the data from the feedback property to the
+         * object from the parent property.  This is reset whenever the feedback
+         * property or parent property are changed.  When writing is done this
+         * will be set to false and the feedbackWritten property will indicate
+         * if the feedback was successfully written.
+         */
+        feedbackWriting: {
+          type: Boolean,
+          notify: true,
+          observer: '_feedbackWritingChanged',
+        },
+
+        /**
+         * Indicates if the feedback has been written successfully.
+         */
+        feedbackWritten: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+
+        __feedbackWritingTimestamp: Number,
+      };
+    }
+
+    _parentChanged(parent, previousParent) {
+      if (parent === previousParent) return;
+
+      this.feedbackWriting = false;
+      this._setFeedbackWritten(false);
+    }
+
+    _feedbackChanged(feedback, previousFeedback) {
+      if (feedback === previousFeedback) return;
+
+      this.feedbackWriting = false;
+      this._setFeedbackWritten(false);
+    }
+
+    _feedbackWritingChanged(writing, previousWriting) {
+      if (writing === previousWriting) return;
+
+      if (writing) {
+        var parent = this.parent;
+        var feedback = this.feedback;
+        if (!parent || !feedback) {
+          // nothing to write, so reset state
+          this.feedbackWriting = false;
+        } else {
+          var timestamp = Date.now();
+          this.__feedbackWritingTimestamp = timestamp;
+
+          this._setFeedbackWritten(false);
+
+          this.addFeedback(feedback, null, parent, (feedbackData) => {
+            if (this.parent === parent && this.feedback === feedback
+                && this.feedbackWriting && this.__feedbackWritingTimestamp === timestamp) {
+              this._setFeedbackWritten(!!feedbackData);
+              this.feedbackWriting = false;
+            }
+          });
+        }
+      } // do nothing when writing is set to false, cancelling will be handled by comparing timestamps
+    }
+
+    /**
+     * Add feedback for given parent.  This will not update the feedbackWriting
+     * or feedbackWritten properties.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     feedback: [Feedback],
+     *     ...
+     *   }
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *   }
+     *
+     * @param {Object} feedback (Optional) Feedback to add. If not provided, the value from the feedback property will be used.
+     * @param {String} id       (Optional) ID of feedback. If not provided, the feedback object's ID will be used. If it's still null, a new UUID will be generated.
+     * @param {Object} parent   (Optional) Parent object to add feedback for. If not provided, the value from the parent property will be used.
+     * @param {Function(FeedbackData)} onComplete (Optional) Function called when completed, with the feedback's written data if successful, otherwise null
+     */
+    addFeedback(feedback, id, parent, onComplete) {
+      if (!parent) {
+        parent = this.parent;
+        if (!parent) {
+          console.error('No parent set for feedback writer');
+          if (onComplete) onComplete.bind(this)();
+          return;
+        }
+      }
+      if (!feedback) {
+        feedback = this.feedback;
+        if (!feedback) {
+          console.error('No feedback set for writer');
+          if (onComplete) onComplete.bind(this)();
+          return;
+        }
+      }
+      if (!id) {
+        id = feedback.id;
+        if (!id) {
+          id = CTree.Writer.getUuid();
+        }
+      }
+
+      var ctreeKey = this.ctreeKey;
+      this._addFeedback(feedback, id, parent, ctreeKey, (feedbackData) => {
+        if (onComplete) onComplete.bind(this)(feedbackData);
+      });
+    }
+
+    /**
+     * Add feedback for given parent.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     feedback: [Feedback],
+     *     ...
+     *   }
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *   }
+     *
+     * @param {Object} feedback Feedback to add
+     * @param {String} id       ID of feedback
+     * @param {Object} parent   Parent object to add feedback for
+     * @param {String} ctreeKey Key for cTree to write feedback to
+     * @param {Function(FeedbackData)} onComplete Function called when completed, with the feedback's written data if successful, otherwise null
+     */
+    _addFeedback(feedback, id, parent, ctreeKey, onComplete) {
+      // TODO: Override to implement writing
+    }
+  }
+
+  CTree.FeedbackWriterElementImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    CTree.FeedbackWriterElementImport.href = '/src/ctree-writer/ctree-feedback-writer-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    CTree.FeedbackWriterElementImport.href = '/src/ctree-writer/ctree-feedback-writer-firebase.html';
+  } else {
+    CTree.FeedbackWriterElementImport.href = '/src/ctree-writer/ctree-feedback-writer-test.html';
+  }
+  document.documentElement.appendChild(CTree.FeedbackWriterElementImport);
+  CTree.FeedbackWriterElementImport.load();
+
+})();
+
+</script>
