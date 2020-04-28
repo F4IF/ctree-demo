@@ -29,7 +29,7 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-loader-behavior-firebase.html">
+<link rel="import" href="ctree-data-loader-firebase.html">
 
 <script>
 (function() {
@@ -39,7 +39,7 @@ this license.
   /**
    * Implementation of feedback loader using Firebase.
    */
-  class CTreeFeedbackLoader extends CTree.FeedbackLoaderMixin(CTree.LoaderBehavior) {
+  CTree.FeedbackLoader = class extends CTree.FeedbackLoaderMixin(CTree.DataLoader) {
 
     static get is() { return 'ctree-feedback-loader'; }
 
@@ -114,10 +114,9 @@ this license.
       }, pageSize);
     }
   }
-  CTree.FeedbackLoader = CTreeFeedbackLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeFeedbackLoader.is, CTreeFeedbackLoader);
+  customElements.define(CTree.FeedbackLoader.is, CTree.FeedbackLoader);
 
 })();
 

@@ -36,7 +36,7 @@ this license.
 
   'use strict';
 
-  CTree.WriterBehaviorTest = class extends CTree.WriterBehaviorIncrementalBase {
+  CTree.WriterBehaviorMixin = (superClass) => class extends CTree.WriterBehaviorIncrementalMixin(superClass) {
     static get properties() {
       return {
       };
@@ -70,6 +70,7 @@ this license.
       }, 1000);
     }
   };
+  CTree.WriterBehavior = class extends CTree.WriterBehaviorMixin(CTree.WriterBehaviorBase) {};
 
 })();
 

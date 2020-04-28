@@ -291,7 +291,8 @@ this license.
     cTreeData.testHistory = getTestElementSubset(testElementsKeys.length / 5);
   };
 
-  CTree.LoaderBehavior = class extends CTree.LoaderBehaviorBase {
+
+  CTree.LoaderBehaviorMixin = (superClass) => class extends superClass {
     static get properties() {
       return {
         /**
@@ -374,35 +375,8 @@ this license.
         }
       }, Test.LOAD_DELAY);
     }
-
-    /**
-     * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
-     * called with the final, fully loaded item.
-     *
-     * @param {String} elementId           ID of the element to load data for.
-     * @param {Function(Element)} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
-     * @param {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
-     */
-    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
-      // TODO: support descriptionId and segmentVariations
-      this.element = cTreeData.elements[elementId];
-
-      if (!this.element) {
-        setTimeout(() => {
-          if (this.element || this.elementId != elementId) return; // element or elementId updated
-
-          // TODO: this should simulate reality better by only returning the pieces of the element needed for suggestedItem (id, type, name, description config, description segments)
-          var element = cTreeData.testElements[elementId];
-          cTreeData.elements[elementId] = element;
-
-          if (this._cTreeData == cTreeData) {
-            onComplete(element);
-          }
-        }, Test.LOAD_DELAY);
-      }
-    }
   };
+  CTree.LoaderBehavior = class extends CTree.LoaderBehaviorMixin(CTree.LoaderBehaviorBase) {};
 
 })();
 

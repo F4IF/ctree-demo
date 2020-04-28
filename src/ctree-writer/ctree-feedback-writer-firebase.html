@@ -37,11 +37,10 @@ this license.
 
   'use strict';
 
-  class CTreeFeedbackWriter extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {}
-  CTree.FeedbackWriter = CTreeFeedbackWriter;
+  CTree.FeedbackWriter = class extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehavior) {};
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeFeedbackWriter.is, CTreeFeedbackWriter);
+  customElements.define(CTree.FeedbackWriter.is, CTree.FeedbackWriter);
 
 })();
 

@@ -29,7 +29,7 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-loader-behavior-test.html">
+<link rel="import" href="ctree-data-loader-test.html">
 
 <script>
 (function() {
@@ -113,7 +113,7 @@ this license.
    *   hasMore: Boolean,
    *   offset: String,			// test: Number
    */
-  class CTreeListLoader extends CTree.ListLoaderMixin(CTree.LoaderBehavior) {
+  CTree.ListLoader = class extends CTree.ListLoaderMixin(CTree.DataLoader) {
 
     static get is() { return 'ctree-list-loader'; }
 
@@ -189,10 +189,9 @@ this license.
       }
     }
   }
-  CTree.ListLoader = CTreeListLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeListLoader.is, CTreeListLoader);
+  customElements.define(CTree.ListLoader.is, CTree.ListLoader);
 
 })();
 
