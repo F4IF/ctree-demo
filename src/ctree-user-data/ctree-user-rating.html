@@ -1,0 +1,316 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<link rel="import" href="ctree-user-data-behavior.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  CTree.UserRatingMixin = (superClass) => class extends superClass {
+
+    static get properties() {
+      return {
+        /**
+         * Parent data object to get/set rating for.  When set, this will load
+         * if upvote or downvote was set for the parent by the user.
+         *
+         * Structure:
+         *   {
+         *     id: String,
+         *     rating: Number,
+         *     ...
+         *   }
+         */
+        parent: {
+          type: Object,
+          observer: '_parentChanged',
+        },
+
+        /**
+         * Set to true if the user has upvoted the parent.  This is updated to
+         * reflect the value set by the user when the parent property is changed.
+         * If this value is updated, the new value is written.  Setting this
+         * from true to false will return the rating to 0.  Setting this value
+         * to true will set the rating to 1, and set downvote to false if it was
+         * set to true.
+         *
+         * Currently all ratings are bound to -1, 0, or 1 for all parent types,
+         * but if that changes, this will be set to true for any positive rating.
+         */
+        upvote: {
+          type: Boolean,
+          notify: true,
+          observer: '_upvoteChanged',
+        },
+
+        /**
+         * Set to true if the user has downvoted the parent.  This is updated to
+         * reflect the value set by the user when the parent property is changed.
+         * If this value is updated, the new value is written.  Setting this
+         * from true to false will return the rating to 0.  Setting this value
+         * to true will set the rating to -1, and set upvote to false if it was
+         * set to true.
+         *
+         * Currently all ratings are bound to -1, 0, or 1 for all parent types,
+         * but if that changes, this will be set to true for any negative rating.
+         */
+        downvote: {
+          type: Boolean,
+          notify: true,
+          observer: '_downvoteChanged',
+        },
+
+        /**
+         * Holds the rating for the parent set by the user.  This is updated to
+         * reflect the value set by the user when the parent property is changed.
+         * If this value is updated, the new value is written.  Setting this
+         * value will also update the upvote and downvote properties
+         * appropriately, with any positive number representing an upvote and any
+         * negative number representing a downvote.  The value set will be bound
+         * to the ratings range for the parent, which is currently -1, 0, or 1
+         * for all parent types.
+         */
+        rating: {
+          type: Number,
+          notify: true,
+          observer: '_ratingChanged',
+        },
+
+        /**
+         * Indicates if the current upvote/downvote state set for the parent by
+         * the user is being loaded.  This happens automatically after the
+         * parent property has been set.  Loading is cancelled if the rating is
+         * updated.
+         */
+        loading: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+
+        /**
+         * Indicates if the current upvote/downvote state from the user is being
+         * updated for the parent.  This happens automatically whenever upvote
+         * or downvote is changed.
+         */
+        writing: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+        },
+
+        _verifiedRating: Number,
+
+        __suppressWrite: Boolean,
+      };
+    }
+
+    _parentChanged(parent, previousParent) {
+      if (parent === previousParent) return;
+
+      // reset data
+      this._setLoading(false);
+      this._setWriting(false);
+      const wasSuppressingWrite = this.__suppressWrite;
+      this.__suppressWrite = true;
+      this.upvote = false;
+      this.downvote = false;
+      this.rating = 0;
+      this._verifiedRating = 0;
+      this.__suppressWrite = wasSuppressingWrite;
+
+      const user = this.user;
+      if (parent /*&& user*/) {
+        this._setLoading(true);
+        this._loadRating(parent, user, (rating) => {
+          if (parent !== this.parent || user !== this.user) return;
+
+          if (rating == null) {
+            rating = this._getCachedRating(parent, user);
+          }
+          if (rating != null) {
+            this._verifiedRating = rating;
+            if (!this.writing && this.rating !== rating) {
+              const wasSuppressingWrite = this.__suppressWrite;
+              this.__suppressWrite = true;
+              this.rating = rating;
+              this.__suppressWrite = wasSuppressingWrite;
+            }
+            this._setCachedRating(rating, parent, user);
+          }
+
+          this._setLoading(false);
+        });
+      }
+    }
+
+    _upvoteChanged(upvote, previousUpvote) {
+      if (upvote === previousUpvote || this.__suppressWrite) return;
+
+      if (upvote) {
+        this.rating = 1;
+      } else {
+        this.rating = 0;
+      }
+    }
+
+    _downvoteChanged(downvote, previousDownvote) {
+      if (downvote === previousDownvote || this.__suppressWrite) return;
+
+      if (downvote) {
+        this.rating = -1;
+      } else {
+        this.rating = 0;
+      }
+    }
+
+    _ratingChanged(rating, previousRating) {
+      const parent = this.parent;
+      if (rating === previousRating || !parent) return;
+
+      // clamp to bounds
+      if (rating > 1) {
+        this.rating = 1;
+      } else if (rating < -1) {
+        this.rating = -1;
+
+      } else {
+        // valid rating
+        this._setLoading(false);
+
+        const wasSuppressingWrite = this.__suppressWrite;
+        this.__suppressWrite = true;
+
+        // update upvote/downvote
+        if (rating > 0) {
+          this.upvote = true;
+          this.downvote = false;
+        } else if (rating < 0) {
+          this.upvote = false;
+          this.downvote = false;
+        } else { // rating == 0
+          this.upvote = false;
+          this.downvote = false;
+        }
+
+        const user = this.user;
+        if (!wasSuppressingWrite && parent /*&& user*/) {
+          this._setWriting(true);
+          this._writeRating(rating, parent, user, (ratingWritten) => {
+            if (parent !== this.parent || user !== this.user) return;
+
+            if (ratingWritten != null) {
+              this._verifiedRating = ratingWritten;
+              this._setCachedRating(rating, parent, user);
+            }
+            if (this._verifiedRating !== rating) {
+              // writing failed or rating written was different from what was sent, so reset to verified rating
+              const wasSuppressingWrite = this.__suppressWrite;
+              this.__suppressWrite = true;
+              this.rating = this._verifiedRating;
+              this.__suppressWrite = wasSuppressingWrite;
+            }
+
+            this._setWriting(false);
+          });
+        }
+
+        this.__suppressWrite = wasSuppressingWrite;
+      }
+    }
+
+    _getCachedRating(parent, user) {
+      return parent.userRating;
+    }
+
+    _setCachedRating(rating, parent, user) {
+      // TODO: once support user data, cache by user ID
+      parent.userRating = rating;
+    }
+
+    /**
+     * Load user's rating for parent.  Once complete, onComplete will be called
+     * with the result, or null if loading failed.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     rating: Number,
+     *     ...
+     *   }
+     *
+     * @param {Element|Feedback} parent     Parent object to load the rating for
+     * @param {String} user                 ID of the user to load the rating for
+     * @param {Function(Number)} onComplete Function called when loading the rating has completed. This is passed the loaded rating a parameter, or null if failed.
+     */
+    _loadRating(parent, user, onComplete) {
+      // TODO: override in implementation
+    }
+
+    /**
+     * Write user's rating for parent.  Once complete, onComplete will be called
+     * called with the value written, or null if writing failed.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     rating: Number,
+     *     ...
+     *   }
+     *
+     * @param {Number} rating               Rating from the user to set for the parent
+     * @param {Element|Feedback} parent     Parent object to load the rating for
+     * @param {String} user                 ID of the user to load the rating for
+     * @param {Function(Number)} onComplete Function called when writing the rating has completed. This is passed the rating set a parameter, or null if failed.
+     */
+    _writeRating(rating, parent, user, onComplete) {
+      // TODO: override in implementation
+    }
+  };
+
+  CTree.UserRatingElementImport = document.createElement('ctree-import');
+  if (CTree.xApiConfig) {
+    CTree.UserRatingElementImport.href = '/src/ctree-user-data/ctree-user-rating-xapi.html';
+  } else if (CTree.firebaseConfig) {
+    CTree.UserRatingElementImport.href = '/src/ctree-user-data/ctree-user-rating-firebase.html';
+  } else {
+    CTree.UserRatingElementImport.href = '/src/ctree-user-data/ctree-user-rating-test.html';
+  }
+  document.documentElement.appendChild(CTree.UserRatingElementImport);
+  CTree.UserRatingElementImport.load();
+
+})();
+
+</script>
