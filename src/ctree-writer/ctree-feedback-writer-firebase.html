@@ -37,7 +37,22 @@ this license.
 
   'use strict';
 
-  class CTreeFeedbackWriter extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {}
+  class CTreeFeedbackWriter extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {
+    /**
+     * Perform any additional work after feedback is added.
+     *
+     * @param  {FeedbackData} feedbackData Feedback data written to the server
+     */
+    _onFeedbackAdded(feedbackData, parent) {
+      var parentType = CTree.Loader.getObjectDataType(parent);
+      if (parentType === CTree.Loader.DATA_TYPES.ELEMENT) {
+        this._updateNumberBy(1, 'elements/' + parent.id + '/feedbackCount');
+        this._recordInteraction(parent);
+      } else {
+        console.error('Unsupported parent type for feedback: ' + parentType);
+      }
+    }
+  };
   CTree.FeedbackWriter = CTreeFeedbackWriter;
 
   // Register custom element definition using standard platform API
