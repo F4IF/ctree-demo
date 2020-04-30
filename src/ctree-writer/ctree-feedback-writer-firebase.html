@@ -29,6 +29,9 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<!-- Required to get CTree.Loader.getObjectDataType -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
+
 <link rel="import" href="ctree-feedback-writer-incremental.html">
 <link rel="import" href="ctree-writer-behavior-firebase.html">
 
@@ -45,11 +48,23 @@ this license.
      */
     _onFeedbackAdded(feedbackData, parent) {
       var parentType = CTree.Loader.getObjectDataType(parent);
+      var path = null;
       if (parentType === CTree.Loader.DATA_TYPES.ELEMENT) {
-        this._updateNumberBy(1, 'elements/' + parent.id + '/feedbackCount');
-        this._recordInteraction(parent);
+        path = 'elements';
+      } else if (parentType === CTree.Loader.DATA_TYPES.FEEDBACK) {
+        const grandparent = parent.parent;
+        if (grandparent) {
+          const grandparentType = CTree.Loader.getObjectDataType(grandparent, true);
+          path = 'feedback/for' + grandparentType + '/' + grandparent.id;
+        } else {
+          console.error('No grandparent object found');
+        }
       } else {
         console.error('Unsupported parent type for feedback: ' + parentType);
+      }
+      if (path) {
+        this._updateNumberBy(1, path + '/' + parent.id + '/feedbackCount');
+        this._recordInteraction(parent);
       }
     }
   };

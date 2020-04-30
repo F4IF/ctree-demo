@@ -87,6 +87,12 @@ this license.
         return;
       }
 
+      // initialize fields for sorting and searching in case we add that later
+      feedback.feedbackCount = 0;
+      feedback.interactionCount = 0;
+      feedback.lastInteractionDate = new Date().getTime();
+      feedback.rating = 0;
+
       this._writeNewEntry('feedback/for' + parentType + '/' + parent.id, feedback, (feedbackData, id) => {
         if (id) {
           feedbackData.id = id;
