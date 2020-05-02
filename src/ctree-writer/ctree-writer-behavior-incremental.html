@@ -51,12 +51,13 @@ this license.
     /**
      * Writes the data at the given path and calls onComplete({uuid: String}).
      *
-     * @param {String} path Path within tree where to write the data
-     * @param {Object} data The data to write at the given path
+     * @param {String} path     Path within tree where to write the data
+     * @param {Object} data     The data to write at the given path
      * @param {Function(data: Object, uuid: String)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
-     * @param {String} uuid (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
+     * @param {String} uuid     (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
+     * @param {String} ctreeKey (Optional) Key for cTree to write entry to
      */
-    _writeNewEntry(path, data, onComplete, uuid) {
+    _writeNewEntry(path, data, onComplete, uuid, ctreeKey = this.ctreeKey) {
       if (!path) {
         // notify failed, no path value set
         Log.error('Unable to write data, no path set');
@@ -83,17 +84,18 @@ this license.
           onComplete.bind(this)(data, uuid);
         };
       }
-      this._writeData(path + '/' + uuid, data, listener);
+      this._writeData(path + '/' + uuid, data, listener, ctreeKey);
     }
 
     /**
      * Writes the data at the given path and calls onComplete({success: Boolean}).
      *
-     * @param {String} path Path within tree where to write the data
-     * @param {Object} data The data to write at the given path
+     * @param {String} path     Path within tree where to write the data
+     * @param {Object} data     The data to write at the given path
      * @param {Function(Boolean)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
+     * @param {String} ctreeKey (Optional) Key for cTree to write data to
      */
-    _writeData(path, data, onComplete) {
+    _writeData(path, data, onComplete, ctreeKey = this.ctreeKey) {
       // TODO: override to implement writing data
     }
   };

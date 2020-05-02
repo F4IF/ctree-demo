@@ -190,6 +190,10 @@ this license.
           id = CTree.Writer.getUuid();
         }
       }
+      if (!feedback.reviewer) {
+        // no reviewer specified, set empty string because the reviewer property is required
+        feedback.reviewer = "";
+      }
 
       var ctreeKey = this.ctreeKey;
       this._addFeedback(feedback, id, parent, ctreeKey, (feedbackData) => {

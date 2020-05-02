@@ -217,103 +217,6 @@ this license.
     }
 
     /**
-     * Gets the data at the given path and calls handleData({key: Object}).
-     *
-     * @param  {String}         path       Path within tree where to get data from
-     * @param  {Function(key: Object)} handleData Function to call with loaded data as an array of key-value pairs
-     * @param  {String}         orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
-     * @param  {Boolean}        ascending  Sort the items by ascending order.
-     * @param  {Any}            value      A specific value used to start from in the field specified by orderBy.
-     * @param  {Number}         count      Specifies the count of items to return.  If not specified and value is given it returns all items matching that value, otherwise returns all items.
-     * @return null
-     */
-    _getData(path, handleData, orderBy, ascending = true, value, count) {
-      if (!this.ctreeKey) return; // TODO: we should probably handle error cases immediately instead of leaving it to the caller to timeout
-
-      var loader;
-      if (value == null) {
-        loader = document.createElement('firebase-document');
-      } else {
-        loader = document.createElement('firebase-query');
-
-        loader.orderByChild = orderBy;
-        if (!count || count <= 0) {
-          loader.equalTo = value;
-        } else if (ascending) {
-          if (value) {
-            loader.startAt = value;
-          } else if (value === 0) {
-            // required to behave correctly for a 0 value
-            loader.startAt = "0";
-          }
-          loader.limitToFirst = count;
-        } else {
-          if (value) {
-            loader.endAt = value;
-          } else if (value === 0) {
-            // required to behave correctly for a 0 value
-            loader.endAt = "0";
-          }
-          loader.limitToLast = count;
-        }
-      }
-      loader.path = 'ctrees/' + this.ctreeKey + '/' + path;
-      var processed = false;
-      var listener = function() {
-        // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
-        if (processed) return;
-
-        var data = loader.data;
-        if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
-          processed = true;
-          loader.removeEventListener('data-changed', listener);
-          loader.remove();
-          // TODO: if we never get valid data we never remove the node, which should be fixed, probably by adding a timeout
-          if (loader.parentNode) loader.parentNode.removeChild(loader);
-          var mapFunction = function(key) {
-            var object = {}
-            var value = data[key]
-            if (value.$key) {
-              key = value.$key
-              delete value.$key
-            }
-            if (data.$value) {
-              value = value.$value
-            }
-            object[key] = value;
-            return object;
-          }
-          if (typeof(data) === 'object' && (orderBy != null || !ascending)) {
-            data = Object.keys(data).map(mapFunction);
-            data.sort(function(a, b) {
-              var keyA = Object.keys(a)[0];
-              var keyB = Object.keys(b)[0];
-              var valueA;
-              var valueB;
-              if (orderBy != null) {
-                valueA = a[keyA][orderBy];
-                valueB = b[keyB][orderBy];
-              } else {
-                valueA = keyA;
-                valueB = keyB;
-              }
-              if (ascending) {
-                return valueA - valueB;
-              } else {
-                return valueB - valueA;
-              }
-            });
-          } else if (Array.isArray(data)) {
-            data = Object.keys(data).map(mapFunction);
-          }
-          handleData.bind(this)(data);
-        }
-      };
-      loader.addEventListener('data-changed', listener.bind(this));
-      document.body.appendChild(loader);
-    }
-
-    /**
      * Gets the ID for the data item from the array returned by _getData, which
      * is in the format {id: dataEntry}.
      */
@@ -442,7 +345,7 @@ this license.
         if (onComplete) {
           dataContainer.callbacks.push(onComplete);
         }
-        this._getData(relativePath, (data) => {
+        CTree.Loader.getData(this.ctreeKey, relativePath, (data) => {
           if (!this.__testValid(dataContainer, data)) return;
 
           // update properties for loading next set of items
@@ -488,7 +391,7 @@ this license.
         if (onComplete) {
           dataContainer.callbacks.push(onComplete);
         }
-        this._getData(relativePath, (data) => {
+        CTree.Loader.getData(this.ctreeKey, relativePath, (data) => {
           // update properties for loading next set of items
           if (!this.__testValid(dataContainer, data)) return;
           var lastItemIndex = data ? data.length - 1 : -1;
@@ -649,6 +552,103 @@ this license.
     }
   };
   CTree.LoaderBehavior = class extends CTree.LoaderBehaviorMixin(CTree.LoaderBehaviorBase) {};
+
+  /**
+   * Gets the data at the given path and calls handleData({key: Object}).
+   *
+   * @param {String}  cTreeKey   The key for the cTree
+   * @param {String}  path       Path within tree where to get data from
+   * @param {Function(key: Object)} handleData Function to call with loaded data as an array of key-value pairs
+   * @param {String}  orderBy    The name of the key within each item to sort by.  Sorted by the item's key if set to null (default).
+   * @param {Boolean} ascending  Sort the items by ascending order.
+   * @param {Any}     value      A specific value used to start from in the field specified by orderBy.
+   * @param {Number}  count      Specifies the count of items to return.  If not specified and value is given it returns all items matching that value, otherwise returns all items.
+   */
+  CTree.Loader.getData = function(ctreeKey, path, handleData, orderBy, ascending = true, value, count) {
+    if (!ctreeKey) return; // TODO: we should probably handle error cases immediately instead of leaving it to the caller to timeout
+
+    var loader;
+    if (value == null) {
+      loader = document.createElement('firebase-document');
+    } else {
+      loader = document.createElement('firebase-query');
+
+      loader.orderByChild = orderBy;
+      if (!count || count <= 0) {
+        loader.equalTo = value;
+      } else if (ascending) {
+        if (value) {
+          loader.startAt = value;
+        } else if (value === 0) {
+          // required to behave correctly for a 0 value
+          loader.startAt = "0";
+        }
+        loader.limitToFirst = count;
+      } else {
+        if (value) {
+          loader.endAt = value;
+        } else if (value === 0) {
+          // required to behave correctly for a 0 value
+          loader.endAt = "0";
+        }
+        loader.limitToLast = count;
+      }
+    }
+    loader.path = 'ctrees/' + ctreeKey + '/' + path;
+    var processed = false;
+    var listener = function() {
+      // HACK: check if we've already process, because loader.remove() triggers additional listener calls even after removeEventListener is called
+      if (processed) return;
+
+      var data = loader.data;
+      if (data && ((!Array.isArray(data) && Object.keys(data).length > 0) || data.length > 0)) {
+        processed = true;
+        loader.removeEventListener('data-changed', listener);
+        loader.remove();
+        // TODO: if we never get valid data we never remove the node, which should be fixed, probably by adding a timeout
+        if (loader.parentNode) loader.parentNode.removeChild(loader);
+        var mapFunction = function(key) {
+          var object = {}
+          var value = data[key]
+          if (value.$key) {
+            key = value.$key
+            delete value.$key
+          }
+          if (data.$value) {
+            value = value.$value
+          }
+          object[key] = value;
+          return object;
+        }
+        if (typeof(data) === 'object' && (orderBy != null || !ascending)) {
+          data = Object.keys(data).map(mapFunction);
+          data.sort(function(a, b) {
+            var keyA = Object.keys(a)[0];
+            var keyB = Object.keys(b)[0];
+            var valueA;
+            var valueB;
+            if (orderBy != null) {
+              valueA = a[keyA][orderBy];
+              valueB = b[keyB][orderBy];
+            } else {
+              valueA = keyA;
+              valueB = keyB;
+            }
+            if (ascending) {
+              return valueA - valueB;
+            } else {
+              return valueB - valueA;
+            }
+          });
+        } else if (Array.isArray(data)) {
+          data = Object.keys(data).map(mapFunction);
+        }
+        handleData.bind(this)(data);
+      }
+    };
+    loader.addEventListener('data-changed', listener.bind(this));
+    document.body.appendChild(loader);
+  }
 
 })();
 

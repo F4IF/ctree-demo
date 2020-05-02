@@ -89,12 +89,12 @@ this license.
       const parentType = CTree.Loader.getObjectDataType(parent);
       if (parentType === CTree.Loader.DATA_TYPES.ELEMENT) {
         // TODO: clean up by creating a way to get a single non-object value, instead of loading the full element data object
-        this._getData('elements/' + parent.id, (data) => {
+        CTree.Loader.getData(ctreeKey, 'elements/' + parent.id, (data) => {
           var elementRating = 0;
           if (data) {
             elementRating = data.rating;
           }
-          this._writeData('ctrees/' + ctreeKey + '/elements/' + parent.id + '/rating', elementRating + ratingDelta, (success) => {
+          this._writeData('elements/' + parent.id + '/rating', elementRating + ratingDelta, (success) => {
             if (success) {
               // TODO: once supports user profiles, write rating to Firebase
               onComplete(rating);
