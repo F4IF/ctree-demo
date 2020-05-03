@@ -112,6 +112,8 @@ this license.
      * @param {String} ctreeKey               Key for cTree to write description variation to
      */
     _addDescriptionVariation(descriptionVariation, elementId, onComplete, descriptionVariationId, ctreeKey) {
+      const segments = descriptionVariation.segments;
+
       // listen for first variation of each segment to finish writing, then write description entry
       var segmentsData = [];
       var segmentIds = [];
