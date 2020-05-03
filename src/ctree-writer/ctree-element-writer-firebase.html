@@ -29,6 +29,9 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<!-- Required to get CTree.Loader.DATA_TYPES -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
+
 <link rel="import" href="ctree-element-writer-incremental.html">
 <link rel="import" href="ctree-writer-behavior-firebase.html">
 
@@ -37,7 +40,25 @@ this license.
 
   'use strict';
 
-  class CTreeElementWriter extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {}
+  class CTreeElementWriter extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {
+    /**
+     * Perform any additional work after element is added.
+     *
+     * @param {ElementData} elementData Element data written to the server
+     * @param {String} ctreeKey Key for cTree element was added to
+     */
+    _onElementAdded(elementData, ctreeKey) {
+      const parentsData = elementData.parents;
+      if (!parentsData) return;
+
+      const parentIds = Object.keys(parentsData);
+      for (var i = 0; i < parentIds.length; i++) {
+        const parentId = parentIds[i];
+        this._updateNumberBy(1, 'elements/' + parentId + '/childCount');
+        this._recordInteractionForItemWithId(parentId, CTree.Loader.DATA_TYPES.ELEMENT, ctreeKey);
+      }
+    }
+  };
   CTree.ElementWriter = CTreeElementWriter;
 
   // Register custom element definition using standard platform API
