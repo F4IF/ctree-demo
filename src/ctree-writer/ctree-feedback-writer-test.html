@@ -29,48 +29,19 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-writer-behavior-incremental.html">
+<link rel="import" href="ctree-feedback-writer-incremental.html">
+<link rel="import" href="ctree-writer-behavior-test.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  CTree.WriterBehaviorTest = class extends CTree.WriterBehaviorIncrementalBase {
-    static get properties() {
-      return {
-      };
-    }
+  class CTreeFeedbackWriter extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehaviorTest) {}
+  CTree.FeedbackWriter = CTreeFeedbackWriter;
 
-    /**
-     * Writes the data at the given path and calls onComplete({success: Boolean}).
-     *
-     * @param {String} path     Path within tree where to write the data
-     * @param {Object} data     The data to write at the given path
-     * @param {Function(Boolean)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
-     * @param {String} ctreeKey (Optional) Key for cTree to write data to
-     */
-    _writeData(path, data, onComplete, ctreeKey = this.ctreeKey) {
-      if (!ctreeKey) {
-        // notify failed, no ctreeKey value set
-        Log.error('Unable to write data, no ctreeKey set');
-        if (onComplete) onComplete.bind(this)(false);
-        return;
-      }
-
-      var processed = false;
-      var processComplete = function() {
-        if (processed) return;
-
-        processed = true;
-
-        if (onComplete) onComplete.bind(this)(true);
-      }
-      setTimeout(() => {
-        processComplete(true);
-      }, 1000);
-    }
-  };
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeFeedbackWriter.is, CTreeFeedbackWriter);
 
 })();
 

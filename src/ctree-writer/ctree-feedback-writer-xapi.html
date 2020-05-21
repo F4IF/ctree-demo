@@ -1,0 +1,90 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="ctree-writer-behavior-xapi.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  class CTreeFeedbackWriter extends CTree.FeedbackWriterMixin(CTree.WriterBehaviorXapi) {
+
+    static get is() { return 'ctree-feedback-writer'; }
+
+    static get properties() {
+      return {
+      };
+    }
+
+    /**
+     * Add feedback for given parent.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     feedback: [Feedback],
+     *     ...
+     *   }
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *   }
+     *
+     * @param {Object} feedback Feedback to add
+     * @param {String} id       ID of feedback
+     * @param {Object} parent   Parent object to add feedback for
+     * @param {String} ctreeKey Key for cTree to write feedback to
+     * @param {Function(FeedbackData)} onComplete Function called when completed, with the feedback's written data if successful, otherwise null
+     */
+    _addFeedback(feedback, id, parent, ctreeKey, onComplete) {
+      /**
+       * TODO: Write feedback via xAPI.
+       *
+       * Once return from xAPI call, call onComplete with updated feedback
+       * data if successful, otherwise call onComplete with null data.
+       *
+       * onComplete.bind(this)(returnedData);
+       **/
+    }
+  }
+
+  CTree.FeedbackWriter = CTreeFeedbackWriter;
+
+  // Register custom element definition using standard platform API
+  customElements.define(CTreeFeedbackWriter.is, CTreeFeedbackWriter);
+
+})();
+
+</script>

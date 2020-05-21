@@ -30,53 +30,32 @@ this license.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 
-<link rel="import" href="ctree-writer-behavior.html">
+<!-- Needed to get CTree.Loader.getData function -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior-firebase.html">
+
+<link rel="import" href="ctree-writer-behavior-incremental.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  CTree.WriterBehaviorFirebase = class extends CTree.WriterBehaviorBase {
+  CTree.WriterBehaviorFirebase = class extends CTree.WriterBehaviorIncrementalBase {
     static get properties() {
       return {
       };
     }
 
     /**
-     * Writes the data at the given path and calls onComplete({uuid: String}).
-     *
-     * @param {String} path Path within tree where to write the data
-     * @param {Object} data The data to write at the given path
-     * @param {Function(data: Object, uuid: String)} onComplete Function to call when the data write has completed, either successfully or unsuccessfully.  The UUID and data written is passed back as a parameter if it was written successfully, otherwise the values are null.
-     * @param {String} uuid (Optional) ID to use when writing new entry.  If not provided, a new new UUID will be generated.
-     */
-    _writeNewEntry(path, data, onComplete, uuid) {
-      if (!uuid) {
-        uuid = CTree.Writer.getUuid();
-      }
-      var listener = null;
-      if (onComplete) {
-        listener = (success) => {
-          if (!success) {
-            data = null;
-            uuid = null;
-          }
-          onComplete.bind(this)(data, uuid);
-        };
-      }
-      this._writeData(path + '/' + uuid, data, listener);
-    }
-
-    /**
      * Writes the data at the given path and calls onComplete({success: Boolean}).
      *
-     * @param {String} path Path within tree where to write the data
-     * @param {Object} data The data to write at the given path
+     * @param {String} path     Path within tree where to write the data
+     * @param {Object} data     The data to write at the given path
      * @param {Function(Boolean)} onComplete (Optional) Function to call when the data write has completed, either successfully or unsuccessfully.  The success state is passed as a parameter.
+     * @param {String} ctreeKey (Optional) Key for cTree to write data to
      */
-    _writeData(path, data, onComplete) {
-      if (!this.ctreeKey) {
+    _writeData(path, data, onComplete, ctreeKey = this.ctreeKey) {
+      if (!ctreeKey) {
         // notify failed, no ctreeKey value set
         Log.error('Unable to write data, no ctreeKey set');
         if (onComplete) onComplete.bind(this)(false);
@@ -99,12 +78,57 @@ this license.
         processComplete(false);
       }, this.timeout);
       document.body.appendChild(writer);
-      writer.setStoredValue(path, data).then(
+      writer.setStoredValue('ctrees/' + ctreeKey + '/' + path, data).then(
         () => { processComplete(true) },
         () => { processComplete(false) });
     }
-  };
 
+    /**
+     * Update the number at the given path by the delta specified.  Once complete,
+     * onComplete will be called with the updated value, or null if writing failed.
+     *
+     * @param {Number} delta                Delta to apply to the number at the given path
+     * @param {String} path                 Relative database path of number in cTree data
+     * @param {Function(Number)} onComplete (Optional) Function called when writing has completed. This is passed the new number set a parameter, or null if failed.
+     * @param {String} ctreeKey             (Optional) Key for cTree to write data to
+     */
+    _updateNumberBy(delta, path, onComplete, ctreeKey = this.ctreeKey) {
+      // TODO: clean up by making work with a single non-object value, instead of loading the full data object (maybe new getValue function instead of getData)
+      const key = path.substring(path.lastIndexOf('/') + 1);
+      path = path.substring(0, path.length - key.length - 1);
+      CTree.Loader.getData(ctreeKey, path, (data) => {
+        const value = data[key];
+        path = path + '/' + key;
+      //CTree.Loader.getData(ctreeKey, path, (value) => {
+        const newValue = value + delta;
+        this._writeData(path, newValue, (success) => {
+          if (success) {
+            if (onComplete) onComplete(newValue);
+          } else {
+            if (onComplete) onComplete(null);
+          }
+        }, ctreeKey);
+      });
+    }
+
+    /**
+     * Call this function to update the last interaction date and increment the
+     * interaction count.
+     *
+     * @param {Object} item     Item to record the interaction data for
+     * @param {String} ctreeKey (Optional) Key for cTree to write data to
+     */
+    _recordInteraction(item, ctreeKey = this.ctreeKey) {
+      var parentType = CTree.Loader.getObjectDataType(item);
+      if (parentType === CTree.Loader.DATA_TYPES.ELEMENT) {
+        const elementDataPath = 'elements/' + item.id + '/';
+        this._updateNumberBy(1, elementDataPath + 'interactionCount', null, ctreeKey);
+        this._writeData(elementDataPath + 'lastInteractionDate', new Date().getTime(), null, ctreeKey);
+      } else {
+        console.error('Unsupported item type for recording interaction: ' + parentType);
+      }
+    }
+  };
 })();
 
 </script>

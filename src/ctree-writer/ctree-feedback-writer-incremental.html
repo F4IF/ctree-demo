@@ -1,0 +1,120 @@
+<!--
+@license
+Copyright (c) 2019 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Required to get CTree.Loader.getObjectDataType -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
+
+<link rel="import" href="ctree-writer-behavior-incremental.html">
+
+<script>
+(function() {
+
+  'use strict';
+
+  /**
+   * Mixin for feedback writer implementations which break down data into their
+   * respective sub-components and writes them.  This isn't needed if breaking
+   * down data is done on the server side.  This allows just passing the
+   * behavior implementation, so no specific element writer implementation is
+   * needed.
+   *
+   * This can only be used with classes which extend CTree.WriterBehaviorIncrementalBase
+   */
+  CTree.FeedbackWriterIncrementalMixin = (superClass) => class extends CTree.FeedbackWriterMixin(superClass) {
+
+    static get is() { return 'ctree-feedback-writer'; }
+
+    static get properties() {
+      return {
+      };
+    }
+
+    /**
+     * Add feedback for given parent.
+     *
+     * Parent Structure:
+     *   {
+     *     id: String,
+     *     feedback: [Feedback],
+     *     ...
+     *   }
+     *
+     * Feedback Structure:
+     *   {
+     *     id: String,
+     *     reviewer: String,	// TODO: should probably be an object (user ID or reference to public user object)
+     *     text: String,
+     *   }
+     *
+     * @param {Feedback} feedback Feedback to add
+     * @param {String} id         ID of feedback
+     * @param {Object} parent     Parent object to add feedback for
+     * @param {String} ctreeKey   Key for cTree to write feedback to
+     * @param {Function(FeedbackData)} onComplete Function called when completed, with the feedback's written data if successful, otherwise null
+     */
+    _addFeedback(feedback, id, parent, ctreeKey, onComplete) {
+      var parentType = CTree.Loader.getObjectDataType(parent, true);
+      if (!parentType) {
+        Log.error('Unable to write feedback, unrecognized parent type');
+        return;
+      }
+
+      // initialize fields for sorting and searching in case we add that later
+      feedback.feedbackCount = 0;
+      feedback.interactionCount = 0;
+      feedback.lastInteractionDate = new Date().getTime();
+      feedback.rating = 0;
+
+      this._writeNewEntry('feedback/for' + parentType + '/' + parent.id, feedback, (feedbackData, id) => {
+        if (id) {
+          feedbackData.id = id;
+        }
+        if (feedbackData) {
+          this._onFeedbackAdded(feedbackData, parent);
+        }
+        onComplete.bind(this)(feedbackData);
+      }, id, ctreeKey);
+    }
+
+    /**
+     * Perform any additional work after feedback is added.
+     *
+     * @param {FeedbackData} feedbackData Feedback data written to the server
+     * @param {Object} parent             Parent object feedback was added for
+     */
+    _onFeedbackAdded(feedbackData, parent) {
+      // TODO: override if additional processing should be done after new feedback is added
+    }
+  };
+
+})();
+
+</script>
