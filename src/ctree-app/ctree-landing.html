@@ -57,6 +57,8 @@ this license.
 <link rel="import" href="icons.html">
 <link rel="import" href="features-section.html">
 
+<link rel="import" href="../ctree-testimonials/ctree-testimonials.html">
+
 <dom-module id="ctree-landing">
   <template>
     <style>
@@ -88,6 +90,8 @@ this license.
         @apply --layout-fit;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        background-color: #DBE8DE;
+        color: #63A375;
       }
       #headerTitle, #menuButton {
         display: none;
@@ -311,7 +315,6 @@ this license.
           line-height: 40px;
           font-size: 2.375em;
           margin: 65px auto 20px;
-          color: #2B2B2B;
         }
         div #participate p {
           font-size: 1.25em;
@@ -384,8 +387,8 @@ this license.
         background-color: #BFBFBF;
       }
       #feedback.section-styling {
-        background-color: #F8F8F8;
-        color: #196848;
+        background-color: #DBE8DE;
+        color: #63A375;
       }
       #ctree.section-styling {
         background-color: #196848;
@@ -424,6 +427,7 @@ this license.
         font-size: 2.1em;
         margin-top: 60px;
         letter-spacing: .02em;
+        color: #2B2B2B;
       }
       #participate p {
         color: #222322;
@@ -447,7 +451,6 @@ this license.
         color: #000000;
         display: flex;
       }
-      
     </style>
 
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
@@ -501,28 +504,7 @@ this license.
         <div id="overview" class="section-styling">
         </div>
         <div id="feedback" class="section-styling">
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
+          <ctree-testimonials></ctree-testimonials>
         </div>
 
         <features-section id="features"></features-section>
