@@ -40,7 +40,7 @@ this license.
 
   'use strict';
 
-  class CTreeElementWriter extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {
+  CTree.ElementWriter = class extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehavior) {
     /**
      * Perform any additional work after element is added.
      *
@@ -59,10 +59,9 @@ this license.
       }
     }
   };
-  CTree.ElementWriter = CTreeElementWriter;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeElementWriter.is, CTreeElementWriter);
+  customElements.define(CTree.ElementWriter.is, CTree.ElementWriter);
 
 })();
 

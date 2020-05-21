@@ -36,7 +36,7 @@ this license.
 
   'use strict';
 
-  CTree.WriterBehaviorXapi = class extends CTree.WriterBehaviorBase {
+  CTree.WriterBehaviorMixin = (superClass) => class extends superClass {
     static get properties() {
       return {
       };
@@ -44,6 +44,7 @@ this license.
 
     // TODO: add any generic functions useful for writing via xAPI
   };
+  CTree.WriterBehavior = class extends CTree.WriterBehaviorMixin(CTree.WriterBehaviorBase) {};
 
 })();
 

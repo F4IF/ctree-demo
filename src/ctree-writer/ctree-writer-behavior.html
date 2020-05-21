@@ -39,7 +39,7 @@ this license.
     window.CTree = {};
   }
 
-  CTree.WriterBehaviorBase = class extends Polymer.Element {
+  CTree.WriterBehaviorBaseMixin = (superClass) => class extends superClass {
     static get properties() {
       return {
         /**
@@ -81,6 +81,7 @@ this license.
       // TODO: do anything when key changed?
     }
   };
+  CTree.WriterBehaviorBase = class extends CTree.WriterBehaviorBaseMixin(Polymer.Element) {};
 
   // Initialize object to hold shared static constants and functions
   CTree.Writer = {};

@@ -31,7 +31,7 @@ this license.
 
 <link rel="import" href="../ctree-writer/ctree-writer-behavior.html">
 
-<link rel="import" href="ctree-loader-behavior-test.html">
+<link rel="import" href="ctree-data-loader-test.html">
 
 <script>
 (function() {
@@ -41,7 +41,7 @@ this license.
   /**
    * Test implementation of feedbac loader.
    */
-  class CTreeFeedbackLoader extends CTree.FeedbackLoaderMixin(CTree.LoaderBehavior) {
+  CTree.FeedbackLoader = class extends CTree.FeedbackLoaderMixin(CTree.DataLoader) {
 
     static get is() { return 'ctree-feedback-loader'; }
 
@@ -95,10 +95,9 @@ this license.
       }, 2000);
     }
   }
-  CTree.FeedbackLoader = CTreeFeedbackLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeFeedbackLoader.is, CTreeFeedbackLoader);
+  customElements.define(CTree.FeedbackLoader.is, CTree.FeedbackLoader);
 
 })();
 

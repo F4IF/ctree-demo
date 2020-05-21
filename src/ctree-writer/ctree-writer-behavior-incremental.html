@@ -42,7 +42,7 @@ this license.
    * breaking down data is done on the server side.  This allows reduces the
    * implementation specific code needed.
    */
-  CTree.WriterBehaviorIncrementalBase = class extends CTree.WriterBehaviorBase {
+  CTree.WriterBehaviorIncrementalMixin = (superClass) => class extends superClass {
     static get properties() {
       return {
       };

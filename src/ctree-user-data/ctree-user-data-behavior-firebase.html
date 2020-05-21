@@ -29,18 +29,17 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-element-writer-incremental.html">
-<link rel="import" href="ctree-writer-behavior-test.html">
+<link rel="import" href="../ctree-loader/ctree-loader-behavior-firebase.html">
+<link rel="import" href="../ctree-writer/ctree-writer-behavior-firebase.html">
+
+<link rel="import" href="ctree-user-data-behavior.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  CTree.ElementWriter = class extends CTree.ElementWriterIncrementalMixin(CTree.WriterBehavior) {};
-
-  // Register custom element definition using standard platform API
-  customElements.define(CTree.ElementWriter.is, CTree.ElementWriter);
+  CTree.UserDataBehavior = class extends CTree.WriterBehaviorMixin(class extends CTree.LoaderBehaviorMixin(CTree.UserDataBehaviorBase) {}) {};
 
 })();
 

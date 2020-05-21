@@ -40,7 +40,7 @@ this license.
 
   'use strict';
 
-  class CTreeFeedbackWriter extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehaviorFirebase) {
+  CTree.FeedbackWriter = class extends CTree.FeedbackWriterIncrementalMixin(CTree.WriterBehavior) {
     /**
      * Perform any additional work after feedback is added.
      *
@@ -68,10 +68,9 @@ this license.
       }
     }
   };
-  CTree.FeedbackWriter = CTreeFeedbackWriter;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeFeedbackWriter.is, CTreeFeedbackWriter);
+  customElements.define(CTree.FeedbackWriter.is, CTree.FeedbackWriter);
 
 })();
 
