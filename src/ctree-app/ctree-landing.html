@@ -109,6 +109,9 @@ this license.
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
+      #navDrawer {
+        display: none;
+      }
       paper-tab {
         width: 0;
       }
@@ -281,6 +284,9 @@ this license.
         }
         #headerTitle, #menuButton {
           display: inline-block;
+        }
+        #navDrawer {
+          display: block;
         }
         h1 {
           font-size: 4em;
@@ -508,7 +514,7 @@ this license.
         </div>
 
         <features-section id="features"></features-section>
-        
+
         <div id="ctree" class="section-styling">
           <p>W</p>
           <p>W</p>
@@ -582,7 +588,7 @@ this license.
         </div>
     </app-header-layout>
 
-    <app-drawer id="navDrawer" class="nav-drawer" align="right" position="right" swipe-open>
+    <app-drawer id="navDrawer" align="right" position="right" swipe-open>
       <ul>
         <li>
           <a href="[[rootPath]]?section=overview" on-click="_toggleDrawer">
