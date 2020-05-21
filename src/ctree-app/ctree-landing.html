@@ -55,6 +55,7 @@ this license.
 
 <link rel="import" href="ctree-app-icon.html">
 <link rel="import" href="icons.html">
+<link rel="import" href="features-section.html">
 
 <link rel="import" href="../ctree-testimonials/ctree-testimonials.html">
 
@@ -79,6 +80,8 @@ this license.
         display: block;
         --app-primary-color: #5F9F00;
         --app-secondary-color: black;
+        --app-header-padding-fix: 65px;
+        --app-header-margin-fix: -65px;
       }
       #mainLayout app-toolbar {
         padding: 0 8px 0 0;
@@ -142,10 +145,6 @@ this license.
 
       h1 {
         font-size: 4em;
-      }
-
-      #features-horizontal-line {
-        margin-top: -35px;
       }
 
       /* social media icon bar stuff */
@@ -292,11 +291,7 @@ this license.
           text-align: center;
         }
         #features {
-          font-size: .75em;
           text-align: center;
-        }
-        #features-horizontal-line {
-          margin-top: -15px;
         }
         #ctree {
           font-size: .75em;
@@ -394,10 +389,6 @@ this license.
       #feedback.section-styling {
         background-color: #DBE8DE;
         color: #63A375;
-      }
-      #features.section-styling {
-        background-color: #FFFFFF;
-        color: #196848;
       }
       #ctree.section-styling {
         background-color: #196848;
@@ -515,34 +506,9 @@ this license.
         <div id="feedback" class="section-styling">
           <ctree-testimonials></ctree-testimonials>
         </div>
-        <div id="features" class="section-styling">
-          <div class= "center-div">
-            <h1 align="center">Features</h1>
-            <hr id="features-horizontal-line"/>
-            <!-- grid layout to be added here with icons and descriptions. -->
-          </div>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-          <p>W</p>
-        </div>
+
+        <features-section id="features"></features-section>
+        
         <div id="ctree" class="section-styling">
           <p>W</p>
           <p>W</p>
