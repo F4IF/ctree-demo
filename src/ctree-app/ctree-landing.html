@@ -81,11 +81,7 @@ this license.
         --app-secondary-color: black;
       }
       #mainLayout app-toolbar {
-        padding: 15px 10px 10px 15px;
-        @apply --layout-horizontal;
-        @apply --layout-end-justified;
-        background-color: rgba(255, 255, 255, 0.95);
-
+        padding: 0 8px 0 0;
       }
       #content {
         @apply --layout-fit;
@@ -94,59 +90,37 @@ this license.
         background-color: #DBE8DE;
         color: #63A375;
       }
-      #headerTitle {
-        color: #63A375;
-        font-size: 23px;
-
-      }
-      #menuButton{
-        color: black;
-        float: right;
+      #headerTitle, #menuButton {
+        display: none;
       }
       app-drawer ul {
         text-align: left !important;
       }
       app-header-layout {
-        height: 200vh;
+        height: 100vh;
       }
       app-header {
         background-color: #FFFFFF;
         color: #fff;
-        height: 6%;
       }
       app-header paper-icon-button {
-
+        --paper-icon-button-ink-color: white;
       }
-
-
+      paper-tab {
+        width: 0;
+      }
       paper-tab[link] a {
         @apply --layout-horizontal;
         @apply --layout-center-center;
-        color: #000000;
+        color: #196948;
         text-decoration: none;
-        font-size: 12px;
-        outline: none;
-
-
       }
-      paper-tabs{
-        --paper-tabs-selection-bar-color: blue;
-      }
-      paper-tab.iron-selected{
-        color: blue !important ;
-
-
-      }
-      paper-tabs[noink][nobar] paper-tab.core-selected {
-            color: #db352c;
-
       paper-tab iron-icon {
         padding-right: 2px;
       }
       .tabTooltip {
         visibility: hidden;
       }
-
       paper-button {
         text-transform: none;
       }
@@ -165,7 +139,6 @@ this license.
       .bold-text {
         font-weight: bold;
       }
-
 
       h1 {
         font-size: 4em;
@@ -306,10 +279,6 @@ this license.
         }
         paper-tabs {
           display: none;
-          float: right;
-
-
-
         }
         #headerTitle, #menuButton {
           display: inline-block;
@@ -493,8 +462,6 @@ this license.
       }
     </style>
 
-
-
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
     <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader-test.html" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
     <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
@@ -505,55 +472,45 @@ this license.
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
 
-
-
     <app-header-layout id="mainLayout" has-scrolling-region>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-      <app-header slot="header" reveals effects="waterfall" >
-        <app-toolbar class="toolbar">
+      <app-header slot="header" reveals effects="waterfall">
+        <app-toolbar>
           <ctree-app-icon></ctree-app-icon>
-          <div id="headerTitle" main-title> Collaboration Tree</div>
-
-
-          <div id="paperTabsWidth" style="width:60%">
-            <paper-icon-button id="menuButton" icon="menu" drawer-toggle >Collaboration Trees</paper-icon-button>
-
-
-            <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px" style="width:50px" no-bar noink autoselectDelay>
-              <paper-tab id="overviewTab" name="overview" link>
-                <a href="[[rootPath]]?section=overview" tabindex="-1">
-                  Overview
-                </a>
-              </paper-tab>
-              <paper-tab id="feedbackTab" name="feedback" link>
-                <a href="[[rootPath]]?section=feedback" tabindex="-1">
-                  Feedback
-                </a>
-              </paper-tab>
-              <paper-tab id="featuresTab" name="features" link>
-                <a href="[[rootPath]]?section=features" tabindex="-1">
-                  Features
-                </a>
-              </paper-tab>
-              <paper-tab id="ctreeTab" name="ctree" link>
-                <a href="[[rootPath]]?section=ctree" tabindex="-1">
-                  cTree
-                </a>
-              </paper-tab>
-              <paper-tab id="participateTab" name="participate" link>
-                <a href="[[rootPath]]?section=participate" tabindex="-1">
-                  Participate
-                </a>
-              </paper-tab>
-            </paper-tabs>
-          </div>
+          <div id="headerTitle" main-title>Collaboration Trees</div>
+          <paper-icon-button id="menuButton" icon="menu" on-tap="_toggleDrawer"></paper-icon-button>
+          <paper-tabs selected="{{section}}" attr-for-selected="name" fallback-selection="overview" bottom-item style="margin-left: 66px">
+            <paper-tab id="overviewTab" name="overview" link>
+              <a href="[[rootPath]]?section=overview" tabindex="-1">
+                Overview
+              </a>
+            </paper-tab>
+            <paper-tab id="feedbackTab" name="feedback" link>
+              <a href="[[rootPath]]?section=feedback" tabindex="-1">
+                Feedback
+              </a>
+            </paper-tab>
+            <paper-tab id="featuresTab" name="features" link>
+              <a href="[[rootPath]]?section=features" tabindex="-1">
+                Features
+              </a>
+            </paper-tab>
+            <paper-tab id="ctreeTab" name="ctree" link>
+              <a href="[[rootPath]]?section=ctree" tabindex="-1">
+                cTree
+              </a>
+            </paper-tab>
+            <paper-tab id="participateTab" name="participate" link>
+              <a href="[[rootPath]]?section=participate" tabindex="-1">
+                Participate
+              </a>
+            </paper-tab>
+          </paper-tabs>
         </app-toolbar>
       </app-header>
 
       <div id="content">
         <div id="overview" class="section-styling">
-
         </div>
         <div id="feedback" class="section-styling">
           <ctree-testimonials></ctree-testimonials>
