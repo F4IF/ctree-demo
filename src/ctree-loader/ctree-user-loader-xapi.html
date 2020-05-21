@@ -29,21 +29,21 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ctree-loader-behavior-xapi.html">
+<link rel="import" href="ctree-data-loader-xapi.html">
 
 <script>
 (function() {
 
   'use strict';
 
-  class CTreeUserLoader extends CTree.UserLoaderMixin(CTree.LoaderBehavior) {
+  CTree.UserLoader = class extends CTree.UserLoaderMixin(CTree.DataLoader) {
 
     static get is() { return 'ctree-user-loader'; }
   }
   CTree.UserLoader = CTreeUserLoader;
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeUserLoader.is, CTreeUserLoader);
+  customElements.define(CTree.UserLoader.is, CTree.UserLoader);
 
 })();
 

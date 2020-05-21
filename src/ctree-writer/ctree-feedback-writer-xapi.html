@@ -29,6 +29,7 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="ctree-feedback-writer.html">
 <link rel="import" href="ctree-writer-behavior-xapi.html">
 
 <script>
@@ -36,7 +37,7 @@ this license.
 
   'use strict';
 
-  class CTreeFeedbackWriter extends CTree.FeedbackWriterMixin(CTree.WriterBehaviorXapi) {
+  CTree.FeedbackWriter = class extends CTree.FeedbackWriterMixin(CTree.WriterBehavior) {
 
     static get is() { return 'ctree-feedback-writer'; }
 
@@ -78,12 +79,10 @@ this license.
        * onComplete.bind(this)(returnedData);
        **/
     }
-  }
-
-  CTree.FeedbackWriter = CTreeFeedbackWriter;
+  };
 
   // Register custom element definition using standard platform API
-  customElements.define(CTreeFeedbackWriter.is, CTreeFeedbackWriter);
+  customElements.define(CTree.FeedbackWriter.is, CTree.FeedbackWriter);
 
 })();
 

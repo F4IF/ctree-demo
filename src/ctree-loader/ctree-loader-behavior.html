@@ -44,7 +44,7 @@ this license.
     window.CTree = {};
   }
 
-  CTree.LoaderBehaviorBase = class extends Polymer.Element {
+  CTree.LoaderBehaviorBaseMixin = (superClass) => class extends superClass {
     static get properties() {
       return {
         /**
@@ -83,57 +83,6 @@ this license.
         ctreeKey: {
           type: String,
           observer: '_keyChanged',
-        },
-
-        /**
-         * The name of the cTree to display to users.
-         */
-        name: {
-          type: String,
-          notify: true,
-        },
-
-        /**
-         * All types for current cTree, indexed by ID.
-         *
-         * Structure:
-         *   {
-         *     id: {
-         *       id: String,
-         *       name: String,
-         *       description: String,
-         *       iconUrl: String,
-         *       color: String,
-         *       parentsRequired: Boolean,
-         *       parentsMax: Number,
-         *       parentTypes: [Strings],
-         *     },
-         *     ...
-         *   }
-         */
-        types: {
-          type: Object,
-          readOnly: true,
-          notify: true,
-        },
-
-        /**
-         * All segment types supported by current cTree, indexed by ID.
-         *
-         * Structure:
-         *   {
-         *     id: {
-         *       id: String,
-         *       componentName: String,
-         *       canBeThumbnail: Boolean,
-         *     },
-         *     ...
-         *   }
-         */
-        segmentTypes: {
-          type: Object,
-          readOnly: true,
-          notify: true,
         },
 
         /**
@@ -309,36 +258,6 @@ this license.
     }
 
     /**
-     * Load the human readable name associated with the cTree
-     *
-     * @param {String} ctreeKey Key for cTree to load name for
-     * @param {Function(String)} onComplete Function called when completed, with the cTree name if successful, otherwise null
-     */
-    _loadName(cTreeKey, onComplete) {
-      // TODO: override in implementation
-    }
-
-    /**
-     * Load the element types associated with the cTree
-     *
-     * @param {String} cTreeKey Key for cTree to load element types for
-     * @param {Function(Types)} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
-     */
-    _loadTypes(cTreeKey, onComplete) {
-      // TODO: override in implementation
-    }
-
-    /**
-     * Load the segment types associated with the cTree
-     *
-     * @param {String} cTreeKey Key for cTree to load segment types for
-     * @param {Function(SegmentTypes)} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
-     */
-    _loadSegmentTypes(cTreeKey, onComplete) {
-      // TODO: override in implementation
-    }
-
-    /**
      * Converts the data array returned by an API call to an object containing
      * each item indexed by its ID.
      */
@@ -387,20 +306,8 @@ this license.
     _cTreeDataChanged(cTreeData, previousCTreeData) {
       // TODO: override to initialize additional fields when cTreeData changes
     }
-
-    /**
-     * Load element data for the provided element ID.  Once complete, onLoadingComplete will be
-     * called with the final, fully loaded item.
-     *
-     * @param {String} elementId           ID of the element to load data for.
-     * @param {Function(Element[])} onComplete (Optional) Function called when loading the description and all segments has been completed. This is passed the item as a parameter.
-     * @param {String} descriptionId       (Optional) ID of the description you want to load.
-     * @param {Array} segmentVariations    (Optional) Array of IDs with a variation for each segment to be loaded. The corresponding descriptionId must also be specified.
-     */
-    _loadElement(elementId, onComplete, descriptionId, segmentVariations) {
-      // TODO: override in implementation
-    }
   };
+  CTree.LoaderBehaviorBase = class extends CTree.LoaderBehaviorBaseMixin(Polymer.Element) {};
 
   // Initialize object to hold shared static constants and functions
   CTree.Loader = {};
