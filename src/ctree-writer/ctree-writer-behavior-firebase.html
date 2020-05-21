@@ -119,13 +119,24 @@ this license.
      * @param {String} ctreeKey (Optional) Key for cTree to write data to
      */
     _recordInteraction(item, ctreeKey = this.ctreeKey) {
-      var parentType = CTree.Loader.getObjectDataType(item);
-      if (parentType === CTree.Loader.DATA_TYPES.ELEMENT) {
-        const elementDataPath = 'elements/' + item.id + '/';
+      this._recordInteractionForItemWithId(item.id, CTree.Loader.getObjectDataType(item), ctreeKey);
+    }
+
+    /**
+     * Call this function to update the last interaction date and increment the
+     * interaction count.
+     *
+     * @param {Object} itemId   ID of item to record the interaction data for
+     * @param {Object} itemType Type of item to record the interaction data for
+     * @param {String} ctreeKey (Optional) Key for cTree to write data to
+     */
+    _recordInteractionForItemWithId(itemId, itemType, ctreeKey = this.ctreeKey) {
+      if (itemType === CTree.Loader.DATA_TYPES.ELEMENT) {
+        const elementDataPath = 'elements/' + itemId + '/';
         this._updateNumberBy(1, elementDataPath + 'interactionCount', null, ctreeKey);
         this._writeData(elementDataPath + 'lastInteractionDate', new Date().getTime(), null, ctreeKey);
       } else {
-        console.error('Unsupported item type for recording interaction: ' + parentType);
+        console.error('Unsupported item type for recording interaction: ' + itemType);
       }
     }
   };

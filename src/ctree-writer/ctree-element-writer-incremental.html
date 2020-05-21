@@ -97,18 +97,30 @@ this license.
         }
 
         this._writeNewEntry('elements', data, (elementData, id) => {
+          if (!elementData) return;
+
           if (id) {
             elementData.id = id;
           }
-          if (elementData) {
-            elementData.description = [descriptionData];
-          }
+          elementData.description = [descriptionData];
+          this._onElementAdded(elementData, ctreeKey);
+
           onComplete.bind(this)(elementData);
         }, id, ctreeKey);
       }, null, ctreeKey);
       for (var i = 1; i < descriptionVariations.length; i++) {
         this.addDescriptionVariation(descriptionVariations[i], id, null, null, ctreeKey)
       }
+    }
+
+    /**
+     * Perform any additional work after element is added.
+     *
+     * @param {ElementData} elementData Element data written to the server
+     * @param {String} ctreeKey Key for cTree element was added to
+     */
+    _onElementAdded(elementData, ctreeKey) {
+      // TODO: override if additional processing should be done after new element is added
     }
 
     /**
