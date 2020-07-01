@@ -78,8 +78,10 @@ this license.
     <!-- TODO: <ctree-import href="/src/ctree-app/ctree-catalog.html"></ctree-import> -->
     <iron-location path="{{path}}" dwell-time="800"></iron-location>
 
-    <ctree-landing hidden$="[[!isRootPath(path, rootPath)]]"></ctree-landing>
-    <ctree-catalog hidden$="[[isRootPath(path, rootPath)]]"></ctree-catalog>
+    <!-- TODO: uncomment once merge with landing page branch ->
+    <!--<ctree-landing hidden$="[[!isRootPath(path, rootPath)]]"></ctree-landing>
+    <ctree-catalog hidden$="[[isRootPath(path, rootPath)]]"></ctree-catalog>-->
+    <ctree-catalog></ctree-catalog>
   </template>
 
   <script>
