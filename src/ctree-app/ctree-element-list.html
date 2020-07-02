@@ -1,0 +1,166 @@
+<!--
+@license
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or any
+later version.
+
+Foundation For an Innovative Future reserves the right to release the
+covered work, in part or in whole, under a different open source
+license and/or with specific copyleft exclusions.  Such a release
+would not invalidate the license for this project, although the
+project released with a modified license would not be considered
+part of this covered work or subject to the copyleft portions of this
+license even if the projects are identical.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Please email contact@innovativeFuture.org for inquiries related to
+this license.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../ctree-import/ctree-import.html">
+
+<dom-module id="ctree-element-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #elementPreviewList {
+        @apply --layout-fit;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        padding: 10px 10px 48px 10px;
+      }
+      #elementPreviewList[noScroll] {
+        overflow-y: hidden !important;
+      }
+      ctree-element-preview {
+        width: 280px;
+        height: 320px;
+      }
+      #loadingIndicator {
+        position: absolute;
+        top: auto !important;
+        bottom: -36px;
+        left: 0;
+        right: 0;
+        font-size: 16px;
+        text-align: center;
+      }
+      ctree-element-preview[hidden] {
+        display: none !important;
+      }
+    </style>
+
+    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader.html" required="ListLoader" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
+    <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
+
+    <ctree-list-loader id="loader" ctree-key="[[ctreeKey]]" name="{{ctreeName}}" current-name="[[listType]]" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader>
+
+    <iron-list id="elementPreviewList" items="[[pageListItems]]" as="item" grid noScroll$="[[noScroll]]">
+      <!-- HACK: added  hidden$="[[!item]]" to prevent phantom items from being added -->
+      <template>
+        <ctree-element-preview ctree-key="[[ctreeKey]]" list-item="[[item]]" hidden$="[[!item]]"></ctree-element-preview>
+      </template>
+
+      <div id="loadingIndicator" hidden$="[[!loadingListItems]]">
+        <paper-spinner active$="[[loadingListItems]]"></paper-spinner> Loading more
+      </div>
+    </iron-list>
+
+    <iron-scroll-threshold id="scrollThreshold"
+        lower-threshold="500"
+        scroll-target="elementPreviewList"
+        on-lower-threshold="loadMoreListItems">
+    </iron-scroll-threshold>
+  </template>
+
+  <script>
+    class CTreeElementList extends Polymer.Element {
+
+      static get is() { return 'ctree-element-list'; }
+
+      static get properties() {
+        return {
+          ctreeKey: {
+            type: String,
+            observer: '_ctreeKeyChanged',
+          },
+
+          listType: {
+            type: String,
+            observer: '_listTypeChanged',
+          },
+
+          noScroll: Boolean,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_loadingListItemsChanged(loadingListItems)',
+        ];
+      }
+
+      loadMoreListItems() {
+        if (this.$.importLoader.loaded) {
+          this.$.loader.loadCurrent();
+        } else {
+          this.$.importLoader.load();
+        }
+      }
+
+      resetLoading() {
+        this.$.scrollThreshold.clearTriggers();
+        // This must be delayed to prevent issue with rootPath being set after trying to load items, which triggers loading component
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          if (!this.$.importLoader.loaded || this.$.loader.currentItems.length == 0) {
+            this.loadMoreListItems();
+          }
+        });
+      }
+
+      _importLoaderLoadingChanged(e) {
+        if (!e.detail.value && this.$.importLoader.loaded
+            && !this.$.importPreview.loading && !this.$.importPreview.loaded) {
+          this.$.importPreview.load();
+          this.loadMoreListItems();
+        }
+      }
+
+      _loadingListItemsChanged(loadingListItems) {
+        if (!loadingListItems) {
+          this.$.scrollThreshold.clearTriggers();
+        }
+      }
+
+      _ctreeKeyChanged(ctreeKey) {
+        this.resetLoading();
+      }
+
+      _listTypeChanged(listType) {
+        this.resetLoading();
+      }
+    }
+
+    // Register custom element definition using standard platform API
+    customElements.define(CTreeElementList.is, CTreeElementList);
+  </script>
+</dom-module>

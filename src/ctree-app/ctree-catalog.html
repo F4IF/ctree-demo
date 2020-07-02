@@ -45,7 +45,6 @@ this license.
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
@@ -54,10 +53,10 @@ this license.
 <link rel="import" href="../ctree-dialogs/ctree-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-new-element-dialog-accessor.html">
 <link rel="import" href="../ctree-dialogs/ctree-user-dialog-accessor.html">
-<link rel="import" href="../ctree-import/ctree-import.html">
 <link rel="import" href="../ctree-loader/ctree-loader-behavior.html"> <!-- needs to be added to fix crash when showing dialog on refresh -->
 <link rel="import" href="../ctree-toggle-button/ctree-toggle-button.html">
 
+<link rel="import" href="ctree-element-list.html"
 <link rel="import" href="icons.html">
 
 <script>
@@ -150,27 +149,10 @@ this license.
       .drawer-list a.subroute {
         padding-left: 32px;
       }
-      #elementPreviewList {
-        @apply --layout-fit;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-
-        padding: 10px;
-        padding-top: 10px;
-        padding-bottom: 48px;
-      }
-      ctree-element-preview {
-        width: 280px;
-        height: 320px;
-      }
-      #loadingIndicator {
-        position: absolute;
-        top: auto !important;
-        bottom: -36px;
-        left: 0;
-        right: 0;
-        font-size: 16px;
-        text-align: center;
+      /* HACK: When we use #elementList it results in duplicate scroll regions from has-scrolling-region property on app-header-layout */
+      .ctree-element-list{
+        width: 100%;
+        height: 100vh;
       }
       #addButton {
         position: absolute;
@@ -197,9 +179,6 @@ this license.
       paper-icon-button[hidden] {
         display: none !important;
       }
-      ctree-element-preview[hidden] {
-        display: none !important;
-      }
       @media (max-width: 340px) {
         .tabLabel {
           display: none;
@@ -210,20 +189,17 @@ this license.
       }
     </style>
 
-    <firebase-app id="firebase"></firebase-app>
-    <firebase-auth id="auth"></firebase-auth>
-
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
-    <ctree-import id="importLoader" href="/src/ctree-loader/ctree-list-loader.html" required="ListLoader" on-loading-changed="_importLoaderLoadingChanged"></ctree-import>
-    <ctree-import id="importPreview" href="/src/ctree-element-preview/ctree-element-preview.html"></ctree-import>
+
+    <!-- TODO: use ctree-data-loader if we make it available as a stand alone loader -->
+    <ctree-import href="/src/ctree-loader/ctree-list-loader.html"></ctree-import>
+    <ctree-list-loader ctree-key="[[ctreeKey]]" name="{{ctreeName}}"></ctree-list-loader>
 
     <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
     <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
     <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
-
-    <ctree-list-loader id="loader" ctree-key="[[ctreeKey]]" name="{{ctreeName}}" current-items="{{pageListItems}}" current-loading="{{loadingListItems}}" current-has-more="{{hasMoreListItems}}"></ctree-list-loader>
 
     <!-- <app-drawer-layout fullbleed> -->
 
@@ -288,22 +264,7 @@ this license.
 
         </app-header>
 
-        <iron-list id="elementPreviewList" items="[[pageListItems]]" as="item" grid>
-          <!-- HACK: added  hidden$="[[!item]]" to prevent phantom items from being added -->
-          <template>
-            <ctree-element-preview ctree-key="[[page]]" list-item="[[item]]" hidden$="[[!item]]"></ctree-element-preview>
-          </template>
-
-          <div id="loadingIndicator" hidden$="[[!loadingListItems]]">
-            <paper-spinner active$="[[loadingListItems]]"></paper-spinner> Loading more
-          </div>
-        </iron-list>
-
-        <iron-scroll-threshold id="scrollThreshold"
-            lower-threshold="500"
-            scroll-target="elementPreviewList"
-            on-lower-threshold="loadMoreListItems">
-        </iron-scroll-threshold>
+        <ctree-element-list id="elementList" ctree-key="[[ctreeKey]]" list-type="[[subpage]]"></ctree-element-list>
 
         <!-- <paper-fab id="addButton" icon="add" title="Add" on-tap="_addElement"></paper-fab> -->
 
@@ -366,7 +327,6 @@ this license.
           '_dialogParamChanged(queryParams.d)',
           '_pathChanged(path)',
           '_subpageChanged(subpage)',
-          '_loadingListItemsChanged(loadingListItems)',
         ];
       }
 
@@ -380,7 +340,7 @@ this license.
       }
 
       notificationsDrawerTransitioned() {
-        this.$.elementPreviewList.style.overflowY = this.$.notificationsDrawer.opened ? "hidden" : "auto";
+        this.$.elementList.noScroll = this.$.notificationsDrawer.opened;
       }
 
       clearNotifications() {
@@ -401,14 +361,6 @@ this license.
         dialog.open();
       }
 
-      loadMoreListItems() {
-        if (this.$.importLoader.loaded) {
-          this.$.loader.loadCurrent();
-        } else {
-          this.$.importLoader.load();
-        }
-      }
-
       _clearSearch() {
         this.searchText = '';
       }
@@ -419,20 +371,6 @@ this license.
 
       _toggleCTreeSaved() {
         // TODO: determine which ctree this was clicked for and toggle its data.saved value
-      }
-
-      _importLoaderLoadingChanged(e) {
-        if (!e.detail.value && this.$.importLoader.loaded
-            && !this.$.importPreview.loading && !this.$.importPreview.loaded) {
-          this.$.importPreview.load();
-          this.loadMoreListItems();
-        }
-      }
-
-      _loadingListItemsChanged(loadingListItems) {
-        if (!loadingListItems) {
-          this.$.scrollThreshold.clearTriggers();
-        }
       }
 
       _getCTreeList() {
@@ -511,12 +449,8 @@ this license.
           }
           subpage = 'suggested';
         }
-        var forceSubpageChanged = (this.page != page && this.subpage == subpage);
         this.page = page;
         this.subpage = subpage;
-        if (forceSubpageChanged) {
-          this._subpageChanged(subpage);
-        }
       }
 
       _pageChanged(page) {
@@ -529,17 +463,6 @@ this license.
 
       _searchTextChanged(searchText) {
         // TODO:
-      }
-
-      _subpageChanged(subpage) {
-        this.$.loader.currentName = subpage;
-        this.$.scrollThreshold.clearTriggers();
-        // This must be delayed to prevent issue with rootPath being set after trying to load items, which triggers loading component
-        Polymer.RenderStatus.afterNextRender(this, () => {
-          if (!this.$.importLoader.loaded || this.$.loader.currentItems.length == 0) {
-            this.loadMoreListItems();
-          }
-        });
       }
 
       // TODO: respond to element changes via the ctree element loader

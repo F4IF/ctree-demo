@@ -251,6 +251,10 @@ this license.
       this._loadHistoryItems(cTreeData, listData);
     }
 
+    __loadUndefined() {
+      console.error('Error: loadCurrent() called for ctree-list-loader, but currentName is invalid: ' + this.currentName);
+    }
+
     /**
      * Load the next page of suggested items.
      *
@@ -331,7 +335,7 @@ this license.
       } else if (currentName == 'history') {
         this.__setCurrent(this.loadHistory, this.historyItems, this.historyLoading, this.historyHasMore);
       } else {
-        this.__setCurrent(null, [], false, false);
+        this.__setCurrent(this.__loadUndefined, [], false, false);
       }
     }
 
