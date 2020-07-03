@@ -29,23 +29,313 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
-<link rel="import" href="ctree-structure-list-node-list.html">
+<link rel="import" href="ctree-structure-list-node.html">
+<link rel="import" href="icons.html">
 
 <dom-module id="ctree-structure-list">
   <template>
     <style>
       :host {
         display: block;
-        padding: 10px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .left-margin {
+        flex: 0 1 auto;
+        width: 2.4em;
+      }
+      .post-row {
+        display: flex;
+        align-items: center;
+        height: 40px;
+      }
+      .post-info {
+        text-align: center;
+        justify-content: center;
+      }
+      .post {
+        padding-left: 8px;
       }
     </style>
 
-    <ctree-structure-list-node-list element-id="0"></ctree-structure-list-node-list>
+    <template is="dom-repeat" items="[[_postsByType]]" as="typeGroup">
+      <template is="dom-repeat" items="[[typeGroup.posts]]" as="post">
+        <ctree-structure-list-node
+            ctree-key="[[ctreeKey]]"
+            load-more-page-size="[[loadMorePageSize]]"
+            load-nested-depth-max="[[loadNestedDepthMax]]"
+            top-posts-separate="[[topPostsSeparate]]"
+            top-posts-only="[[topPostsOnly]]"
+            hide-unused-types="[[hideUnusedTypes]]"
+            show-load-parents="[[showLoadParents]]"
+            group-by-type="[[groupByType]]"
+            post="[[post]]"
+            ></ctree-structure-list-node>
+      </template>
+      <div class="post-row" hidden$="[[!_showLoadMore(topPostsOnly, _hasMore)]]">
+        <iron-icon class="left-margin post-info" icon="posts-load"></iron-icon>
+        <div id="loadMore" class="post">[[_getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly)]]</div>
+      </div>
+      <div class="post-row" hidden$="[[!_showNoPostsItem(typeGroup.posts, topPostsOnly, hideUnusedTypes, _hasMore)]]">
+        <iron-icon class="left-margin post-info" icon="posts-none"></iron-icon>
+        <div class="post">No [[_getTypeName(typeGroup.typeId)]]</div>
+      </div>
+    </template>
   </template>
 
   <script>
     class CTreeStructureList extends Polymer.Element {
+
       static get is() { return 'ctree-structure-list'; }
+
+      static get properties() {
+        return {
+          ctreeKey: {
+            type: String,
+          },
+
+          loadMorePageSize: {
+            type: Number,
+            value: 10,
+          },
+
+          loadNestedDepthMax: {
+            type: Number,
+            value: 1,
+          },
+
+          topPostsSeparate: {
+            type: Boolean,
+            value: false,
+          },
+
+          topPostsOnly: {
+            type: Boolean,
+            value: false,
+          },
+
+          hideUnusedTypes: {
+            type: Boolean,
+            value: false,
+          },
+
+          showLoadParents: {
+            type: Boolean,
+            value: false,
+          },
+
+          groupByType: {
+            type: Boolean,
+            value: false,
+            observer: '_groupByTypeChanged',
+          },
+
+          /**
+           * Array of posts or posts by type to show (depending on if groupByType set to true or not).
+           *
+           * Post Structure:
+           *   id: String,
+           *   typeId: String,
+           *   title: String,
+           *   rating: Number,        // default: 0
+           *   topPost: Boolean,      // default: false
+           *   bookmarked: Boolean,   // optional: true if user bookmarked post
+           *   description: [{        // optional: only if preview shown by default
+           *     id: String,
+           *     segments: [{
+           *       id: String,
+           *       type: SegmentType,
+           *       variations: [{
+           *         id: String,
+           *         data: dynamic,	  // data type depends on segment type
+           *       }, ...],
+           *     }, ...],
+           *   }, ...],
+           *   children: [Post],      // optional
+           *
+           * PostsByType Structure:
+           *   typeId: String,
+           *   posts: [Post],
+           */
+          posts: {
+            type: Array,
+            observer: '_postsChanged',
+          },
+
+          _postsByType: Array,
+
+          _nextPageOffset: String,
+
+          _hasMore: {
+            type: Boolean,
+            value: true,
+          },
+        };
+      }
+
+      loadPostResponses(postId, postType) {
+        // TODO: get from loader (if groupByType specified, separate into groups for each type which has postType as parent)
+        // TODO: if !postId load each without a parent (if groupByType specified, separate into groups for each type which can have no parent, regardless of postType value)
+        this._postsByType = [
+          {
+            typeId: "21ec137f-d241-1062-535d-348db8190275",
+            posts: [
+              { id: "subject1", typeId: "21ec137f-d241-1062-535d-348db8190275", title: "Subject Title", rating: 3725179, topPost: true,
+                children: [
+                  {
+                    typeId: "725d347c-7990-8cc7-f63f-7fb92009b853",
+                    posts: [
+                      { id: "goal1", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Goal 1 Title", rating: 150718, topPost: true, children: [] },
+                      { id: "goal2", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Goal 2 Title", rating: 140000, topPost: true,
+                        children: [
+                          {
+                            typeId: "725d347c-7990-8cc7-f63f-7fb92009b853",
+                            posts: [
+                              { id: "subgoal1", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Sub Goal 1 Title", rating: 508, topPost: true,
+                                children: [
+                                  {
+                                    typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa",
+                                    posts: [
+                                      { id: "question1", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Sub Goal 1 Question 1 Title", rating: 32, topPost: false },
+                                      { id: "question2", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Sub Goal 1 Question 2 Title", rating: 17, topPost: false },
+                                    ]
+                                  }
+                                ]
+                              },
+                              { id: "subgoal2", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Sub Goal 2 Title", rating: -13, topPost: false, children: [] },
+                            ]
+                          },
+                          {
+                            typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80",
+                            posts: [
+                              { id: "problem1", typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80", title: "Goal 2 Problem 1 Title", rating: 718, topPost: true,
+                                children: [
+                                  {
+                                    typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193",
+                                    posts: [
+                                      { id: "solution1", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 1 Title", rating: 320, topPost: true },
+                                      { id: "solution2", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 2 Title", rating: 27, topPost: false },
+                                      { id: "solution3", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 3 Title", rating: -5, topPost: false },
+                                    ]
+                                  }
+                                ]
+                              },
+                              { id: "problem2", typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80", title: "Goal 2 Problem 2 Title", rating: 10, topPost: false, children: [] },
+                              { id: "problem3", typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80", title: "Goal 2 Problem 3 Title", rating: 8, topPost: false,
+                                children: [
+                                  {
+                                    typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193",
+                                    posts: [
+                                      { id: "solution1", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 3 Solution 1 Title", rating: 8, topPost: true },
+                                    ]
+                                  }
+                                ]
+                              },
+                              { id: "problem4", typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80", title: "Goal 2 Problem 4 Title", rating: -2, topPost: false, children: [] },
+                            ]
+                          },
+                          {
+                            typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa",
+                            posts: [
+                              { id: "question1", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Goal 2 Question 1 Title", rating: 718, topPost: true, children: [] },
+                              { id: "question2", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Goal 2 Question 2 Title", rating: 508, topPost: true,
+                                children: [
+                                  {
+                                    typeId: "77ffc744-2142-c4cc-8366-35d4c3a6f23b",
+                                    posts: [
+                                      { id: "answer1", typeId: "77ffc744-2142-c4cc-8366-35d4c3a6f23b", title: "Question 2 Answer 1 Title", rating: 32, topPost: false },
+                                      { id: "answer2", typeId: "77ffc744-2142-c4cc-8366-35d4c3a6f23b", title: "Question 2 Answer 2 Title", rating: 17, topPost: false },
+                                    ]
+                                  }
+                                ]
+                              },
+                              { id: "question3", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Goal 2 Question 3 Title", rating: 26, topPost: false, children: [] },
+                            ]
+                          }
+                        ]
+                      },
+                      { id: "goal3", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Sub Post Title", rating: 240, topPost: false, children: [] },
+                    ]
+                  }
+                ]
+              },
+            ]
+          }
+        ];
+      }
+
+      _postsChanged(posts) {
+        if (!posts) return;
+
+        if (!this.groupByType && posts.length > 0 && posts[0].typeId) {
+          console.warn('Posts are grouped by type, but groupByType is false, updating to true');
+          this.groupByType = true;
+        }
+        if (this.groupByType && posts.length > 0 && !posts[0].typeId) {
+          console.warn('Posts are not grouped by type, but groupByType is true, updating to false');
+          this.groupByType = false;
+        }
+
+        if (this.groupByType) {
+          this._postsByType = posts;
+        } else {
+          this._postsByType = [{ posts: posts }];
+        }
+      }
+
+      _groupByTypeChanged(groupByType, previousGroupByType) {
+        if (groupByType == previousGroupByType) return;
+
+        if (this.postsByType) {
+          console.warn('Changing groupByType when posts already set can be inefficient');
+        }
+
+        // TODO: try to group/ungroup posts
+      }
+
+      _showLoadMore(topPostsOnly, hasMore) {
+        return hasMore && !topPostsOnly;
+      }
+
+      _getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly) {
+        var text;
+        const posts = typeGroup.posts;
+        if (topPostsSeparate && (posts.length == 0 || posts[posts.length - 1].topPost)) {
+          if (this._hasTopPosts(typeGroup.posts)) {
+            text = "";
+          } else {
+            text = "No Top " + this._getTypeName(typeGroup.typeId) + ", ";
+          }
+          text += "Load Lower Rated " + this._getTypeName(typeGroup.typeId);
+        } else {
+          text = "Load More " + this._getTypeName(typeGroup.typeId);
+        }
+
+        return text;
+      }
+
+      _hasTopPosts(posts) {
+        return posts.length != 0 && posts[0].topPost;
+      }
+
+      _getTypeName(typeId) {
+        // TODO: look up type name (need to keep plural version for use here)
+        return typeId ? typeId : "Posts";
+      }
+
+      _showNoPostsItem(posts, topPostsOnly, hideUnusedTypes, hasMore) {
+        if (hideUnusedTypes) return false;
+
+        var showNoPosts;
+        if (topPostsOnly) {
+          showNoPosts = this._hasTopPosts(posts);
+        } else {
+          showNoPosts = !hasMore;
+        }
+
+        return showNoPosts;
+      }
     }
 
     // Register custom element definition using standard platform API

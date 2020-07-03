@@ -39,6 +39,20 @@ this license.
 
   CTree.UtilsMixin = (superClass) => class extends superClass {
 
+    static get properties() {
+      return {
+        true: {
+          type: Boolean,
+          value: true,
+        },
+
+        false: {
+          type: Boolean,
+          value: true,
+        },
+      };
+    }
+
     /**
      * A function to get the logical boolean AND of all arguments.  This is
      * useful for data bindings when you want to combine multiple properties.
@@ -48,6 +62,21 @@ this license.
     and() {
       for (var i = 0; i < arguments.length; i++) {
         if (!arguments[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * A function to get the logical boolean AND of all argument=value pairs.
+     * This is useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean AND of all arguments passed to the function
+     */
+    valueAnd() {
+      for (var i = 0; i < arguments.length; i += 2) {
+        if (arguments[i] != arguments[i+1]) {
           return false;
         }
       }
@@ -67,6 +96,31 @@ this license.
         }
       }
       return false;
+    }
+
+    /**
+     * A function to get the logical boolean OR of all argument=value pairs.
+     * This is useful for data bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} The logical boolean OR of all arguments passed to the function
+     */
+    valueOr() {
+      for (var i = 0; i < arguments.length; i += 2) {
+        if (arguments[i] == arguments[i+1]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * A function to get the logical boolean NOT of value.  This is useful for
+     * data bindings when you need to negate a value passed to a computed property.
+     *
+     * @return {Boolean} The logical boolean OR of all arguments passed to the function
+     */
+    not(value) {
+      return !value;
     }
 
     /**

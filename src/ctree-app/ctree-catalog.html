@@ -187,6 +187,16 @@ this license.
           visibility: visible;
         }
       }
+      .horizontal-scroll-container {
+      }
+      #reviewPage {
+        display: inline-block;
+        white-space: nowrap;
+        padding: 8px;
+      }
+      #elementList {
+        display: none;
+      }
     </style>
 
     <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
@@ -264,6 +274,8 @@ this license.
 
         </app-header>
 
+        <ctree-import id="importStructureList" href="/src/ctree-structure-list/ctree-structure-list.html" on-loading-changed="_importStructureListLoadingChanged"></ctree-import>
+        <ctree-structure-list id="reviewPage" ctree-key="[[ctreeKey]]" load-nested-depth-max="10" top-posts-separate show-load-parents group-by-type></ctree-structure-list>
         <ctree-element-list id="elementList" ctree-key="[[ctreeKey]]" list-type="[[subpage]]"></ctree-element-list>
 
         <!-- <paper-fab id="addButton" icon="add" title="Add" on-tap="_addElement"></paper-fab> -->
@@ -326,8 +338,17 @@ this license.
         return [
           '_dialogParamChanged(queryParams.d)',
           '_pathChanged(path)',
-          '_subpageChanged(subpage)',
         ];
+      }
+
+      ready() {
+        super.ready();
+
+        if (this.$.importStructureList.loaded) {
+          this.$.reviewPage.loadPostResponses();
+        } else {
+          this.$.importStructureList.load();
+        }
       }
 
       showSearch() {
@@ -359,6 +380,12 @@ this license.
         // TODO: show account stats in account dialog
         dialog.page = 'stats';
         dialog.open();
+      }
+
+      _importStructureListLoadingChanged(e) {
+        if (!e.detail.value && this.$.importStructureList.loaded) {
+          this.$.reviewPage.loadPostResponses();
+        }
       }
 
       _clearSearch() {

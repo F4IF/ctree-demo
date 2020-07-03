@@ -33,7 +33,10 @@ this license.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
-<link rel="import" href="ctree-structure-list-node-list.html">
+<link rel="import" href="../ctree-loader/ctree-element-loader.html">
+<link rel="import" href="../ctree-utils/ctree-utils-mixin.html">
+
+<link rel="import" href="ctree-structure-list.html">
 <link rel="import" href="icons.html">
 
 <dom-module id="ctree-structure-list-node">
@@ -41,9 +44,11 @@ this license.
     <style>
       :host {
         display: block;
-        padding: 4px;
       }
-      .itemRow {
+      [hidden] {
+        display: none !important;
+      }
+      /*.itemRow {
         display: none;
         white-space: nowrap;
       }
@@ -72,39 +77,179 @@ this license.
       ctree-structure-list-node-list {
         display: none;
         padding: 0 0 0 24px;
+      }*/
+      .container {
+        display: flex;
+        width: 100%; /* may need to change to a fixed size if doesn't work correctly for deeply nested posts */
+      }
+      .left-margin {
+        flex: 0 1 auto;
+        width: 2.4em;
+      }
+      .post-row {
+        display: flex;
+        align-items: center;
+        height: 40px;
+      }
+      .post-info {
+        text-align: center;
+        justify-content: center;
+      }
+      .post {
+        padding-left: 8px;
+      }
+      .content {
+        flex: 1;
+      }
+      #rating {
+        font-size: small;
+        font-weight: bold;
+      }
+      #threadBar {
+        background: #000;
+        width: 3px;
+        height: calc(100% - 40px);
+        margin: 0 auto;
       }
     </style>
 
-    <div id="itemRow" class="itemRow">
-      <paper-button on-tap="openElement">
-        <iron-icon id="icon"></iron-icon>
-        <div id="title"></div>
-      </paper-button><paper-icon-button id="expand" on-tap="toggleExpanded" icon="expand-more"></paper-icon-button>
-      <paper-spinner id="spinner"></paper-spinner>
+    <ctree-element-loader ctree-key="[[ctreeKey]]" types="{{_types}}"></ctree-element-loader>
+
+    <div class="container">
+      <div class="left-margin" on-click="_marginClicked">
+        <div class="post-row post-info" hidden$="[[!_groupCollapsed]]">
+          <iron-icon icon="group-expand"></iron-icon>
+        </div>
+        <div id="rating" class="post-row post-info" hidden$="[[_groupCollapsed]]">[[_toRatingString(post.rating)]]</div>
+        <div id="threadBar" style="background: [[_getTypeColor(_types, post.typeId)]]" hidden$="[[_groupCollapsed]]"></div>
+      </div>
+      <div class="content">
+        <div id="post" class="post-row post">[[post.title]]</div>
+        <div class="container" hidden$="[[or(post.children, _groupCollapsed)]]">
+          <div class="left-margin post-row post-info">
+            <iron-icon icon="level-down"></iron-icon>
+          </div>
+          <div class="content">
+            <div id="post" class="post-row post">[[_loadResponsesText(topPostsSeparate)]]</div>
+          </div>
+        </div>
+        <!-- TODO: if showLoadParents is true, wrap with item which can be clicked to load parents - maybe make a single child and defer post data to there, with this becoming the load parent prompt -->
+        <ctree-structure-list
+            id="children"
+            ctree-key="[[ctreeKey]]"
+            load-more-page-size="[[loadMorePageSize]]"
+            load-nested-depth-max="[[loadNestedDepthMax]]"
+            top-posts-separate="[[topPostsSeparate]]"
+            top-posts-only="[[topPostsOnly]]"
+            hide-unused-types="[[hideUnusedTypes]]"
+            group-by-type="[[groupByType]]"
+            posts="[[post.children]]"
+            hidden$="[[valueOr(post.children, false, _groupCollapsed, true)]]"
+            ></ctree-structure-list>
+      </div>
     </div>
-    <ctree-structure-list-node-list id="childrenRow"></ctree-structure-list-node-list>
   </template>
 
   <script>
-    class CTreeStructureListNode extends Polymer.Element {
+    class CTreeStructureListNode extends CTree.UtilsMixin(Polymer.Element) {
 
       static get is() { return 'ctree-structure-list-node'; }
 
       static get properties() {
         return {
-          elementId: {
+          ctreeKey: {
             type: String,
-            observer: '_elementIdChanged'
           },
-          expanded: {
+
+          loadMorePageSize: Number,
+
+          loadNestedDepthMax: Number,
+
+          topPostsSeparate: Boolean,
+
+          topPostsOnly: Boolean,
+
+          hideUnusedTypes: Boolean,
+
+          showLoadParents: Boolean,
+
+          groupByType: Boolean,
+
+          /**
+           * Array of posts to show.  Changing this value replaces rootPostsByType.
+           *
+           * Post Structure:
+           *   id: String,
+           *   typeId: String,
+           *   title: String,
+           *   rating: Number,        // default: 0
+           *   topPost: Boolean,      // default: false
+           *   bookmarked: Boolean,   // optional: true if user bookmarked post
+           *   description: [{        // optional: only if preview shown by default
+           *     id: String,
+           *     segments: [{
+           *       id: String,
+           *       type: SegmentType,
+           *       variations: [{
+           *         id: String,
+           *         data: dynamic,	// data type depends on segment type
+           *       }, ...],
+           *     }, ...],
+           *   }, ...],
+           *   children: [Post],      // optional
+           */
+          post: {
+            type: Object,
+            observer: '_postChanged',
+          },
+
+          _groupCollapsed: {
             type: Boolean,
             value: false,
-            observer: '_expandedChanged'
-     	    }
+          },
+
+          _types: Object,
         };
       }
 
-      openElement() {
+      _postChanged(post) {
+        // TODO: add any logic needed when post changes here
+        this._groupCollapsed = false;
+      }
+
+      _marginClicked() {
+        // TODO: don't collapse if there aren't any items
+        this._groupCollapsed = !this._groupCollapsed;
+      }
+
+      _toRatingString(rating) {
+        var units = '';
+        if (rating >= 999.5 || rating <= -999.5) {
+          if (rating >= 999500 || rating <= -999500) {
+            if (rating >= 999500000 || rating <= -999500000) {
+              rating /= 1000000000;
+              units = 'b';
+            } else {
+              rating /= 1000000;
+              units = 'm';
+            }
+          } else {
+            rating /= 1000;
+            units = 'k';
+          }
+        }
+        return (rating < 10 && rating > -10 && (rating * 10 % 10 != 0) ? rating.toFixed(1) : rating.toFixed(0)) + units;
+      }
+
+      _getTypeColor(types, typeId) {
+        const type = types ? types[typeId] : null;
+        return type ? type.color : "#000";
+      }
+
+      _loadResponsesText(topPostsSeparate) {
+        return topPostsSeparate ? "Load Top Responses" : "Load Responses";
+      }
+/*      openElement() {
         // TODO: use ctree-element-dialog-accessor instead
         var elementDialog = document.querySelector('ctree-dialogs');
         if (elementDialog) {
@@ -159,7 +304,7 @@ this license.
           this.$.spinner.active = false;
           this.$.childrenRow.style.display = "none";
         }
-      }
+      }*/
     }
 
     // Register custom element definition using standard platform API
