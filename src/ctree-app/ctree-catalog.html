@@ -78,6 +78,9 @@ this license.
         --app-primary-color: #5F9F00;
         --app-secondary-color: black;
       }
+      [hidden] {
+        display: none !important;
+      }
       app-drawer-layout:not([narrow]) [drawer-toggle] {
         display: none;
       }
@@ -176,9 +179,6 @@ this license.
         float: right;
         margin: 4px;
       }
-      paper-icon-button[hidden] {
-        display: none !important;
-      }
       @media (max-width: 340px) {
         .tabLabel {
           display: none;
@@ -189,25 +189,22 @@ this license.
       }
       .horizontal-scroll-container {
       }
-      #reviewPage {
+      #resultsPage {
         display: inline-block;
         white-space: nowrap;
         padding: 8px;
         width: calc(100% - 16px);
       }
-      #elementList {
-        display: none;
-      }
     </style>
 
-    <iron-meta key="rootPath" value="{{rootPath}}"></iron-meta>
+    <iron-meta key="_rootPath" value="{{_rootPath}}"></iron-meta>
 
     <!-- TODO: use ctree-data-loader if we make it available as a stand alone loader -->
     <ctree-import href="/src/ctree-loader/ctree-list-loader.html"></ctree-import>
     <ctree-list-loader ctree-key="[[ctreeKey]]" name="{{ctreeName}}"></ctree-list-loader>
 
-    <iron-location path="{{path}}" query="{{query}}" dwell-time="800"></iron-location>
-    <iron-query-params id="params" params-string="{{query}}" params-object="{{queryParams}}"></iron-query-params>
+    <iron-location path="{{_path}}" query="{{_query}}" dwell-time="800"></iron-location>
+    <iron-query-params id="params" params-string="{{_query}}" params-object="{{_queryParams}}"></iron-query-params>
     <ctree-element-dialog-accessor id="elementDialog" ctree-key="[[ctreeKey]]"></ctree-element-dialog-accessor>
     <ctree-new-element-dialog-accessor id="newElementDialog" ctree-key="[[ctreeKey]]"></ctree-new-element-dialog-accessor>
     <ctree-user-dialog-accessor id="userDialog" ctree-key="[[ctreeKey]]"></ctree-user-dialog-accessor>
@@ -224,9 +221,9 @@ this license.
           </paper-input>
 
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" fallback-selection="test" role="navigation">
-            <template is="dom-repeat" items="[[_getCTreeList(navList.splices,rootPath,searchText)]]" as="item">
+            <template is="dom-repeat" items="[[_getCTreeList(navList.splices,_rootPath,searchText)]]" as="item">
               <div>
-                <a name="[[item.name]]" class="ctree-item" href="[[rootPath]]/[[item.name]]">
+                <a name="[[item.name]]" class="ctree-item" href="[[_rootPath]]/[[item.name]]">
                   <paper-button>
                     <iron-icon src="[[item.data.icon]]"></iron-icon>
                     [[item.data.label]]
@@ -253,17 +250,17 @@ this license.
           <!-- </app-toolbar><app-toolbar style="height: 36px;">
             <paper-tabs selected="{{subpage}}" attr-for-selected="name" fallback-selection="suggested" bottom-item>
               <paper-tab id="suggestedTab" name="suggested" link>
-                <a href="[[rootPath]]/[[ctreeKey]]/suggested" tabindex="-1">
+                <a href="[[_rootPath]]/[[ctreeKey]]/suggested" tabindex="-1">
                   <iron-icon icon="suggested"></iron-icon><div class="tabLabel">SUGGESTED</div>
                 </a>
               </paper-tab>
               <paper-tab id="bookmarksTab" name="bookmarked" link>
-                <a href="[[rootPath]]/[[ctreeKey]]/bookmarked" tabindex="-1">
+                <a href="[[_rootPath]]/[[ctreeKey]]/bookmarked" tabindex="-1">
                   <iron-icon icon="bookmark"></iron-icon><div class="tabLabel">BOOKMARKS</div>
                 </a>
               </paper-tab>
               <paper-tab id="historyTab" name="history" link>
-                <a href="[[rootPath]]/[[ctreeKey]]/history" tabindex="-1">
+                <a href="[[_rootPath]]/[[ctreeKey]]/history" tabindex="-1">
                   <iron-icon icon="history"></iron-icon><div class="tabLabel">HISTORY</div>
                 </a>
               </paper-tab>
@@ -276,8 +273,8 @@ this license.
         </app-header>
 
         <ctree-import id="importStructureList" href="/src/ctree-structure-list/ctree-structure-list.html" on-loading-changed="_importStructureListLoadingChanged"></ctree-import>
-        <ctree-structure-list id="reviewPage" ctree-key="[[ctreeKey]]" load-nested-depth-max="10" top-posts-separate show-load-parents group-by-type></ctree-structure-list>
-        <ctree-element-list id="elementList" ctree-key="[[ctreeKey]]" list-type="[[subpage]]"></ctree-element-list>
+        <ctree-structure-list id="resultsPage" ctree-key="[[ctreeKey]]" load-nested-depth-max="10" hidden$="[[!_showResults(subpage)]]" top-posts-separate show-load-parents group-by-type></ctree-structure-list>
+        <ctree-element-list id="elementList" ctree-key="[[ctreeKey]]" list-type="[[elementListType]]" hidden$="[[_showResults(subpage)]]"></ctree-element-list>
 
         <!-- <paper-fab id="addButton" icon="add" title="Add" on-tap="_addElement"></paper-fab> -->
 
@@ -306,15 +303,21 @@ this license.
 
       static get properties() {
         return {
-          rootPath: {
-            type: String,
-            value: ''
-          },
-
           page: {
             type: String,
             observer: '_pageChanged',
           },
+
+          subpage: {
+            type: String,
+            observer: '_subpageChanged',
+          },
+
+          ctreeKey: String,
+
+          ctreeName: String,
+
+          elementListType: String,
 
           searchText: {
             type: String,
@@ -332,24 +335,23 @@ this license.
           },
 
           notifications: Array,
+
+          _rootPath: {
+            type: String,
+            value: ''
+          },
+
+          _path: {
+            type: String,
+            observer: '_pathChanged',
+          },
         };
       }
 
       static get observers() {
         return [
-          '_dialogParamChanged(queryParams.d)',
-          '_pathChanged(path)',
+          '_dialogParamChanged(_queryParams.d)',
         ];
-      }
-
-      ready() {
-        super.ready();
-
-        if (this.$.importStructureList.loaded) {
-          this.$.reviewPage.loadPostResponses();
-        } else {
-          this.$.importStructureList.load();
-        }
       }
 
       showSearch() {
@@ -385,7 +387,7 @@ this license.
 
       _importStructureListLoadingChanged(e) {
         if (!e.detail.value && this.$.importStructureList.loaded) {
-          this.$.reviewPage.loadPostResponses();
+          this.$.resultsPage.loadPostResponses();
         }
       }
 
@@ -444,8 +446,8 @@ this license.
       }
 
       _pathChanged(fullPath) {
-        if (fullPath.startsWith(this.rootPath)) {
-          fullPath = fullPath.substr(this.rootPath.length);
+        if (fullPath.startsWith(this._rootPath)) {
+          fullPath = fullPath.substr(this._rootPath.length);
         }
         var pathSegments = fullPath.split('/');
         if (pathSegments.length > 1) {
@@ -463,7 +465,7 @@ this license.
           var subpage;
           if (pathSegments.length > 2) {
             subpage = pathSegments[2];
-            if (subpage != 'bookmarked' && subpage != 'history') {
+            if (subpage != 'bookmarked' && subpage != 'history' && subpage != 'results') {
               subpage = 'suggested';
             }
           } else {
@@ -482,11 +484,30 @@ this license.
       }
 
       _pageChanged(page) {
-        if (this.rootPath && this.rootPath.length > 0) {
-          this.ctreeKey = this.rootPath + (page && page.length > 0 ? '/' + page : '');
+        if (this._rootPath && this._rootPath.length > 0) {
+          this.ctreeKey = this._rootPath + (page && page.length > 0 ? '/' + page : '');
         } else {
           this.ctreeKey = page;
         }
+      }
+
+      _subpageChanged(subpage) {
+        if (subpage == 'bookmarked' || subpage == 'history') {
+          this.elementListType = subpage;
+        } else {
+          this.elementListType = 'suggested';
+        }
+        if (subpage == 'results') {
+          if (this.$.importStructureList.loaded) {
+            this.$.resultsPage.loadPostResponses();
+          } else {
+            this.$.importStructureList.load();
+          }
+        }
+      }
+
+      _showResults(subpage) {
+        return subpage == 'results';
       }
 
       _searchTextChanged(searchText) {

@@ -48,9 +48,25 @@ this license.
 
         false: {
           type: Boolean,
-          value: true,
+          value: false,
         },
       };
+    }
+
+    /**
+     * A function to test if all arguments are equal.  This is useful for data
+     * bindings when you want to combine multiple properties.
+     *
+     * @return {Boolean} True if all arguments are equal
+     */
+    equal() {
+      const value = arguments[0];
+      for (var i = 1; i < arguments.length; i++) {
+        if (value != arguments[i]) {
+          return false;
+        }
+      }
+      return true;
     }
 
     /**
