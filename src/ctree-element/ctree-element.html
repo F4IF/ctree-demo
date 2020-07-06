@@ -79,7 +79,7 @@ this license.
 
     <paper-toolbar class="toolbar">
       <div class="background" style="background-color: [[headerColor]]; opacity: [[headerOpacity]]" slot="top"></div>
-      <div class="background" hidden$="[[!headerClickable]]" on-click="_toolbarClicked" slot="top">
+      <div class="background" hidden$="[[!headerClickable]]" on-click="_headerClicked" slot="top">
         <paper-ripple noink="[[!headerClickable]]"></paper-ripple>
       </div>
       <iron-icon slot="top" id="typeIcon" src="[[type.iconUrl]]"></iron-icon>
@@ -100,6 +100,12 @@ this license.
     class CTreeElement extends CTree.ToolbarBehavior {
 
       static get is() { return 'ctree-element'; }
+
+      /**
+       * Fired when the toolbar is tapped (only when headerClickable is true)
+       *
+       * @event tap-header
+       */
 
       static get properties() {
         return {
@@ -167,8 +173,8 @@ this license.
         return value;
       }
 
-      _toolbarClicked(e) {
-        // TODO: fire on-tap-toolbar
+      _headerClicked(e) {
+        this.dispatchEvent(new CustomEvent('tap-header', {bubbles: true, composed: true}));
       }
 
       _onToggleButton() {

@@ -140,7 +140,8 @@ this license.
       </div>
       <div class="content">
         <div class="post-row">
-          <ctree-element id="post" class="post" element="[[post]]" header-clickable nocontent noclose></ctree-element>
+          <ctree-element id="post" class="post" element="[[post]]" header-clickable nocontent noclose
+              on-tap-header="_elementClicked"></ctree-element>
         </div>
         <!-- TODO: if showLoadParents is true, wrap with item which can be clicked to load parents - maybe make a single child and defer post data to there, with this becoming the load parent prompt -->
         <ctree-structure-list
@@ -228,8 +229,14 @@ this license.
         };
       }
 
-      loadResponses() {
-        // TODO:
+      loadResponses(e) {
+        // TODO: load responses
+        console.log('load responses clicked: ' + this.post.id);
+      }
+
+      _elementClicked(e) {
+        // TODO: open details for post;
+        console.log('element clicked: ' + this.post.id);
       }
 
       _typesChanged(types) {

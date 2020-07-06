@@ -84,16 +84,17 @@ this license.
               post="[[post]]"
               ></ctree-structure-list-node>
         </template>
-        <div class="post-row" hidden$="[[!_showLoadMore(topPostsOnly, _hasMore)]]">
+        <div class="post-row" hidden$="[[!_showLoadMore(topPostsOnly, typeGroup.hasMore, typeGroup.pageOffset)]]">
           <iron-icon class="left-margin post-info" icon="posts-load"></iron-icon>
           <ctree-element class="post"
               title="[[_getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly, _types)]]"
               type="[[_getType(typeGroup, _types)]]"
               header-opacity="0.2"
               header-title-style="color: black; font-size: small !important; font-weight: bold; text-transform: uppercase;"
-              header-clickable nocontent noclose></ctree-element>
+              header-clickable nocontent noclose
+              on-tap-header="_loadMoreClicked" type-group="[[typeGroup]]"></ctree-element>
         </div>
-        <div class="post-row" hidden$="[[!_showNoPostsItem(typeGroup.posts, topPostsOnly, hideUnusedTypes, _hasMore)]]">
+        <div class="post-row" hidden$="[[!_showNoPostsItem(typeGroup.posts, topPostsOnly, hideUnusedTypes, typeGroup.hasMore, typeGroup.pageOffset)]]">
           <iron-icon class="left-margin post-info" icon="posts-none"></iron-icon>
           <ctree-element class="post"
               title="No [[_getTypeName(typeGroup.typeId, _types)]]"
@@ -186,13 +187,6 @@ this license.
           },
 
           _postsByType: Array,
-
-          _nextPageOffset: String,
-
-          _hasMore: {
-            type: Boolean,
-            value: true,
-          },
         };
       }
 
@@ -221,12 +215,14 @@ this license.
                                     posts: [
                                       { id: "question1", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Sub Goal 1 Question 1 Title", rating: 32, topPost: false },
                                       { id: "question2", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Sub Goal 1 Question 2 Title", rating: 17, topPost: false },
-                                    ]
+                                    ],
+                                    pageOffset: "ABC123"
                                   }
                                 ]
                               },
                               { id: "subgoal2", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Sub Goal 2 Title", rating: -13, topPost: false, children: [] },
-                            ]
+                            ],
+                            pageOffset: "ABC123"
                           },
                           {
                             typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80",
@@ -239,7 +235,8 @@ this license.
                                       { id: "solution1", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 1 Title", rating: 320, topPost: true },
                                       { id: "solution2", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 2 Title", rating: 27, topPost: false },
                                       { id: "solution3", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 1 Solution 3 Title", rating: -5, topPost: false },
-                                    ]
+                                    ],
+                                    pageOffset: "ABC123"
                                   }
                                 ]
                               },
@@ -250,12 +247,14 @@ this license.
                                     typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193",
                                     posts: [
                                       { id: "solution1", typeId: "8e4d0986-7fc1-fdde-a167-bcb905702193", title: "Problem 3 Solution 1 Title", rating: 8, topPost: true },
-                                    ]
+                                    ],
+                                    pageOffset: "ABC123"
                                   }
                                 ]
                               },
                               { id: "problem4", typeId: "5a7c59ba-add8-e251-9eb2-5801058c9e80", title: "Goal 2 Problem 4 Title", rating: -2, topPost: false, children: [] },
-                            ]
+                            ],
+                            pageOffset: "ABC123"
                           },
                           {
                             typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa",
@@ -268,21 +267,25 @@ this license.
                                     posts: [
                                       { id: "answer1", typeId: "77ffc744-2142-c4cc-8366-35d4c3a6f23b", title: "Question 2 Answer 1 Title", rating: 32, topPost: false },
                                       { id: "answer2", typeId: "77ffc744-2142-c4cc-8366-35d4c3a6f23b", title: "Question 2 Answer 2 Title", rating: 17, topPost: false },
-                                    ]
+                                    ],
+                                    pageOffset: "ABC123"
                                   }
                                 ]
                               },
                               { id: "question3", typeId: "890a8cf3-4a9d-3a59-212f-63c903b918fa", title: "Goal 2 Question 3 Title", rating: 26, topPost: false, children: [] },
-                            ]
+                            ],
+                            pageOffset: "ABC123"
                           }
                         ]
                       },
                       { id: "goal3", typeId: "725d347c-7990-8cc7-f63f-7fb92009b853", title: "Sub Post Title", rating: 240, topPost: false, children: [] },
-                    ]
+                    ],
+                    pageOffset: "ABC123"
                   }
                 ]
               },
-            ]
+            ],
+            pageOffset: "ABC123"
           }
         ];
       }
@@ -316,8 +319,13 @@ this license.
         // TODO: try to group/ungroup posts
       }
 
-      _showLoadMore(topPostsOnly, hasMore) {
-        return hasMore && !topPostsOnly;
+      _showLoadMore(topPostsOnly, hasMore, pageOffset) {
+        return !topPostsOnly && hasMore != false && pageOffset != null;
+      }
+
+      _loadMoreClicked(e) {
+        // TODO: load more items to e.target.typeGroup and update value for hasMore
+        console.log('load more clicked: ' + e.target.typeGroup.typeId);
       }
 
       _getType(typeGroup, types=this._types) {
@@ -351,14 +359,14 @@ this license.
         return type ? type.name + 's' : "Posts";
       }
 
-      _showNoPostsItem(posts, topPostsOnly, hideUnusedTypes, hasMore) {
+      _showNoPostsItem(posts, topPostsOnly, hideUnusedTypes, hasMore, pageOffset) {
         if (hideUnusedTypes) return false;
 
         var showNoPosts;
         if (topPostsOnly) {
           showNoPosts = this._hasTopPosts(posts);
         } else {
-          showNoPosts = !hasMore;
+          showNoPosts = hasMore == false || !pageOffset;
         }
 
         return showNoPosts;
