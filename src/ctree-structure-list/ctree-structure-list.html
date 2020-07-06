@@ -29,6 +29,8 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 
+<link rel="import" href="../ctree-loader/ctree-list-loader.html">
+
 <link rel="import" href="ctree-structure-list-node.html">
 <link rel="import" href="icons.html">
 
@@ -37,6 +39,7 @@ this license.
     <style>
       :host {
         display: block;
+        margin-bottom: -16px;
       }
       [hidden] {
         display: none !important;
@@ -48,7 +51,7 @@ this license.
       .post-row {
         display: flex;
         align-items: center;
-        height: 40px;
+        height: 48px;
       }
       .post-info {
         text-align: center;
@@ -56,30 +59,49 @@ this license.
       }
       .post {
         padding-left: 8px;
+        /* TODO: may be a better experience when there are buttons, if so may want a different width for smaller width screens */
+        /*width: 800px;*/
+      }
+      #content > * {
+        padding-bottom: 16px;
       }
     </style>
 
+    <ctree-list-loader ctree-key="[[ctreeKey]]" types="{{_types}}"></ctree-list-loader>
+
     <template is="dom-repeat" items="[[_postsByType]]" as="typeGroup">
-      <template is="dom-repeat" items="[[typeGroup.posts]]" as="post">
-        <ctree-structure-list-node
-            ctree-key="[[ctreeKey]]"
-            load-more-page-size="[[loadMorePageSize]]"
-            load-nested-depth-max="[[loadNestedDepthMax]]"
-            top-posts-separate="[[topPostsSeparate]]"
-            top-posts-only="[[topPostsOnly]]"
-            hide-unused-types="[[hideUnusedTypes]]"
-            show-load-parents="[[showLoadParents]]"
-            group-by-type="[[groupByType]]"
-            post="[[post]]"
-            ></ctree-structure-list-node>
-      </template>
-      <div class="post-row" hidden$="[[!_showLoadMore(topPostsOnly, _hasMore)]]">
-        <iron-icon class="left-margin post-info" icon="posts-load"></iron-icon>
-        <div id="loadMore" class="post">[[_getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly)]]</div>
-      </div>
-      <div class="post-row" hidden$="[[!_showNoPostsItem(typeGroup.posts, topPostsOnly, hideUnusedTypes, _hasMore)]]">
-        <iron-icon class="left-margin post-info" icon="posts-none"></iron-icon>
-        <div class="post">No [[_getTypeName(typeGroup.typeId)]]</div>
+      <div id="content">
+        <template is="dom-repeat" items="[[typeGroup.posts]]" as="post">
+          <ctree-structure-list-node
+              ctree-key="[[ctreeKey]]"
+              load-more-page-size="[[loadMorePageSize]]"
+              load-nested-depth-max="[[loadNestedDepthMax]]"
+              top-posts-separate="[[topPostsSeparate]]"
+              top-posts-only="[[topPostsOnly]]"
+              hide-unused-types="[[hideUnusedTypes]]"
+              show-load-parents="[[showLoadParents]]"
+              group-by-type="[[groupByType]]"
+              post="[[post]]"
+              ></ctree-structure-list-node>
+        </template>
+        <div class="post-row" hidden$="[[!_showLoadMore(topPostsOnly, _hasMore)]]">
+          <iron-icon class="left-margin post-info" icon="posts-load"></iron-icon>
+          <ctree-element class="post"
+              title="[[_getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly, _types)]]"
+              type="[[_getType(typeGroup, _types)]]"
+              header-opacity="0.2"
+              header-title-style="color: black; font-size: small !important; font-weight: bold; text-transform: uppercase;"
+              header-clickable nocontent noclose></ctree-element>
+        </div>
+        <div class="post-row" hidden$="[[!_showNoPostsItem(typeGroup.posts, topPostsOnly, hideUnusedTypes, _hasMore)]]">
+          <iron-icon class="left-margin post-info" icon="posts-none"></iron-icon>
+          <ctree-element class="post"
+              title="No [[_getTypeName(typeGroup.typeId, _types)]]"
+              type="[[_getType(typeGroup, _types)]]"
+              header-opacity="0.2"
+              header-title-style="color: black; font-size: small !important; font-weight: bold; text-transform: uppercase;"
+              nocontent noclose></ctree-element>
+        </div>
       </div>
     </template>
   </template>
@@ -298,18 +320,22 @@ this license.
         return hasMore && !topPostsOnly;
       }
 
-      _getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly) {
+      _getType(typeGroup, types=this._types) {
+        return types && typeGroup.typeId ? types[typeGroup.typeId] : null;
+      }
+
+      _getLoadMoreText(typeGroup, topPostsSeparate, topPostsOnly, types=this._types) {
         var text;
         const posts = typeGroup.posts;
         if (topPostsSeparate && (posts.length == 0 || posts[posts.length - 1].topPost)) {
           if (this._hasTopPosts(typeGroup.posts)) {
             text = "";
           } else {
-            text = "No Top " + this._getTypeName(typeGroup.typeId) + ", ";
+            text = "No Top " + this._getTypeName(typeGroup.typeId, types) + ", ";
           }
-          text += "Load Lower Rated " + this._getTypeName(typeGroup.typeId);
+          text += "Load Lower Rated " + this._getTypeName(typeGroup.typeId, types);
         } else {
-          text = "Load More " + this._getTypeName(typeGroup.typeId);
+          text = "Load More " + this._getTypeName(typeGroup.typeId, types);
         }
 
         return text;
@@ -319,9 +345,10 @@ this license.
         return posts.length != 0 && posts[0].topPost;
       }
 
-      _getTypeName(typeId) {
-        // TODO: look up type name (need to keep plural version for use here)
-        return typeId ? typeId : "Posts";
+      _getTypeName(typeId, types=this._types) {
+        // TODO: need to keep plural version of name for use here
+        const type = types[typeId];
+        return type ? type.name + 's' : "Posts";
       }
 
       _showNoPostsItem(posts, topPostsOnly, hideUnusedTypes, hasMore) {

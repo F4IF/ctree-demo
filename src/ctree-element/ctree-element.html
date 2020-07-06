@@ -43,14 +43,28 @@ this license.
       :host {
         display: block;
       }
+      [hidden] {
+        display: none !important;
+      }
       .toolbar {
+        width: 100%;
         --paper-toolbar-height: 48px;
         --paper-toolbar-sm-height: 48px;
 
+        background: none;
         @apply --shadow-elevation-2dp;
+      }
+      .background {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #000;
       }
       .title {
         font-size: 16px !important;
+        z-index: 1;
       }
       .type-description {
         width: 180px;
@@ -63,9 +77,13 @@ this license.
       }
     </style>
 
-    <paper-toolbar class="toolbar" style="background-color: [[headerColor]];">
-      <iron-icon slot="top" id="typeIcon" src="[[element.type.iconUrl]]"></iron-icon>
-      <span slot="top" class="title">[[element.title]]</span>
+    <paper-toolbar class="toolbar">
+      <div class="background" style="background-color: [[headerColor]]; opacity: [[headerOpacity]]" slot="top"></div>
+      <div class="background" hidden$="[[!headerClickable]]" on-click="_toolbarClicked" slot="top">
+        <paper-ripple noink="[[!headerClickable]]"></paper-ripple>
+      </div>
+      <iron-icon slot="top" id="typeIcon" src="[[type.iconUrl]]"></iron-icon>
+      <span slot="top" class="title" style="[[headerTitleStyle]]">[[title]]</span>
       <!-- TODO: see if some of the button attributes can be set by the behavior -->
       <!--<paper-icon-button slot="top" id="bookmarkButton" icon="[[_toggleButtonIcon]]" alt="favorite" on-tap="_toggleButton"></paper-icon-button>
       <paper-icon-button slot="top" id="share" icon="share" alt="share" on-tap="_showShare"></paper-icon-button>-->
@@ -73,9 +91,9 @@ this license.
       <paper-tooltip slot="top" for="bookmarkButton" offset="-8">Bookmark</paper-tooltip>
       <paper-tooltip slot="top" for="share" offset="-8">Share</paper-tooltip>
       <paper-tooltip slot="top" for="close" offset="-8">Close</paper-tooltip>
-      <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[element.type.name]]: [[element.type.description]]</paper-tooltip>
+      <paper-tooltip slot="top" for="typeIcon" position="right" offset="8" animation-delay="0" class="type-description">[[type.name]]: [[type.description]]</paper-tooltip>
     </paper-toolbar>
-    <div class="content"><slot></slot></div>
+    <div class="content" hidden$="[[noContent]]"><slot></slot></div>
   </template>
 
   <script>
@@ -85,16 +103,48 @@ this license.
 
       static get properties() {
         return {
+          /**
+           * Element Structure:
+           *   title: String,
+           *   type: Type,
+           *   color: String,         // optional: if element customizes its own color
+           *   bookmarked: Boolean,   // optional
+           */
           element: {
             type: Object,
             observer: '_elementChanged',
           },
 
+          title: String,
+
+          /**
+           * Type Structure:
+           *   name: String,
+           *   description: String,
+           *   iconUrl: String,
+           *   color: String,
+           */
+          type: Object,
+
           headerColor: {
             type: String,
             value: "#cfcfcf",
-            computed: '_calculateHeaderColor(element)'
+            computed: '_calculateHeaderColor(element.color, type.color)'
           },
+
+          headerOpacity: {
+            type: Number,
+            value: 1,
+          },
+
+          headerTitleStyle: String,
+
+          headerClickable: {
+            type: Boolean,
+            value: false,
+          },
+
+          nocontent: Boolean,
 
           /**
            * Toggle icon names.
@@ -106,6 +156,21 @@ this license.
         };
       }
 
+      static get observers() {
+        return [
+          '_elementTitleChanged(element.title)',
+          '_elementTypeChanged(element.type)',
+        ];
+      }
+
+      _value(value) {
+        return value;
+      }
+
+      _toolbarClicked(e) {
+        // TODO: fire on-tap-toolbar
+      }
+
       _onToggleButton() {
         this.element.bookmarked = !this.element.bookmarked;
       }
@@ -114,16 +179,16 @@ this license.
         return this.element ? (this.element.bookmarked ? true : false) : undefined;
       }
 
-      _calculateHeaderColor(element) {
-        var headerColor = "#cfcfcf";//this.headerColor;
-        if (element) {
-          if (element.color) {
-            headerColor = element.color;
-          } else if (element.type && element.type.color) {
-            headerColor = element.type.color;
-          }
-        }
-        return headerColor;
+      _calculateHeaderColor(elementColor, typeColor) {
+        return elementColor == null ? typeColor == null ? "#cfcfcf" : typeColor : elementColor
+      }
+
+      _elementTitleChanged(title) {
+        this.title = title;
+      }
+
+      _elementTypeChanged(type) {
+        this.type = type;
       }
 
       _elementChanged(element) {

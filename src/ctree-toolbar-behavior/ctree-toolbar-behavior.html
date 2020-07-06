@@ -63,7 +63,10 @@ this license.
          * Example value:
          *   ['icon-border', 'icon']
          */
-        _toggleButtonIconNames: Array,
+        _toggleButtonIconNames: {
+          type: Array,
+          observer: '_updateToggleButtonIcon',
+        },
       };
     }
 

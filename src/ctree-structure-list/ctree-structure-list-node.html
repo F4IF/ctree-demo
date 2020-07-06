@@ -33,6 +33,7 @@ this license.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
+<link rel="import" href="../ctree-element/ctree-element.html">
 <link rel="import" href="../ctree-loader/ctree-element-loader.html">
 <link rel="import" href="../ctree-utils/ctree-utils-mixin.html">
 
@@ -89,7 +90,7 @@ this license.
       .post-row {
         display: flex;
         align-items: center;
-        height: 40px;
+        height: 48px;
       }
       .post-info {
         text-align: center;
@@ -97,6 +98,8 @@ this license.
       }
       .post {
         padding-left: 8px;
+        /* TODO: may be a better experience when there are buttons, if so may want a different width for smaller width screens */
+        /*width: 800px;*/
       }
       .content {
         flex: 1;
@@ -108,8 +111,20 @@ this license.
       #threadBar {
         background: #000;
         width: 3px;
-        height: calc(100% - 40px);
+        height: calc(100% - 48px);
         margin: 0 auto;
+      }
+      #loadResponses {
+        height: 48px;
+        margin: 8px 0 -4px 8px;
+        font-weight: bold;
+        font-size: small;
+      }
+      #loadResponses iron-icon {
+        margin-right: 4px;
+      }
+      #children {
+        padding-top: 16px;
       }
     </style>
 
@@ -124,14 +139,8 @@ this license.
         <div id="threadBar" style="background: [[_getTypeColor(_types, post.typeId)]]" hidden$="[[_groupCollapsed]]"></div>
       </div>
       <div class="content">
-        <div id="post" class="post-row post">[[post.title]]</div>
-        <div class="container" hidden$="[[or(post.children, _groupCollapsed)]]">
-          <div class="left-margin post-row post-info">
-            <iron-icon icon="level-down"></iron-icon>
-          </div>
-          <div class="content">
-            <div id="post" class="post-row post">[[_loadResponsesText(topPostsSeparate)]]</div>
-          </div>
+        <div class="post-row">
+          <ctree-element id="post" class="post" element="[[post]]" header-clickable nocontent noclose></ctree-element>
         </div>
         <!-- TODO: if showLoadParents is true, wrap with item which can be clicked to load parents - maybe make a single child and defer post data to there, with this becoming the load parent prompt -->
         <ctree-structure-list
@@ -144,8 +153,12 @@ this license.
             hide-unused-types="[[hideUnusedTypes]]"
             group-by-type="[[groupByType]]"
             posts="[[post.children]]"
-            hidden$="[[valueOr(post.children, false, _groupCollapsed, true)]]"
+            hidden$="[[!_childrenVisible(post.children, _groupCollapsed)]]"
             ></ctree-structure-list>
+        <paper-button id="loadResponses" on-tap="loadResponses" hidden$="[[or(post.children, _groupCollapsed)]]">
+          <iron-icon icon="level-down"></iron-icon>
+          [[_loadResponsesText(topPostsSeparate)]]
+        </paper-button>
       </div>
     </div>
   </template>
@@ -208,8 +221,24 @@ this license.
             value: false,
           },
 
-          _types: Object,
+          _types: {
+            type: Object,
+            observer: '_typesChanged',
+          },
         };
+      }
+
+      loadResponses() {
+        // TODO:
+      }
+
+      _typesChanged(types) {
+        if (!this.post) return;
+
+        const type = types[this.post.typeId];
+        if (type) {
+          this.set('post.type', type);
+        }
       }
 
       _postChanged(post) {
@@ -248,6 +277,10 @@ this license.
 
       _loadResponsesText(topPostsSeparate) {
         return topPostsSeparate ? "Load Top Responses" : "Load Responses";
+      }
+
+      _childrenVisible(children, groupCollapsed) {
+        return !groupCollapsed && children && children.length > 0;
       }
 /*      openElement() {
         // TODO: use ctree-element-dialog-accessor instead
