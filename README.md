@@ -2,7 +2,7 @@
 
 # Events
 
-We have events in Los Angeles on some [Tuesday nights](https://www.eventbrite.com/e/43962200124) and the [first Saturday](https://www.eventbrite.com/e/43962135932) of each month.  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and collaborate online on our [Slack Group](http://slack.ctree.org).
+We're currently holding online events every [Tuesday night](https://www.eventbrite.com/e/43962200124) and [Saturday afternoon](https://www.eventbrite.com/e/99903808982).  Join our [Los Angeles Meetup](https://www.meetup.com/cTreeProject) to keep track of upcoming events and communicate with other contributors anytime via our [Slack Group](http://slack.ctree.org).
 
 # Collaboration Tree
 
@@ -72,7 +72,7 @@ The PRPL pattern, in a nutshell:
 * **Lazy-load** and progressively upgrade next routes on-demand
 
 ## License
-Copyright (c) 2017 Foundation For an Innovative Future (InnovativeFuture.org)
+Copyright (c) 2020 Foundation For an Innovative Future (InnovativeFuture.org)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -122,7 +122,7 @@ Chrome
 
 The preferred method of communication for the community is our
 [Slack group](http://slack.ctree.org).  There are also regular events held in
-[Los Angeles, CA](http://meetup.ctree.org) and [online](http://eventbrite.com/e/37789071129)
+[Los Angeles, CA](http://meetup.ctree.org) and [online](https://eventbrite.com/o/13646084582)
 to encourage contributors to set aside time to work on the project.  If you're
 interested in starting events in your area please email
 [contact@innovativeFuture.org](mailto:contact@innovativeFuture.org).  There are
@@ -151,58 +151,58 @@ testing.
 This team is responsible for implementing the database to hold and access all
 user and collaboration tree data.  For the alpha version this means duplicating
 the randomly generated data structures and interfaces and backing them with a
-real online database, likely Firebase due to native Polymer support.  This is a
-high priority part of the project, required before we can start alpha testing.
+real online database.  This is a high priority part of the project, required
+before we can start alpha testing.
 
 ### Visualization
 
 One of the core ideas behind Collaboration Trees is that contributors can
-quickly contribute by skimming suggested elements.  This makes reviewing the
-most popular elements and overall structure of the tree more difficult for
+quickly contribute by skimming suggested posts.  This makes reviewing the
+most popular posts and overall structure of the tree more difficult for
 anyone trying to watch the progress of the tree or check for an answer if a
 question or problem was used as the seed for the tree.  This team is responsible
 for creating and integrating different visualizations of the overall data.  This
 will aid alpha testing, but is not yet a requirement before it begins.
 
-### Element
+### Post
 
-Elements are the individual pieces which make up all Collaboration Trees,
-similar to comments in a forum or pages on a wiki. Because of this, elements
+Posts are the individual pieces which make up all Collaboration Trees,
+similar to comments in a forum or pages on a wiki. Because of this, posts
 require more work, which has been divided into sub-teams.
 
-#### New Element
+#### New Post
 
 This team is responsible for implementing everything required to create new
-elements, whether they're the first element for a new Collaboration Tree, a new
-element related to another element, or a new element which needs to be linked to
-another element.  This also includes the important task of looking for other
-existing elements which may be similar and suggesting them to the user to try
+posts, whether they're the first post for a new Collaboration Tree, a new
+post related to another post, or a new post which needs to be linked to
+another post.  This also includes the important task of looking for other
+existing posts which may be similar and suggesting them to the user to try
 and reduce duplicates.  Because this is required for building cTrees, the core
 functionality is required before we can start alpha testing.
 
-#### Element Details
+#### Post Details
 
-This team is responsible for the core details screen of the element dialog.  The
+This team is responsible for the core details screen of the post dialog.  The
 core functionality is already implemented, but can be improved to be more
 intuitive.  This team is also responsible for adding additional types of input
-for elements via the pluggable structure.
+for posts via the pluggable structure.
 
-#### Element Feedback
+#### Post Feedback
 
 Feedback is a core component for Collaboration Trees, being supported for each
-element variation as well as each variation of each piece of an element.  This
-team is responsible for making the element dialog's feedback screen fully
+post variation as well as each variation of each piece of an post.  This
+team is responsible for making the post dialog's feedback screen fully
 functional, including listing, sorting, and adding feedback.  One unique feature
 of cTree comments is that supporting data, like images, quotes, or studies, is
 encouraged by increasing their visibility when included.  This team is also
 responsible for the up/down vote functionality supported both on the feedback
-screen and details screen of the element dialog.
+screen and details screen of the post dialog.
 
-#### Element Contributors
+#### Post Contributors
 
-Elements list a summary of top contributors on their preview and details screen,
+Posts list a summary of top contributors on their preview and details screen,
 which takes the user to a summary of all contributors and their contributions to
-the element.  This team is responsible for both the summary and page listing all
+the post.  This team is responsible for both the summary and page listing all
 contributors.
 
 ### User Dialog
