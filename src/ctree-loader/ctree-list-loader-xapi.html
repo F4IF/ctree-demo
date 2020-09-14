@@ -40,6 +40,7 @@ this license.
    * Implementation of list loader using xAPI.
    *
    * CTreeData Structure:
+   *   key: String,
    *   url: String,
    *   name: String,
    *   types: TypesById,
@@ -69,15 +70,20 @@ this license.
      * @param {ListLoader} listData  The listData the items will be added to
      */
     _loadSuggestedItems(cTreeData, listData) {
-      /**
-       * TODO: Load next page of suggested items via xAPI for the cTree with the
-       * key cTreeData.key.
-       *
-       * When the items are loaded update all the listData fields appropriately.
-       *
-       * Store list items to local element cache. If an item already exists,
-       * update it as needed.
-       **/
+      this._getCTreeData(cTreeData.key, {
+        post: null, // 'suggested'
+        pageOffset: listData.offset,
+        //postPageSize: this.$.pageSize,
+      }, data => {
+        if (!data) {
+          console.error('Error: unable to load suggested posts: no valid data');
+          return;
+        }
+
+        var postData = data.post;
+        listData.offset = data.postNextPageOffset;
+        this._loadListItems(cTreeData, listData, data.post, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
+      });
     }
 
     /**
@@ -114,6 +120,37 @@ this license.
        * Store list items to local element cache. If an item already exists,
        * update it as needed.
        **/
+    }
+
+    _loadListItems(cTreeData, listData, items, name, itemsName, hasMore) {
+      if (!items || items.length == 0) {
+        listData.hasMore = false;
+        if (this._cTreeData == cTreeData) {
+          hasMore(false);
+        }
+      } else {
+        for (var key in items) {
+          var item = items[key];
+          if (this._cTreeData == cTreeData) {
+            this.push(itemsName, item);
+            if (this.currentName == name) {
+              this.notifySplices('currentItems', [{
+                index: this.currentItems.length - 1,
+                removed: [],
+                addedCount: 1,
+                object: this.currentItems,
+                type: 'splice',
+              }]);
+            }
+          } else {
+            listData.items.push(item);
+          }
+        }
+      }
+      listData.loading = false;
+      if (this._cTreeData == cTreeData) {
+        this._setLoading(name, false);
+      }
     }
   }
 

@@ -29,6 +29,10 @@ this license.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../ctree-import/ctree-import.html">
+<!-- Required to get CTree.Loader.getObjectDataType -->
+<link rel="import" href="../ctree-loader/ctree-loader-behavior.html">
+
 <link rel="import" href="ctree-loader-behavior.html">
 
 <script>
@@ -52,6 +56,34 @@ this license.
     }
   };
   CTree.LoaderBehavior = class extends CTree.LoaderBehaviorMixin(CTree.LoaderBehaviorBase) {};
+
+  /**
+   * Gets the data at the given path and calls handleData({key: Object}).
+   *
+   * @param {Object}                params      Key-value pairs of all parameters
+   * @param {Function(key: Object)} handleData  Function to call with loaded data, or null if failed
+   */
+  CTree.Loader.getData = function(params, handleData) {
+    var paramString = '';
+    for (var key in params) {
+      if (paramString.length > 0) {
+        paramString += '&';
+      }
+      paramString += key;
+      var value = params[key];
+      if (value != null && value != true) {
+        paramString += '=' + value;
+      }
+    }
+    console.log('request: ' + CTree.xApiConfig.databaseUrl + '/get?' + paramString);
+    fetch(CTree.xApiConfig.databaseUrl + '/get?' + paramString)
+      .then(response => response.json())
+      .then(data => handleData(data))
+      .catch(error => {
+        console.error("Error: " + error);
+        handleData(null);
+      });
+  }
 
 })();
 

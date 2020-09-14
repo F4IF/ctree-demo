@@ -44,20 +44,43 @@ this license.
     }
 
     /**
+     * Gets the cTree data based on the given params and calls onComplete({key: Object}).
+     *
+     * @param {String}                cTreeKey    Key of tree to get the data for
+     * @param {Object}                params      Key-value pairs of all parameters
+     * @param {Function(key: Object)} onComplete  Function to call with loaded data, or null if failed
+     */
+    _getCTreeData(cTreeKey, params, onComplete) {
+      params.cTree = cTreeKey;
+      CTree.Loader.getData(params, data => {
+        if (!data || !data.cTrees) { // TODO: change from data.cTrees to data.cTree to match spec
+          console.error('Error: unable to load valid cTree data');
+          onComplete(null);
+        } else {
+          // TODO: uncomment to match spec (currently, uses key 'cTree' instead of 'id')
+          //onComplete(CTree.Loader.getFromArrayWithId(data.cTree, cTreeKey, false));
+          onComplete(data.cTrees[0]);
+        }
+      });
+    }
+
+    /**
      * Load the human readable name associated with the cTree
      *
      * @param {String} ctreeKey Key for cTree to load name for
      * @param {Function(String)} onComplete Function called when completed, with the cTree name if successful, otherwise null
      */
     _loadName(cTreeKey, onComplete) {
-      /**
-       * TODO: Load cTree name via xAPI
-       *
-       * Once return from xAPI call, call onComplete with cTree name if
-       * successful, otherwise call onComplete with null.
-       *
-       * onComplete.bind(this)(name);
-       */
+       this._getCTreeData(cTreeKey, {
+         cTreeName: true,
+       }, data => {
+         if (!data) {
+           console.error('Error: unable to load cTree name: no valid data');
+           onComplete(null);
+         } else {
+           onComplete(data.cTreeName);
+         }
+       });
     }
 
     /**
@@ -67,14 +90,16 @@ this license.
      * @param {Function(Types)} onComplete Function called when completed, with the element types if successful, otherwise null. Types may be an array or object with types indexed by ID.
      */
     _loadTypes(cTreeKey, onComplete) {
-      /**
-       * TODO: Load element types for cTree via xAPI
-       *
-       * Once return from xAPI call, call onComplete with element types for
-       * cTree if successful, otherwise call onComplete with null.
-       *
-       * onComplete.bind(this)(types);
-       */
+      this._getCTreeData(cTreeKey, {
+        postType: null, // 'id'
+      }, data => {
+        if (!data) {
+          console.error('Error: unable to load post types: no valid data');
+          onComplete(null);
+        } else {
+          onComplete(data.postType);
+        }
+      });
     }
 
     /**
@@ -84,14 +109,16 @@ this license.
      * @param {Function(SegmentTypes)} onComplete Function called when completed, with the segment types if successful, otherwise null. Types may be an array or object with segment types indexed by ID.
      */
     _loadSegmentTypes(cTreeKey, onComplete) {
-      /**
-       * TODO: Load segment types for cTree via xAPI
-       *
-       * Once return from xAPI call, call onComplete with segment types for
-       * cTree if successful, otherwise call onComplete with null.
-       *
-       * onComplete.bind(this)(segmentTypes);
-       */
+      this._getCTreeData(cTreeKey, {
+        segmentType: null, // 'id'
+      }, data => {
+        if (!data) {
+          console.error('Error: unable to load segment types: no valid data');
+          onComplete(null);
+        } else {
+          onComplete(data.segmentType);
+        }
+      });
     }
 
     /**
