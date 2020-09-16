@@ -73,14 +73,13 @@ this license.
       this._getCTreeData(cTreeData.key, {
         post: null, // 'suggested'
         pageOffset: listData.offset,
-        //postPageSize: this.$.pageSize,
+        postPageSize: this.pageSize,
       }, data => {
         if (!data) {
           console.error('Error: unable to load suggested posts: no valid data');
           return;
         }
 
-        var postData = data.post;
         listData.offset = data.postNextPageOffset;
         this._loadListItems(cTreeData, listData, data.post, 'suggested', 'suggestedItems', this._setSuggestedHasMore);
       });

@@ -213,6 +213,9 @@ this license.
           }
         });
       }
+      // TODO: allow for optimized bundled data requests by requesting post types and segment types either at the same
+      //   time as name, or (even better) when any request returning an element is made and nothing has been loaded for
+      //   post types or segment types
       if (Object.keys(cTreeData.types).length == 0) {
         this._loadTypes(cTreeData.key, (types) => {
           if (types) {
