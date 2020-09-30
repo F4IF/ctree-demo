@@ -63,7 +63,7 @@ this license.
    * @param {Object}                params      Key-value pairs of all parameters
    * @param {Function(key: Object)} handleData  Function to call with loaded data, or null if failed
    */
-  CTree.Loader.getData = function(params, handleData) {
+  CTree.Loader.getData = function(params, handleData, handleError) {
     var paramString = '';
     for (var key in params) {
       if (paramString.length > 0) {
@@ -81,7 +81,7 @@ this license.
       .then(data => handleData(data))
       .catch(error => {
         console.error("Error: " + error);
-        handleData(null);
+        handleError();
       });
   }
 

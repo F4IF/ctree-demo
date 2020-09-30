@@ -53,15 +53,13 @@ this license.
     _getCTreeData(cTreeKey, params, onComplete) {
       params.cTree = cTreeKey;
       CTree.Loader.getData(params, data => {
-        if (!data || !data.cTrees) { // TODO: change from data.cTrees to data.cTree to match spec
+        if (!data || !data.cTree) {
           console.error('Error: unable to load valid cTree data');
           onComplete(null);
         } else {
-          // TODO: uncomment to match spec (currently, uses key 'cTree' instead of 'id')
-          //onComplete(CTree.Loader.getFromArrayWithId(data.cTree, cTreeKey, false));
-          onComplete(data.cTrees[0]);
+          onComplete(CTree.Loader.getFromArrayWithId(data.cTree, cTreeKey, false));
         }
-      });
+      }, () => onComplete(null));
     }
 
     /**
