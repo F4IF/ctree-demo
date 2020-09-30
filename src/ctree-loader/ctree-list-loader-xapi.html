@@ -129,7 +129,11 @@ this license.
         }
       } else {
         for (var key in items) {
-          var item = items[key];
+          // TODO: remove these lines and uncomment the next once 'name' is changed to 'title'
+          var element = items[key];
+          if (!element.title) element.title = element.name;
+          var item = {element: element};
+          // var item = {element: items[key]};
           if (this._cTreeData == cTreeData) {
             this.push(itemsName, item);
             if (this.currentName == name) {
