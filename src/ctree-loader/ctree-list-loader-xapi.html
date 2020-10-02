@@ -129,9 +129,16 @@ this license.
         }
       } else {
         for (var key in items) {
-          // TODO: remove these lines and uncomment the next once 'name' is changed to 'title'
           var element = items[key];
+          // TODO: remove these lines and uncomment the next once 'name' is changed to 'title' and type is returned
           if (!element.title) element.title = element.name;
+          if (element.type != null) {
+            element.typeId = element.type;
+          } else {
+            element.typeId = Object.keys(cTreeData.types)[0];
+          }
+          //element.typeId = element.type;
+          element.type = cTreeData.types[element.typeId];
           var item = {element: element};
           // var item = {element: items[key]};
           if (this._cTreeData == cTreeData) {
