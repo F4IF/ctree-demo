@@ -1,0 +1,23 @@
+{
+  "name": "ctree-demo",
+  "version": "1.0.0",
+  "description": "[Click here for steps to set up this project on your local machine](#setup)",
+  "main": " ",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/F4IF/ctree-demo.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/F4IF/ctree-demo/issues"
+  },
+  "homepage": "https://github.com/F4IF/ctree-demo#readme",
+  "dependencies": {
+    "bower": "^1.8.14",
+    "polymer-cli": "^1.9.11"
+  }
+}
